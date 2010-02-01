@@ -1,0 +1,20 @@
+pysandbox is a Python sandbox
+
+See also:
+
+ * Security in Python Wiki:
+   http://wiki.python.org/moin/Security
+ * safelite.py:
+   http://tav.espians.com/a-challenge-to-break-python-security.html
+ * Zope security:
+   http://svn.zope.org/zope.security/trunk/src/zope/security/
+ * Python taint mode:
+   http://www.cats-muvva.net/software/
+ * Controlling Access to Resources Within The Python Interpreter:
+   http://www.cs.ubc.ca/~drifty/papers/python_security.pdf
+ * PyPy sandbox:
+   http://codespeak.net/pypy/dist/pypy/doc/sandbox.html
+ * mxProxy:
+   http://www.egenix.com/products/python/mxBase/mxProxy/
+ * Python 2.3: rexec and Bastion
+
