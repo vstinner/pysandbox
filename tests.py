@@ -1,5 +1,5 @@
 from __future__ import with_statement
-from sandbox import Sandbox
+from sandbox import Sandbox, SandboxError
 from tempfile import NamedTemporaryFile
 
 def test_valid_code():
@@ -9,16 +9,38 @@ def test_valid_code():
     with Sandbox():
         assert 1+2 == 3
 
+def test_open_whitelist():
+    """
+    Check sandbox open() whitelist
+    """
+    filename = __file__
+
+    try:
+        with Sandbox(open_whitelist=tuple()):
+            with open(filename) as fp:
+                fp.read()
+        assert False, "open whitelist doesn't work"
+    except SandboxError, err:
+        # Expect a safe_open() error
+        assert str(err).startswith('Deny access to file ')
+
+    with Sandbox(open_whitelist=[filename]):
+        with open(filename) as fp:
+            fp.read()
+
+    with open(filename) as fp:
+        fp.read()
+
 def test_write_file():
     """
-    Check that builtin open() is missing
+    Check writing into a file is blocked
     """
     with NamedTemporaryFile("wb") as tempfile:
         try:
             with Sandbox():
                 with open(tempfile.name, "w") as fp:
                     fp.write("test")
-            assert False, "open is still available!"
+            assert False, "writing to a file is not blocked"
         except ValueError, err:
             # Expect a safe_open() error
             assert str(err) == "Only read modes are allowed."

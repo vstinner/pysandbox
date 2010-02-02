@@ -3,7 +3,7 @@ from types import FrameType
 from sys import _getframe
 
 from .cpython import dictionary_of
-from .safe_open import safe_open
+from .safe_open import _safe_open
 from .restorable_dict import RestorableDict
 
 class CleanupBuiltins:
@@ -11,16 +11,12 @@ class CleanupBuiltins:
     Deny unsafe builtins functions.
     """
     def __init__(self):
-        #self.unsafe_builtins = ['open', 'file', 'execfile', 'reload', 'compile', 'input', 'eval']
-        self.unsafe_builtins = (
-            # open a file
-            'open', 'file',
-        )
         self.get_frame_locals = dictionary_of(FrameType)['f_locals'].__get__
         self.builtin_dict = RestorableDict(__builtin__.__dict__)
-        self.original = {}
 
-    def enable(self):
+    def enable(self, sandbox):
+        whitelist = sandbox.config.get('open_whitelist', None)
+        safe_open = _safe_open(open, whitelist)
         self.builtin_dict['open'] = safe_open
         self.builtin_dict['file'] = safe_open
 
@@ -28,6 +24,6 @@ class CleanupBuiltins:
         frame_locals = self.get_frame_locals(frame)
         frame_locals['__builtins__'] = self.builtin_dict.copy()
 
-    def disable(self):
+    def disable(self, sandbox):
         self.builtin_dict.restore()
 

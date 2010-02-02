@@ -12,6 +12,22 @@ Protection of the sandbox itself:
  * Read function closure
 
 
+Options
+=======
+
+You can specify a white list of allowed path using Sandbox(open_whitelist=<your
+list>).
+
+
+Example
+=======
+
+Code:
+
+   with Sandbox():
+      ... execute unsafe code here ...
+
+
 See also
 ========
 

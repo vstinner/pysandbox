@@ -12,9 +12,9 @@ class HideAttributes:
     def __init__(self):
         self.function_dict = RestorableDict(dictionary_of(FunctionType))
 
-    def enable(self):
+    def enable(self, sandbox):
         del self.function_dict['func_closure']
 
-    def disable(self):
+    def disable(self, sandbox):
         self.function_dict.restore()
 
