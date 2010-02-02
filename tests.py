@@ -52,7 +52,10 @@ def read_closure_secret():
         return _closure
     func = closure()
     del closure
-    cell = func.func_closure[0]
+    try:
+        cell = func.func_closure[0]
+    except AttributeError:
+        cell = func.__closure__[0]
     secret = get_cell_value(cell)
     assert secret == 42
 
@@ -61,7 +64,9 @@ def test_closure():
         try:
             read_closure_secret()
         except AttributeError, err:
-            assert str(err) == "'function' object has no attribute 'func_closure'"
+            assert str(err) in (
+                "'function' object has no attribute 'func_closure'",
+                "'function' object has no attribute '__closure__'")
         else:
             assert False, "func_closure is present"
 

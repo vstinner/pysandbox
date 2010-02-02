@@ -1,4 +1,5 @@
 from types import FunctionType
+from sys import version_info
 try:
     from sys import _clear_type_cache
 except ImportError:
@@ -19,6 +20,8 @@ class HideAttributes:
 
     def enable(self, sandbox):
         del self.function_dict['func_closure']
+        if version_info >= (2, 6):
+            del self.function_dict['__closure__']
 
     def disable(self, sandbox):
         self.function_dict.restore()
