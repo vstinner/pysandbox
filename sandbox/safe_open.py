@@ -1,4 +1,4 @@
-from os.path import realpath, exists
+from os.path import realpath
 from sandbox import SandboxError
 
 def _safe_open(open, open_whitelist):

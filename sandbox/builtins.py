@@ -20,6 +20,10 @@ class CleanupBuiltins:
         self.builtin_dict['open'] = safe_open
         self.builtin_dict['file'] = safe_open
 
+        def importError(*args, **kw):
+            raise ImportError("Deny import in the sandbox")
+        self.builtin_dict['__import__'] = importError
+
         frame = _getframe(2)
         frame_locals = self.get_frame_locals(frame)
         frame_locals['__builtins__'] = self.builtin_dict.copy()

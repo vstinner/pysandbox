@@ -6,6 +6,7 @@ Blocked functions
 Functions:
 
  * Create a file, write into an existing file
+ * Import a module
 
 Protection of the sandbox itself:
 

@@ -3,16 +3,10 @@ from sandbox import Sandbox, SandboxError
 from tempfile import NamedTemporaryFile
 
 def test_valid_code():
-    """
-    Check that a valid code works in the sandbox
-    """
     with Sandbox():
         assert 1+2 == 3
 
 def test_open_whitelist():
-    """
-    Check sandbox open() whitelist
-    """
     filename = __file__
 
     try:
@@ -32,9 +26,6 @@ def test_open_whitelist():
         fp.read()
 
 def test_write_file():
-    """
-    Check writing into a file is blocked
-    """
     with NamedTemporaryFile("wb") as tempfile:
         try:
             with Sandbox():
@@ -66,9 +57,6 @@ def read_closure_secret():
     assert secret == 42
 
 def test_closure():
-    """
-    Check that a function closure value can not be retrieved.
-    """
     with Sandbox():
         try:
             read_closure_secret()
@@ -79,4 +67,16 @@ def test_closure():
 
     # closure are readable outside the sandbox
     read_closure_secret()
+
+def test_import():
+    with Sandbox():
+        try:
+            import os
+        except ImportError, err:
+            assert str(err) == 'Deny import in the sandbox'
+        else:
+            assert False
+
+    # import is allowed outside the sandbox
+    import os
 
