@@ -1,16 +1,7 @@
-from .cpython import dictionary_of
 from types import FunctionType
 
-class Dict:
-    def __init__(self, dict):
-        self.dict = dict
-        self.removed = {}
-
-    def __delitem__(self, key):
-        self.removed[key] = self.dict.pop(key)
-
-    def restore(self):
-        self.dict.update(self.removed)
+from .cpython import dictionary_of
+from .restorable_dict import RestorableDict
 
 class HideAttributes:
     """
@@ -19,7 +10,7 @@ class HideAttributes:
      * function.xxx
     """
     def __init__(self):
-        self.function_dict = Dict(dictionary_of(FunctionType))
+        self.function_dict = RestorableDict(dictionary_of(FunctionType))
 
     def enable(self):
         del self.function_dict['func_closure']
