@@ -20,3 +20,6 @@ class Sandbox:
 from .builtins import CleanupBuiltins
 Sandbox.protections.append(CleanupBuiltins())
 
+from .attributes import HideAttributes
+Sandbox.protections.append(HideAttributes())
+
