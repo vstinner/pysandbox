@@ -6,6 +6,5 @@ get_dict.argtypes = [py_object]
 
 def dictionary_of(ob):
     dptr = get_dict(ob)
-    if dptr and dptr.contents:
-        return dptr.contents.value
+    return dptr.contents.value
 
