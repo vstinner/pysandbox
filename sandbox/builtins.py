@@ -5,8 +5,11 @@ from sys import _getframe
 from .cpython import dictionary_of
 
 class CleanupBuiltins:
+    """
+    Deny unsafe builtins functions.
+    """
     def __init__(self):
-        self.unsafe_builtins = ['open']
+        self.unsafe_builtins = ['open', 'file', 'execfile', 'reload', 'compile', 'input', 'eval']
         self.get_frame_locals = dictionary_of(FrameType)['f_locals'].__get__
         self.original = {}
 
