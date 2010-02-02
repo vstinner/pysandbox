@@ -1,5 +1,6 @@
 from __future__ import with_statement
 from sandbox import Sandbox
+from tempfile import NamedTemporaryFile
 
 def test_valid_code():
     """
@@ -8,23 +9,24 @@ def test_valid_code():
     with Sandbox():
         assert 1+2 == 3
 
-def test_builtin_open():
+def test_write_file():
     """
     Check that builtin open() is missing
     """
-    filename = __file__
-    try:
-        with Sandbox():
-            with open(filename) as fp:
-                fp.read()
-        assert False, "open is still available!"
-    except NameError, err:
-        # open() is blocked by the sandbox
-        assert str(err) == "global name 'open' is not defined"
+    with NamedTemporaryFile("wb") as tempfile:
+        try:
+            with Sandbox():
+                with open(tempfile.name, "w") as fp:
+                    fp.write("test")
+            assert False, "open is still available!"
+        except ValueError, err:
+            # Expect a safe_open() error
+            assert str(err) == "Only read modes are allowed."
 
     # open() is restored at sandbox exit
-    with open(filename) as fp:
-        fp.read()
+    with NamedTemporaryFile("wb") as tempfile:
+        with open(tempfile.name, "w") as fp:
+            fp.write("test")
 
 def read_closure_secret():
     def get_cell_value(cell):

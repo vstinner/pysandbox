@@ -1,6 +1,19 @@
-pysandbox is a Python sandbox
+pysandbox is a Python sandbox.
 
-See also:
+Blocked functions
+=================
+
+Functions:
+
+ * Create a file, write into an existing file
+
+Protection of the sandbox itself:
+
+ * Read function closure
+
+
+See also
+========
 
  * Security in Python Wiki:
    http://wiki.python.org/moin/Security
