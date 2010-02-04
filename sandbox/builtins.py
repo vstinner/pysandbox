@@ -2,6 +2,7 @@ import __builtin__
 from types import FrameType
 from sys import _getframe
 
+from sandbox import BlockedFunction
 from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
@@ -23,6 +24,10 @@ class CleanupBuiltins:
 
         import_whitelist = sandbox.config['import_whitelist']
         self.builtin_dict['__import__'] = _safe_import(__import__, import_whitelist)
+
+        def safe_exit(code=0):
+            raise BlockedFunction("exit")
+        self.builtin_dict['exit'] = safe_exit
 
         frame = _getframe(2)
         frame_locals = self.get_frame_locals(frame)

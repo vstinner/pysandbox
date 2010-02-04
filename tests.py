@@ -95,6 +95,15 @@ def test_import():
         assert sys.__name__ == 'sys'
         assert sys.version == sys_version
 
+def test_exit():
+    with Sandbox():
+        try:
+            exit()
+        except SandboxError, err:
+            assert str(err) == "Function exit() blocked by the sandbox"
+        else:
+            assert False
+
 def main():
     # Get all tests
     all_tests = []

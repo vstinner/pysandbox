@@ -1,6 +1,10 @@
 class SandboxError(Exception):
     pass
 
+class BlockedFunction(SandboxError):
+    def __init__(self, name):
+        SandboxError.__init__(self, "Function %s() blocked by the sandbox" % name)
+
 class Protection:
     def enable(self, sandbox):
         pass
