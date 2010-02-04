@@ -56,6 +56,7 @@ def read_closure_secret():
     try:
         cell = func.func_closure[0]
     except AttributeError:
+        # Python 2.6+
         cell = func.__closure__[0]
     secret = get_cell_value(cell)
     assert secret == 42
@@ -65,9 +66,7 @@ def test_closure():
         try:
             read_closure_secret()
         except AttributeError, err:
-            assert str(err) in (
-                "'function' object has no attribute 'func_closure'",
-                "'function' object has no attribute '__closure__'")
+            assert str(err) == "'function' object has no attribute '__closure__'"
         else:
             assert False, "func_closure is present"
 
@@ -103,6 +102,27 @@ def test_exit():
             assert str(err) == "Function exit() blocked by the sandbox"
         else:
             assert False
+
+def get_sandbox_from_func_globals():
+    def mysum(a, b):
+        return a+b
+    try:
+        func_globals = mysum.func_globals
+    except AttributeError:
+        # Python 2.6+
+        func_globals = mysum.__globals__
+    return func_globals['Sandbox']
+
+def test_func_globals():
+    with Sandbox():
+        try:
+            get_sandbox_from_func_globals()
+        except AttributeError, err:
+            assert str(err) == "'function' object has no attribute '__globals__'"
+        else:
+            assert False
+
+    assert get_sandbox_from_func_globals() is Sandbox
 
 def main():
     # Get all tests

@@ -12,6 +12,7 @@ Functions:
 Protection of the sandbox itself:
 
  * Read function closure
+ * Read function globals
 
 
 Options

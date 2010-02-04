@@ -20,8 +20,10 @@ class HideAttributes:
 
     def enable(self, sandbox):
         del self.function_dict['func_closure']
+        del self.function_dict['func_globals']
         if version_info >= (2, 6):
             del self.function_dict['__closure__']
+            del self.function_dict['__globals__']
 
     def disable(self, sandbox):
         self.function_dict.restore()
