@@ -1,0 +1,7 @@
+ * Write a real proxy for safe_open()
+   * Deny: real_open = open("tests.py").__class__; real_open("...", "w")
+ * Deny: func.func_code, func.__code__
+ * Deny: func.func_globals, func.__globals__
+ * Deny: type.__subclasses__
+ * Deny builtins: 'execfile', 'reload', 'compile', 'input', 'eval'
+
