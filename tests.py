@@ -6,7 +6,7 @@ def test_valid_code():
     with Sandbox():
         assert 1+2 == 3
 
-def read_first_line(filename):
+def read_first_line(open, filename):
     with open(filename) as fp:
         line = fp.readline()
     assert line.rstrip() == '#!/usr/bin/env python'
@@ -16,16 +16,16 @@ def test_open_whitelist():
     filename = realpath(__file__)
     try:
         with Sandbox():
-            read_first_line(filename)
+            read_first_line(open, filename)
         assert False, "open whitelist doesn't work"
     except SandboxError, err:
         # Expect a safe_open() error
         assert str(err).startswith('Deny access to file ')
 
     with Sandbox(open_whitelist=[filename]):
-        read_first_line(filename)
+        read_first_line(open, filename)
 
-    read_first_line(filename)
+    read_first_line(open, filename)
 
 def write_file(filename):
     with open(filename, "w") as fp:
@@ -152,6 +152,26 @@ def test_func_locals():
     safe_import = _safe_import(builtin_import, {})
     myimport = get_import_from_func_locals(safe_import, sys.exc_info)
     assert myimport is builtin_import
+
+def get_file_from_subclasses():
+    for subtype in object.__subclasses__():
+        if subtype.__name__ == "file":
+            return subtype
+    raise ValueError("Unable to get file type")
+
+def test_subclasses():
+    filename = __file__
+
+    with Sandbox():
+        try:
+            get_file_from_subclasses()
+        except AttributeError, err:
+            assert str(err) == "type object 'object' has no attribute '__subclasses__'"
+        else:
+            assert False
+
+    file = get_file_from_subclasses()
+    read_first_line(file, filename)
 
 def main():
     # Get all tests

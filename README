@@ -13,7 +13,7 @@ Blocked functions
 Functions:
 
  * Read, write, or create a file
- * Import modules or use module attribute not in the whitelist
+ * Import modules
  * exit()
 
 Protection of the sandbox itself:
@@ -21,6 +21,7 @@ Protection of the sandbox itself:
  * Read function closure
  * Read function globals
  * Read frame locals
+ * Get type subclasses
 
 
 Options
