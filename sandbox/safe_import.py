@@ -5,7 +5,8 @@ class SafeModule(object):
     def __init__(self, module):
         self.__name = repr(module.__name__)
         try:
-            self.__name += " from %r" % module.__file__
+            self.__file = module.__file__
+            self.__name += " from %r" % self.__file__
         except AttributeError:
             self.__name += " (built-in)"
         self.__name__ = module.__name__
@@ -22,7 +23,7 @@ def _safe_import(__import__, module_whitelist):
         try:
             whitelist = module_whitelist[name]
         except KeyError:
-            raise ImportError("Import %s blocked by the sandbox" % name)
+            raise ImportError('Import "%s" blocked by the sandbox' % name)
         real_module = __import__(name, globals, locals, fromlist, level)
         module = SafeModule(real_module)
         for attr in whitelist:
