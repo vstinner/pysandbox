@@ -13,6 +13,9 @@ class Protection:
         pass
 
 DEFAULT_CONFIG = {
+    # builtins whitelist: see CleanupBuiltins
+    'builtins_whitelist': tuple(),
+
     # open() whitelist: see safe_open()
     'open_whitelist': tuple(),
 
