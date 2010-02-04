@@ -124,6 +124,32 @@ def test_func_globals():
 
     assert get_sandbox_from_func_globals() is Sandbox
 
+def get_import_from_func_locals(safe_import, sys):
+    try:
+        safe_import("os")
+    except ImportError:
+        # import os always raise an error
+        err_value, err_type, try_traceback = sys.exc_info()
+        safe_import_traceback = try_traceback.tb_next
+        safe_import_frame = safe_import_traceback.tb_frame
+        return safe_import_frame.f_locals['__import__']
+
+def test_func_locals():
+    import sys
+
+    with Sandbox():
+        try:
+            get_import_from_func_locals(__import__, sys)
+        except AttributeError, err:
+            assert str(err) == "'frame' object has no attribute 'f_locals'"
+        else:
+            assert False
+
+    builtin_myimport = __import__
+    from sandbox.safe_import import _safe_import
+    safe_import = _safe_import(builtin_myimport, {})
+    assert get_import_from_func_locals(safe_import, sys) is builtin_myimport
+
 def main():
     # Get all tests
     all_tests = []

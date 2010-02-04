@@ -1,6 +1,19 @@
  * Write a real proxy for safe_open()
    * Deny: real_open = open("tests.py").__class__; real_open("...", "w")
- * Deny: func.func_code, func.__code__
+ * Deny: func.func_code, func.__code__, compile(), generator.gi_code
  * Deny: type.__subclasses__
  * Deny builtins: 'execfile', 'reload', 'compile', 'input', 'eval'
+ * Check interaction with threads
+ * Check interaction with signals, eg. SIGALARM and SIGTERM
+ * Make __builtins__ read only?
+   http://mail.python.org/pipermail/python-dev/2009-February/086425.html
+ * Check metaclass hack:
+   http://mail.python.org/pipermail/python-dev/2009-February/086437.html
+   http://mail.python.org/pipermail/python-dev/2009-February/086457.html
+ * warnings imports modules
+   > if there are other non-user-initiated dynamically imported modules?
+   Grep the source for PyImport.
+ * RuntimeError: maximum recursion depth exceeded
+   http://mail.python.org/pipermail/python-dev/2009-February/086463.html
+
 

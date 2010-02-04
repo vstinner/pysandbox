@@ -1,5 +1,12 @@
 pysandbox is a Python sandbox.
 
+Status
+======
+
+pysanbox is tested on Python 2.5 and 2.6 on Debian Sid.
+
+See TODO file for the complete status.
+
 Blocked functions
 =================
 
@@ -13,6 +20,7 @@ Protection of the sandbox itself:
 
  * Read function closure
  * Read function globals
+ * Read frame locals
 
 
 Options
@@ -37,6 +45,9 @@ See also
 Python
 ------
 
+ * tav CPython patches:
+   http://codereview.appspot.com/20051
+   http://codereview.appspot.com/21043
  * secure*.py in plexnet
    http://github.com/tav/plexnet/tree/master/source/plexnet/util
  * Security in Python Wiki:
