@@ -17,9 +17,7 @@ DEFAULT_CONFIG = {
     'open_whitelist': tuple(),
 
     # import whitelist: see safe_import()
-    'import_whitelist': {
-        'sys': ('api_version', 'byteorder', 'copyright', 'hexversion', 'maxint', 'maxunicode', 'subversion', 'version'),
-    },
+    'import_whitelist': {},
 }
 
 class Sandbox:

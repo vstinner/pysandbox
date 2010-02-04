@@ -91,7 +91,7 @@ def test_import():
     import sys
     sys_version = sys.version
     del sys
-    with Sandbox():
+    with Sandbox(import_whitelist={'sys': ('version',)}):
         import sys
         assert sys.__name__ == 'sys'
         assert sys.version == sys_version
