@@ -1,13 +1,14 @@
 from __future__ import with_statement
 from sandbox import Sandbox, SandboxError
 from tempfile import NamedTemporaryFile
+from os.path import realpath
 
 def test_valid_code():
     with Sandbox():
         assert 1+2 == 3
 
 def test_open_whitelist():
-    filename = __file__
+    filename = realpath(__file__)
 
     try:
         with Sandbox(open_whitelist=tuple()):
@@ -93,4 +94,17 @@ def test_import():
         import sys
         assert sys.__name__ == 'sys'
         assert sys.version == sys_version
+
+if __name__ == "__main__":
+    all_tests = []
+    _locals = locals().items()
+    for name, value in _locals:
+        if not name.startswith("test"):
+            continue
+        all_tests.append(value)
+    for func in all_tests:
+        print "Test %s" % func.__name__
+        func()
+    print
+    print "Success!"
 
