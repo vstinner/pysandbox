@@ -12,7 +12,11 @@ def create_options():
         module = __import__(name)
         for part in name.split(".")[1:]:
             module = getattr(module, part)
-        filename = realpath(module.__file__)
+        try:
+            filename = module.__file__
+        except AttributeError:
+            return
+        filename = realpath(filename)
         if filename.endswith('.pyc'):
             filename = filename[:-1]
         if filename.endswith('__init__.py'):
@@ -21,14 +25,24 @@ def create_options():
     plop('code')
     plop('site')
     plop('sandbox')
-    plop('pydoc')
     options['import_whitelist'] = {
         'sys': (
             'api_version', 'version', 'hexversion',
             'stdin', 'stdout', 'stderr',
             'exit'),
         'pydoc': ('help',),
+        're': (
+            'compile', 'match', 'search', 'findall', 'finditer', 'split', 'sub', 'subn', 'escape',
+            'error',
+            'I', 'IGNORECASE',
+            'L', 'LOCALE',
+            'M', 'MULTILINE',
+            'S', 'DOTALL',
+            'X', 'VERBOSE'),
+        'sre_parse': ("parse",),
     }
+    for module in options['import_whitelist']:
+        plop(module)
     options['builtins_whitelist'] = ('exit',)
     print "Sandbox options:"
     pprint(options)
