@@ -11,11 +11,10 @@ def _safe_open(open, open_whitelist):
         if mode not in ['r', 'rb', 'rU']:
             raise ValueError("Only read modes are allowed.")
         fp = open(filename, mode, buffering)
-        if open_whitelist is not None:
-            realname = realpath(filename)
-            if not any(realname.startswith(path) for path in open_whitelist):
-                fp.close()
-                raise SandboxError("Deny access to file %s" % filename)
+        realname = realpath(filename)
+        if not any(realname.startswith(path) for path in open_whitelist):
+            fp.close()
+            raise SandboxError("Deny access to file %s" % filename)
         return fp
     return safe_open
 

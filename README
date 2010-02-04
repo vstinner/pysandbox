@@ -12,7 +12,7 @@ Blocked functions
 
 Functions:
 
- * Create a file, write into an existing file
+ * Read, write, or create a file
  * Import modules or use module attribute not in the whitelist
  * exit()
 

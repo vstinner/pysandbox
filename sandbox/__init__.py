@@ -14,7 +14,7 @@ class Protection:
 
 DEFAULT_CONFIG = {
     # open() whitelist: see safe_open()
-    'open_whitelist': None,
+    'open_whitelist': tuple(),
 
     # import whitelist: see safe_import()
     'import_whitelist': {
