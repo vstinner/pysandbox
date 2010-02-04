@@ -1,46 +1,49 @@
+#!/usr/bin/env python
 from __future__ import with_statement
 from sandbox import Sandbox, SandboxError
-from tempfile import NamedTemporaryFile
-from os.path import realpath
 
 def test_valid_code():
     with Sandbox():
         assert 1+2 == 3
 
-def test_open_whitelist():
-    filename = realpath(__file__)
+def read_first_line(filename):
+    with open(filename) as fp:
+        line = fp.readline()
+    assert line.rstrip() == '#!/usr/bin/env python'
 
+def test_open_whitelist():
+    from os.path import realpath
+    filename = realpath(__file__)
     try:
         with Sandbox(open_whitelist=tuple()):
-            with open(filename) as fp:
-                fp.read()
+            read_first_line(filename)
         assert False, "open whitelist doesn't work"
     except SandboxError, err:
         # Expect a safe_open() error
         assert str(err).startswith('Deny access to file ')
 
     with Sandbox(open_whitelist=[filename]):
-        with open(filename) as fp:
-            fp.read()
+        read_first_line(filename)
 
-    with open(filename) as fp:
-        fp.read()
+    read_first_line(filename)
+
+def write_file(filename):
+    with open(filename, "w") as fp:
+        fp.write("test")
+
 
 def test_write_file():
+    from tempfile import NamedTemporaryFile
     with NamedTemporaryFile("wb") as tempfile:
         try:
             with Sandbox():
-                with open(tempfile.name, "w") as fp:
-                    fp.write("test")
+                write_file(tempfile.name)
             assert False, "writing to a file is not blocked"
         except ValueError, err:
-            # Expect a safe_open() error
             assert str(err) == "Only read modes are allowed."
 
-    # open() is restored at sandbox exit
     with NamedTemporaryFile("wb") as tempfile:
-        with open(tempfile.name, "w") as fp:
-            fp.write("test")
+        write_file(tempfile.name)
 
 def read_closure_secret():
     def get_cell_value(cell):
