@@ -95,16 +95,37 @@ def test_import():
         assert sys.__name__ == 'sys'
         assert sys.version == sys_version
 
-if __name__ == "__main__":
+def main():
+    # Get all tests
     all_tests = []
-    _locals = locals().items()
+    _locals = globals().items()
     for name, value in _locals:
         if not name.startswith("test"):
             continue
         all_tests.append(value)
+
+    # Run tests
+    nerror = 0
     for func in all_tests:
-        print "Test %s" % func.__name__
-        func()
+        name = func.__name__
+        try:
+            func()
+        except BaseException, err:
+            nerror += 1
+            print "Test %s: FAILED! %r" % (name, err)
+        else:
+            print "Test %s: ok" % name
+
+    # Exit
+    from sys import exit
     print
-    print "Success!"
+    if nerror:
+        print "%s ERRORS!" % nerror
+        exit(1)
+    else:
+        print "All tests succeed"
+        exit(0)
+
+if __name__ == "__main__":
+    main()
 
