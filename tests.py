@@ -78,10 +78,19 @@ def test_import():
         try:
             import os
         except ImportError, err:
-            assert str(err) == 'Deny import in the sandbox'
+            assert str(err) == 'Import os blocked by the sandbox'
         else:
             assert False
 
     # import is allowed outside the sandbox
     import os
+
+    # sys.version is allowed by the sandbox
+    import sys
+    sys_version = sys.version
+    del sys
+    with Sandbox():
+        import sys
+        assert sys.__name__ == 'sys'
+        assert sys.version == sys_version
 

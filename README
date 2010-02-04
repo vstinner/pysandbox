@@ -6,7 +6,7 @@ Blocked functions
 Functions:
 
  * Create a file, write into an existing file
- * Import a module
+ * Import modules or use module attribute not in the whitelist
 
 Protection of the sandbox itself:
 
@@ -16,8 +16,8 @@ Protection of the sandbox itself:
 Options
 =======
 
-You can specify a white list of allowed path using Sandbox(open_whitelist=<your
-list>).
+ * open_whitelist: see safe_open()
+ * import_whitelist: see safe_import()
 
 
 Example

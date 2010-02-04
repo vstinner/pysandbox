@@ -8,11 +8,22 @@ class Protection:
     def disable(self, sandbox):
         pass
 
+DEFAULT_CONFIG = {
+    # open() whitelist: see safe_open()
+    'open_whitelist': None,
+
+    # import whitelist: see safe_import()
+    'import_whitelist': {
+        'sys': ('api_version', 'byteorder', 'copyright', 'hexversion', 'maxint', 'maxunicode', 'subversion', 'version'),
+    },
+}
+
 class Sandbox:
     protections = []
 
     def __init__(self, **kw):
-        self.config = kw
+        self.config = dict(DEFAULT_CONFIG)
+        self.config.update(kw)
 
     def __enter__(self):
         for protection in self.protections:

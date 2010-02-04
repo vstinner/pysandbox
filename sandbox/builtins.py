@@ -4,6 +4,7 @@ from sys import _getframe
 
 from .cpython import dictionary_of
 from .safe_open import _safe_open
+from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
 
 class CleanupBuiltins:
@@ -15,14 +16,13 @@ class CleanupBuiltins:
         self.builtin_dict = RestorableDict(__builtin__.__dict__)
 
     def enable(self, sandbox):
-        whitelist = sandbox.config.get('open_whitelist', None)
-        safe_open = _safe_open(open, whitelist)
+        open_whitelist = sandbox.config['open_whitelist']
+        safe_open = _safe_open(open, open_whitelist)
         self.builtin_dict['open'] = safe_open
         self.builtin_dict['file'] = safe_open
 
-        def importError(*args, **kw):
-            raise ImportError("Deny import in the sandbox")
-        self.builtin_dict['__import__'] = importError
+        import_whitelist = sandbox.config['import_whitelist']
+        self.builtin_dict['__import__'] = _safe_import(__import__, import_whitelist)
 
         frame = _getframe(2)
         frame_locals = self.get_frame_locals(frame)
