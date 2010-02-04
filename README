@@ -34,6 +34,11 @@ Code:
 See also
 ========
 
+Python
+------
+
+ * secure*.py in plexnet
+   http://github.com/tav/plexnet/tree/master/source/plexnet/util
  * Security in Python Wiki:
    http://wiki.python.org/moin/Security
  * safelite.py:
@@ -49,4 +54,35 @@ See also
  * mxProxy:
    http://www.egenix.com/products/python/mxBase/mxProxy/
  * Python 2.3: rexec and Bastion
+
+Python-dev mailing list
+-----------------------
+
+ * "Python jail: whitelist vs blacklist"
+   Victor Stinner, Tue Feb 24 13:50:40 CET 2009
+   http://mail.python.org/pipermail/python-dev/2009-February/086444.html
+ * "Challenge: Please break this!"
+   tav, Mon Feb 23 23:41:30 CET 2009
+   http://mail.python.org/pipermail/python-dev/2009-February/086401.html
+   http://mail.python.org/pipermail/python-dev/2009-February/086413.html
+   http://mail.python.org/pipermail/python-dev/2009-February/086439.html
+ * "Reviving restricted mode?"
+   Guido van Rossum, Sun Feb 22 17:45:27 CET 2009
+   http://mail.python.org/pipermail/python-dev/2009-February/086352.html
+ * "object capability; func_closure; __subclasses__"
+   tav, Thu Jun 28 03:04:42 CEST 2007
+   http://mail.python.org/pipermail/python-dev/2007-June/073724.html
+ * "Capabilities"
+   Guido van Rossum, Fri, 07 Mar 2003 12:41:16 -0500
+   http://mail.python.org/pipermail/python-dev/2003-March/033820.html
+   http://mail.python.org/pipermail/python-dev/2003-March/033854.html
+   ...
+   (read the whole archive of march and april 2003)
+
+Other
+-----
+
+ * "Capability-based Financial Instruments"
+   Mark S. Miller, Chip Morningstar and Bill Frantz, 2000
+   http://www.erights.org/elib/capability/ode/index.html
 
