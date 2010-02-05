@@ -1,5 +1,3 @@
- * Write a real proxy for safe_open()
-   * Deny: real_open = open("tests.py").__class__; real_open("...", "w")
  * Deny: func.func_code, func.__code__, compile(), generator.gi_code
  * Deny builtins: 'execfile', 'reload', 'input', 'eval'
  * Check interaction with threads

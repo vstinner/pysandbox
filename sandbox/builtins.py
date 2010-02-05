@@ -4,7 +4,8 @@ from sys import _getframe
 
 from sandbox import BlockedFunction
 from .cpython import dictionary_of
-from .safe_open import _safe_open
+#from .safe_open import _safe_open
+from .safelite_proxy import _FileReader
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
 
@@ -20,7 +21,8 @@ class CleanupBuiltins:
         builtins_whitelist = sandbox.config['builtins_whitelist']
 
         open_whitelist = sandbox.config['open_whitelist']
-        safe_open = _safe_open(open, open_whitelist)
+#        safe_open = _safe_open(open, open_whitelist)
+        safe_open = _FileReader(open_whitelist)
         self.builtin_dict['open'] = safe_open
         self.builtin_dict['file'] = safe_open
 
