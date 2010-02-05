@@ -18,15 +18,15 @@ class CleanupBuiltins:
         self.builtin_dict = RestorableDict(__builtin__.__dict__)
 
     def enable(self, sandbox):
-        builtins_whitelist = sandbox.config['builtins_whitelist']
+        builtins_whitelist = sandbox.config.builtins_whitelist
 
-        open_whitelist = sandbox.config['open_whitelist']
+        open_whitelist = sandbox.config.open_whitelist
 #        safe_open = _safe_open(open, open_whitelist)
         safe_open = _FileReader(open_whitelist)
         self.builtin_dict['open'] = safe_open
         self.builtin_dict['file'] = safe_open
 
-        import_whitelist = sandbox.config['import_whitelist']
+        import_whitelist = sandbox.config.import_whitelist
         self.builtin_dict['__import__'] = _safe_import(__import__, import_whitelist)
 
         if 'exit' not in builtins_whitelist:

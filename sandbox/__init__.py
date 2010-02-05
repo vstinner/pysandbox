@@ -12,31 +12,8 @@ class Protection:
     def disable(self, sandbox):
         pass
 
-DEFAULT_CONFIG = {
-    # builtins whitelist: see CleanupBuiltins
-    'builtins_whitelist': tuple(),
-
-    # open() whitelist: see safe_open()
-    'open_whitelist': tuple(),
-
-    # import whitelist: see safe_import()
-    'import_whitelist': {},
-}
-
-class Sandbox:
-    protections = []
-
-    def __init__(self, **kw):
-        self.config = dict(DEFAULT_CONFIG)
-        self.config.update(kw)
-
-    def __enter__(self):
-        for protection in self.protections:
-            protection.enable(self)
-
-    def __exit__(self, type, value, traceback):
-        for protection in self.protections:
-            protection.disable(self)
+from .config import SandboxConfig
+from .sandbox_class import Sandbox
 
 from .builtins import CleanupBuiltins
 Sandbox.protections.append(CleanupBuiltins())

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import with_statement
-from sandbox import Sandbox, SandboxError
+from sandbox import Sandbox, SandboxError, SandboxConfig
 
 def test_valid_code():
     with Sandbox():
@@ -22,7 +22,9 @@ def test_open_whitelist():
         # Expect a safe_open() error
         assert str(err).startswith('Deny access to file ')
 
-    with Sandbox(open_whitelist=[filename]):
+    config = SandboxConfig()
+    config.open_whitelist.add(filename)
+    with Sandbox(config):
         read_first_line(open, filename)
 
     read_first_line(open, filename)
@@ -91,7 +93,10 @@ def test_import():
     import sys
     sys_version = sys.version
     del sys
-    with Sandbox(import_whitelist={'sys': ('version',)}):
+
+    config = SandboxConfig()
+    config.allowModule('sys', 'version')
+    with Sandbox(config):
         import sys
         assert sys.__name__ == 'sys'
         assert sys.version == sys_version
