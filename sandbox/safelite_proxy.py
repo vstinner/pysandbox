@@ -11,10 +11,8 @@ from sandbox import SandboxError
 
 def _Namespace(
     tuple=tuple, isinstance=isinstance, FunctionType=FunctionType,
-    staticmethod=staticmethod,
+    staticmethod=staticmethod, type=type,
     ):
-
-    __private_data = {}
 
     def Namespace(*args, **kwargs):
         """Return a Namespace from the current scope or the given arguments."""
@@ -37,12 +35,10 @@ def _Namespace(
             def __new__(klass, __getter):
                 return tuple.__new__(klass, __getter)
 
-        ns_items = []; populate = ns_items.append
+        ns_items = []
+        populate = ns_items.append
 
         if args or kwargs:
-
-            frame = None
-
             for arg in args:
                 kwargs[arg.__name__] = arg
 
@@ -52,10 +48,7 @@ def _Namespace(
                 else:
                     populate((name, obj))
 
-        del frame, args, kwargs
-
-        # @/@ what should we do with __doc__ and __name__ ??
-
+        # FIXME: what should we do with __doc__ and __name__ ??
         return NamespaceObject(ns_items)
 
     return Namespace
@@ -68,44 +61,50 @@ del _Namespace
 # guard dekorator
 # ------------------------------------------------------------------------------
 
-def guard(*varspec, **kwspec):
-    def decorator(original_func):
-#        if type(function) is not FunctionType:
-#            raise TypeError("Argument to the guard decorator is not a function.")
+def _guard(getargs=getargs, len=len, enumerate=enumerate, type=type,
+TypeError=TypeError, ValueError=ValueError):
+    def guard(**spec):
+        def decorator(original_func):
+            if type(original_func) is not FunctionType:
+                raise TypeError("Argument to the guard decorator is not a original_func.")
 
-        func_args = getargs(original_func.func_code)[0]
-        len_args = len(func_args) - 1
+            func_args = getargs(original_func.func_code)[0]
+            len_args = len(func_args) - 1
 
-        def func(*args, **kwargs):
-            for i, param in enumerate(args):
-                req = varspec[i]
-                if type(param) is not req:
-                    raise TypeError(
-                        "%s has to be %r" % (func_args[i], req)
-                        )
-            for name, param in kwargs.iteritems():
-                if name not in kwspec:
-                    raise ValueError("no keyword argument %s" % name)
-                req = kwspec[name]
-                if type(param) is not req:
-                    raise TypeError("%s has to be %r" % (name, req))
-            return original_func(*args, **kwargs)
+            def func(*args, **kwargs):
+                for i, param in enumerate(args):
+                    req = spec[func_args[i]]
+                    if type(param) is not req:
+                        raise TypeError(
+                            "%s has to be %r" % (func_args[i], req)
+                            )
+                for name, param in kwargs.iteritems():
+                    if name not in spec:
+                        raise ValueError("Unknown argument %s" % name)
+                    req = spec[name]
+                    if type(param) is not req:
+                        raise TypeError("%s has to be %r" % (name, req))
+                return original_func(*args, **kwargs)
 
-        func.__name__ = original_func.__name__
-        func.__doc__ = original_func.__doc__
-        return func
-    return decorator
+            func.__name__ = original_func.__name__
+            func.__doc__ = original_func.__doc__
+            return func
+        return decorator
+    return guard
+
+guard = _guard()
+del _guard
 
 # ------------------------------------------------------------------------------
 # file reader
 # ------------------------------------------------------------------------------
 
 def _FileReader(open_whitelist,
-    open_file=open, type=type, TypeError=TypeError, Namespace=Namespace,
-    any=any, realpath=realpath,
-    ):
+open_file=open, type=type, TypeError=TypeError, Namespace=Namespace,
+any=any, realpath=realpath, guard=guard, ValueError=ValueError,
+SandboxError=SandboxError):
 
-    @guard(str, str, int)
+    @guard(filename=str, mode=str, buffering=int)
     def FileReader(filename, mode='r', buffering=0):
         """A secure file reader."""
 
@@ -124,19 +123,19 @@ def _FileReader(open_whitelist,
         def close():
             fileobj.close()
 
-        @guard(int)
+        @guard(bufsize=int)
         def read(bufsize=-1):
             return fileobj.read(bufsize)
 
-        @guard(int)
+        @guard(size=int)
         def readline(size=-1):
             return fileobj.readline(size)
 
-        @guard(int)
+        @guard(size=int)
         def readlines(size=-1):
             return fileobj.readlines(size)
 
-        @guard(int, whence=int)
+        @guard(offset=int, whence=int)
         def seek(offset, whence=0):
             fileobj.seek(offset, whence)
 
@@ -164,6 +163,7 @@ def _FileReader(open_whitelist,
         def __enter__():
             return fileobj.__enter__()
 
+        # FIXME: @guard(value=?, errtype=?, traceback=?)
         def __exit__(value, errtype, traceback):
             return fileobj.__exit__(value, errtype, traceback)
 
