@@ -1,5 +1,4 @@
-from os.path import realpath
-from sandbox import SandboxError
+from .proxy import proxy
 
 class SafeModule(object):
     def __init__(self, module):
@@ -11,6 +10,15 @@ class SafeModule(object):
             self.__name += " (built-in)"
         self.__name__ = module.__name__
         self.__doc__ = module.__doc__
+
+    @staticmethod
+    def create(module, attributes):
+        safe = SafeModule(module)
+        for attr in attributes:
+            value = getattr(module, attr)
+            value = proxy(value)
+            setattr(safe, attr, value)
+        return safe
 
     def __repr__(self):
         return "<SafeModule %s>" % (self.__name,)
@@ -24,13 +32,7 @@ def _safe_import(__import__, module_whitelist):
             whitelist = module_whitelist[name]
         except KeyError:
             raise ImportError('Import "%s" blocked by the sandbox' % name)
-        real_module = __import__(name, globals, locals, fromlist, level)
-        module = SafeModule(real_module)
-        for attr in whitelist:
-            value = getattr(real_module, attr)
-            # FIXME: copy/deepcopy the value?
-            # Eg. sys.argv is a mutable list
-            setattr(module, attr, value)
-        return module
+        module = __import__(name, globals, locals, fromlist, level)
+        return SafeModule.create(module, whitelist)
     return safe_import
 

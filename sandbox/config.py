@@ -1,4 +1,4 @@
-from os.path import realpath, dirname
+from os.path import realpath
 
 class SandboxConfig:
     def __init__(self):

@@ -1,20 +1,25 @@
 from os.path import realpath
 from sandbox import SandboxError
+from .guard import guard
+from .proxy import FileProxy
 
-def _safe_open(open, open_whitelist):
-    """
-    Open a file a for reading. If the open_whitelist is defined (not None):
-    check that the file name starts with one of the path of open_whitelist,
-    otherwise raise a SandboxError.
-    """
+def _safe_open(open_whitelist,
+open_file=open, type=type, TypeError=TypeError,
+any=any, realpath=realpath, guard=guard, ValueError=ValueError,
+SandboxError=SandboxError):
+    @guard(filename=str, mode=str, buffering=int)
     def safe_open(filename, mode='r', buffering=0):
+        """A secure file reader."""
+
         if mode not in ['r', 'rb', 'rU']:
             raise ValueError("Only read modes are allowed.")
-        fp = open(filename, mode, buffering)
+
         realname = realpath(filename)
         if not any(realname.startswith(path) for path in open_whitelist):
-            fp.close()
             raise SandboxError("Deny access to file %s" % filename)
-        return fp
+
+        fileobj = open_file(filename, mode, buffering)
+
+        return FileProxy(fileobj)
     return safe_open
 
