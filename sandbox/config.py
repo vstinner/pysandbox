@@ -34,6 +34,7 @@ class SandboxConfig:
             self.builtins_whitelist.add('exit')
         elif feature == 'interpreter':
             self.enable('traceback')
+            self.enable('exit')
             self.allowModuleSourceCode('code')
             self.allowModuleSourceCode('site')
             self.allowModuleSourceCode('sandbox')
@@ -41,6 +42,9 @@ class SandboxConfig:
                 'api_version', 'version', 'hexversion',
                 'stdin', 'stdout', 'stderr')
             self.allowModule('pydoc', 'help')
+        else:
+            self.features.remove(feature)
+            raise ValueError("Unknown feature: %s" % feature)
 
     def allowModule(self, name, *attributes):
         if name in self.import_whitelist:
@@ -67,4 +71,16 @@ class SandboxConfig:
         if filename.endswith('__init__.py'):
             filename = filename[:-11]
         self.open_whitelist.add(filename)
+
+    def createOptparseOptions(self, parser):
+        parser.add_option("--features", help="List of enabled features separated by a comma",
+            type="str")
+
+    def useOptparseOptions(self, options):
+        if options.features:
+            for feature in options.features.split(","):
+                feature = feature.strip()
+                if not feature:
+                    continue
+                self.enable(feature)
 
