@@ -3,6 +3,7 @@ from sys import version_info
 try:
     from sys import _clear_type_cache
 except ImportError:
+    # Python < 2.6 has no type cache, so we don't have to clear it
     def _clear_type_cache():
         pass
 
