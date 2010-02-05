@@ -10,20 +10,26 @@ def createConfig():
 
     parser = OptionParser(usage="%prog [options]")
     config.createOptparseOptions(parser)
+    parser.add_option("--verbose", "-v", help="Verbose mode",
+        action="store_true", default=False)
     options, argv = parser.parse_args()
     if argv:
         parser.print_help()
         exit(1)
 
     config.useOptparseOptions(options)
+
+    if options.verbose:
+        from pprint import pprint
+        print "Sandbox config:"
+        pprint(config.__dict__)
+    else:
+        print "Enabled features: %s" % ', '.join(sorted(config.features))
+    print
+
     return config
 
 config = createConfig()
-from pprint import pprint
-print "Sandbox config:"
-pprint(config.__dict__)
-print
-
 with Sandbox(config):
     InteractiveConsole().interact("Try to break the sandbox!")
 
