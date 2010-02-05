@@ -28,6 +28,8 @@ def _safe_import(__import__, module_whitelist):
         module = SafeModule(real_module)
         for attr in whitelist:
             value = getattr(real_module, attr)
+            # FIXME: copy/deepcopy the value?
+            # Eg. sys.argv is a mutable list
             setattr(module, attr, value)
         return module
     return safe_import
