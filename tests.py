@@ -80,7 +80,7 @@ def test_import():
         try:
             import os
         except ImportError, err:
-            assert str(err) == 'Import os blocked by the sandbox'
+            assert str(err) == 'Import "os" blocked by the sandbox'
         else:
             assert False
 
