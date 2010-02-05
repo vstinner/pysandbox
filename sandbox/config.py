@@ -21,13 +21,12 @@ class SandboxConfig:
 
         if feature == 'regex':
             self.allowModule('re',
-                    'compile', 'match', 'search', 'findall', 'finditer', 'split', 'sub', 'subn', 'escape',
-                    'error',
-                    'I', 'IGNORECASE',
-                    'L', 'LOCALE',
-                    'M', 'MULTILINE',
-                    'S', 'DOTALL',
-                    'X', 'VERBOSE')
+                'compile', 'match', 'search', 'findall', 'finditer', 'split',
+                'sub', 'subn', 'escape', 'I', 'IGNORECASE', 'L', 'LOCALE', 'M',
+                'MULTILINE', 'S', 'DOTALL', 'X', 'VERBOSE',
+                # FIXME: proxy() doesn't support class yet
+                # 'error',
+            )
             self.allowModule('sre_parse', 'parse')
         elif feature == 'exit':
             self.allowModule('sys', 'exit')

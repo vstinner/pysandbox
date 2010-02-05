@@ -1,6 +1,9 @@
 from types import FunctionType
 from sandbox import SandboxError
 from .guard import guard
+from types import FunctionType
+
+builtin_function_or_method = type(len)
 
 def _Namespace(tuple=tuple, isinstance=isinstance, FunctionType=FunctionType,
 staticmethod=staticmethod, type=type):
@@ -105,9 +108,12 @@ SandboxError=SandboxError):
 FileProxy = _FileProxy()
 del _FileProxy
 
-def _proxy(file=file):
+SAFE_TYPES = (int, long, str, unicode, builtin_function_or_method, FunctionType)
+
+def _proxy(safe_types=SAFE_TYPES, file=file):
     def proxy(value):
-        if isinstance(value, (int, long, str, unicode)):
+        if isinstance(value, safe_types):
+            # Safe type, no need to create a proxy
             return value
         elif isinstance(value, file):
             return FileProxy(value)
