@@ -6,28 +6,30 @@ def test_valid_code():
     with Sandbox():
         assert 1+2 == 3
 
-def read_first_line(open, filename):
-    with open(filename) as fp:
+from os.path import realpath
+READ_FILENAME = realpath(__file__)
+del realpath
+
+def read_first_line(open):
+    with open(READ_FILENAME) as fp:
         line = fp.readline()
     assert line.rstrip() == '#!/usr/bin/env python'
 
 def test_open_whitelist():
-    from os.path import realpath
-    filename = realpath(__file__)
     try:
         with Sandbox():
-            read_first_line(open, filename)
+            read_first_line(open)
         assert False, "open whitelist doesn't work"
     except SandboxError, err:
         # Expect a safe_open() error
         assert str(err).startswith('Deny access to file ')
 
     config = SandboxConfig()
-    config.open_whitelist.add(filename)
+    config.open_whitelist.add(READ_FILENAME)
     with Sandbox(config):
-        read_first_line(open, filename)
+        read_first_line(open)
 
-    read_first_line(open, filename)
+    read_first_line(open)
 
 def write_file(filename):
     with open(filename, "w") as fp:
@@ -188,8 +190,6 @@ def get_file_from_subclasses():
     raise ValueError("Unable to get file type")
 
 def test_subclasses():
-    filename = __file__
-
     with Sandbox():
         try:
             get_file_from_subclasses()
@@ -199,7 +199,7 @@ def test_subclasses():
             assert False
 
     file = get_file_from_subclasses()
-    read_first_line(file, filename)
+    read_first_line(file)
 
 def main():
     # Get all tests
