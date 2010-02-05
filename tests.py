@@ -103,6 +103,23 @@ def test_import():
         assert sys.__name__ == 'sys'
         assert sys.version == sys_version
 
+def get_file_from_stdout():
+    import sys
+    return type(sys.stdout)
+
+def test_import_sys_stdout():
+    config = SandboxConfig()
+    config.allowModule('sys', 'stdout')
+    with Sandbox(config):
+        file = get_file_from_stdout()
+        try:
+            read_first_line(file)
+        except ValueError, err:
+            return str(err) == 'need more than 1 value to unpack'
+
+    file = get_file_from_stdout()
+    read_first_line(file)
+
 def test_exit():
     with Sandbox():
         try:
