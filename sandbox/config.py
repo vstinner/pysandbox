@@ -57,6 +57,10 @@ class SandboxConfig:
         if 'traceback' in self.features:
             self.allowModuleSourceCode(name)
 
+    def allowPath(self, path):
+        path = realpath(path)
+        self.open_whitelist.add(path)
+
     def allowModuleSourceCode(self, name):
         """
         Allow reading the module source.
@@ -68,16 +72,18 @@ class SandboxConfig:
             filename = module.__file__
         except AttributeError:
             return
-        filename = realpath(filename)
         if filename.endswith('.pyc'):
             filename = filename[:-1]
         if filename.endswith('__init__.py'):
             filename = filename[:-11]
-        self.open_whitelist.add(filename)
+        self.allowPath(filename)
 
     def createOptparseOptions(self, parser):
         parser.add_option("--features", help="List of enabled features separated by a comma",
             type="str")
+        parser.add_option("--allow-path",
+            help="Allow reading files from PATH",
+            action="append", type="str")
 
     def useOptparseOptions(self, options):
         if options.features:
@@ -86,4 +92,7 @@ class SandboxConfig:
                 if not feature:
                     continue
                 self.enable(feature)
+        if options.allow_path:
+            for path in options.allow_path:
+                self.allowPath(path)
 
