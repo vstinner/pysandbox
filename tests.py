@@ -105,6 +105,29 @@ def test_exit():
         else:
             assert False
 
+    try:
+        exit()
+    except SystemExit:
+        pass
+    else:
+        assert False
+
+def test_sytem_exit():
+    with Sandbox():
+        try:
+            raise SystemExit()
+        except NameError, err:
+            assert str(err) == "global name 'SystemExit' is not defined"
+        except:
+            assert False
+
+    try:
+        raise SystemExit()
+    except SystemExit:
+        pass
+    else:
+        assert False
+
 def get_sandbox_from_func_globals():
     def mysum(a, b):
         return a+b

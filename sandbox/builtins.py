@@ -31,6 +31,7 @@ class CleanupBuiltins:
             def safe_exit(code=0):
                 raise BlockedFunction("exit")
             self.builtin_dict['exit'] = safe_exit
+            del self.builtin_dict['SystemExit']
 
         frame = _getframe(2)
         frame_locals = self.get_frame_locals(frame)
