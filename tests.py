@@ -218,7 +218,23 @@ def test_subclasses():
     file = get_file_from_subclasses()
     read_first_line(file)
 
+def parseOptions():
+    from optparse import OptionParser
+
+    parser = OptionParser(usage="%prog [options]")
+    parser.add_option("--raise", 
+        help="Don't catch exception",
+        dest="raise_exception",
+        action="store_true")
+    options, argv = parser.parse_args()
+    if argv:
+        parser.print_help()
+        exit(1)
+    return options
+
 def main():
+    options = parseOptions()
+
     # Get all tests
     all_tests = []
     _locals = globals().items()
@@ -236,6 +252,8 @@ def main():
         except BaseException, err:
             nerror += 1
             print "Test %s: FAILED! %r" % (name, err)
+            if options.raise_exception:
+                raise
         else:
             print "Test %s: ok" % name
 
