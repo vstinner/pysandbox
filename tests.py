@@ -129,6 +129,16 @@ def test_exit():
         else:
             assert False
 
+    config = SandboxConfig()
+    config.enable("exit")
+    with Sandbox(config):
+        try:
+            exit()
+        except SystemExit:
+            pass
+        else:
+            assert False
+
     try:
         exit()
     except SystemExit:
@@ -143,6 +153,16 @@ def test_sytem_exit():
         except NameError, err:
             assert str(err) == "global name 'SystemExit' is not defined"
         except:
+            assert False
+
+    config = SandboxConfig()
+    config.enable("exit")
+    with Sandbox(config):
+        try:
+            raise SystemExit()
+        except SystemExit:
+            pass
+        else:
             assert False
 
     try:
