@@ -5,8 +5,7 @@ import readline
 from optparse import OptionParser
 
 def createConfig():
-    config = SandboxConfig()
-    config.enable('interpreter')
+    config = SandboxConfig('interpreter')
 
     parser = OptionParser(usage="%prog [options]")
     config.createOptparseOptions(parser)

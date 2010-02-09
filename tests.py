@@ -129,8 +129,7 @@ def test_exit():
         else:
             assert False
 
-    config = SandboxConfig()
-    config.enable("exit")
+    config = SandboxConfig("exit")
     with Sandbox(config):
         try:
             exit(1)
@@ -163,8 +162,7 @@ def test_sytem_exit():
         except:
             assert False
 
-    config = SandboxConfig()
-    config.enable("exit")
+    config = SandboxConfig("exit")
     with Sandbox(config):
         try:
             raise SystemExit()

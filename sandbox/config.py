@@ -1,7 +1,7 @@
 from os.path import realpath
 
 class SandboxConfig:
-    def __init__(self):
+    def __init__(self, *features):
         # builtins whitelist: see CleanupBuiltins
         self.builtins_whitelist = set()
 
@@ -13,6 +13,9 @@ class SandboxConfig:
 
         # list of enabled features
         self.features = set()
+
+        for feature in features:
+            self.enable(feature)
 
     def enable(self, feature):
         if feature in self.features:

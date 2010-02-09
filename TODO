@@ -1,5 +1,6 @@
  * Improve type(open(...))(filename, "r") error message,
    see test_import_sys_stdout()
+ * builtins should be read only
  * Deny: func.func_code, func.__code__, compile(), generator.gi_code
  * Deny builtins: 'execfile', 'reload', 'input', 'eval'
  * Check interaction with threads
