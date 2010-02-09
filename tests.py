@@ -133,16 +133,24 @@ def test_exit():
     config.enable("exit")
     with Sandbox(config):
         try:
-            exit()
-        except SystemExit:
-            pass
+            exit(1)
+        except SystemExit, err:
+            assert err.args[0] == 1
+        else:
+            assert False
+
+        import sys
+        try:
+            sys.exit("bye")
+        except SystemExit, err:
+            assert err.args[0] == "bye"
         else:
             assert False
 
     try:
-        exit()
-    except SystemExit:
-        pass
+        exit(1)
+    except SystemExit, err:
+        assert err.args[0] == 1 
     else:
         assert False
 
