@@ -16,8 +16,8 @@ from .config import SandboxConfig
 from .sandbox_class import Sandbox
 
 from .builtins import CleanupBuiltins
-Sandbox.protections.append(CleanupBuiltins())
+Sandbox.PROTECTIONS.append(CleanupBuiltins)
 
 from .attributes import HideAttributes
-Sandbox.protections.append(HideAttributes())
+Sandbox.PROTECTIONS.append(HideAttributes)
 
