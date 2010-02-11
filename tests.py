@@ -49,22 +49,20 @@ def test_write_file():
         write_file(tempfile.name)
 
 def read_closure_secret():
-    def get_cell_value(cell):
-        # http://code.activestate.com/recipes/439096/
-        return type(lambda: 0)((lambda x: lambda: x)(0).func_code, {}, None, None, (cell,))()
-
-    def closure(secret=42):
-        def _closure():
+    def createClosure(secret):
+        def closure():
             return secret
-        return _closure
-    func = closure()
-    del closure
+        return closure
+    func = createClosure(42)
     try:
         cell = func.func_closure[0]
     except AttributeError:
         # Python 2.6+
         cell = func.__closure__[0]
-    secret = get_cell_value(cell)
+    # Does Python < 2.5 have the cell_contents attribute?  See this recipe,
+    # get_cell_value(), for version without the attribute:
+    # http://code.activestate.com/recipes/439096/ 
+    secret = cell.cell_contents
     assert secret == 42
 
 def test_closure():
