@@ -14,11 +14,13 @@ SandboxError=SandboxError):
         if mode not in ['r', 'rb', 'rU']:
             raise ValueError("Only read modes are allowed.")
 
+        # Try to open the file before checking the path whitelist
+        # to raise an exception if the file doesn't exist
+        fileobj = open_file(filename, mode, buffering)
+
         realname = realpath(filename)
         if not any(realname.startswith(path) for path in open_whitelist):
             raise SandboxError("Deny access to file %s" % filename)
-
-        fileobj = open_file(filename, mode, buffering)
 
         return createObjectProxy(fileobj)
     return safe_open
