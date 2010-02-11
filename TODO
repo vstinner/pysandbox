@@ -1,11 +1,10 @@
- * Improve type(open(...))(filename, "r") error message,
+ e Improve type(open(...))(filename, "r") error message,
    see test_import_sys_stdout()
  * builtins should be read only
  * Deny: func.func_code, func.__code__, compile(), generator.gi_code
  * Deny builtins: 'execfile', 'reload', 'input', 'eval'
  * Check interaction with threads
  * Check interaction with signals, eg. SIGALARM and SIGTERM
- * Make __builtins__ read only?
    http://mail.python.org/pipermail/python-dev/2009-February/086425.html
  * Check metaclass hack:
    http://mail.python.org/pipermail/python-dev/2009-February/086437.html
@@ -17,6 +16,7 @@
    http://mail.python.org/pipermail/python-dev/2009-February/086463.html
  * Fix "raise" in interpreter.py
  * Limit CPU / memory usage
+ * Use CPython sandbox: change frame builtins to get frame.f_restricted=1
  * Remove/Warn about unsafe frame locals, eg.
 
    secret=42
@@ -27,4 +27,9 @@
 
    with Sandbox() as sandbox:
       print sandbox # should raise an error
+
+
+   Problem: in a function, locals have their "cache" using LOAD_FAST
+   and STORE_FAST bytecodes. frame.f_locals is cached in frame.f_localsplus. 
+
 
