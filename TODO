@@ -34,4 +34,6 @@
 
  * import sys; sys.setrecursionlimit(50)
  * write a cache for safe_import. Reuse sys.modules???
+ * interpreter.py: site module introduces help() builtin,
+   type(help) may leak
 

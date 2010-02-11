@@ -17,6 +17,8 @@ def createConfig():
         exit(1)
 
     config.useOptparseOptions(options)
+    if 'traceback' in config.features:
+        config.allowPath(__file__)
 
     if options.verbose:
         from pprint import pprint
