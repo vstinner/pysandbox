@@ -114,8 +114,9 @@ def test_import_sys_stdout():
         file = get_file_from_stdout()
         try:
             read_first_line(file)
-        except ValueError, err:
-            return str(err) == 'need more than 1 value to unpack'
+        except TypeError, err:
+            return str(err) == 'object.__new__() takes no parameters'
+        assert False
 
     file = get_file_from_stdout()
     read_first_line(file)

@@ -33,4 +33,5 @@
    and STORE_FAST bytecodes. frame.f_locals is cached in frame.f_localsplus. 
 
  * import sys; sys.setrecursionlimit(50)
+ * write a cache for safe_import. Reuse sys.modules???
 

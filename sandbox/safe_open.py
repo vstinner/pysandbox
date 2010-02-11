@@ -1,7 +1,7 @@
 from os.path import realpath
 from sandbox import SandboxError
 from .guard import guard
-from .proxy import FileProxy
+from .proxy import createObjectProxy
 
 def _safe_open(open_whitelist,
 open_file=open, type=type, TypeError=TypeError,
@@ -20,6 +20,6 @@ SandboxError=SandboxError):
 
         fileobj = open_file(filename, mode, buffering)
 
-        return FileProxy(fileobj)
+        return createObjectProxy(fileobj)
     return safe_open
 
