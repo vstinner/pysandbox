@@ -25,7 +25,7 @@ def main():
 
     sys.argv = list(argv)
     with Sandbox(config):
-        exec content
+        exec content in globals(), {}
 
 if __name__ == "__main__":
     main()
