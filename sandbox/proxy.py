@@ -1,7 +1,6 @@
 from types import FunctionType
 from sandbox import SandboxError
 from .guard import guard
-from types import FunctionType
 
 builtin_function_or_method = type(len)
 
@@ -108,13 +107,30 @@ SandboxError=SandboxError):
 FileProxy = _FileProxy()
 del _FileProxy
 
-SAFE_TYPES = (int, long, str, unicode, builtin_function_or_method, FunctionType)
+SAFE_TYPES = (
+    type(None), bool,
+    int, long, 
+    str, unicode, 
+    builtin_function_or_method, FunctionType, 
+)
 
 def _proxy(safe_types=SAFE_TYPES, file=file):
     def proxy(value):
         if isinstance(value, safe_types):
             # Safe type, no need to create a proxy
             return value
+        elif isinstance(value, tuple):
+            return tuple(
+                proxy(item)
+                for item in value)
+        elif isinstance(value, list):
+            return list(
+                proxy(item)
+                for item in value)
+        elif isinstance(value, dict):
+            return dict(
+                (proxy(key), proxy(value))
+                for key, value in value.iteritems())
         elif isinstance(value, file):
             return FileProxy(value)
         else:
