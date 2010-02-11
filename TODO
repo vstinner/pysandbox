@@ -1,23 +1,22 @@
- e Improve type(open(...))(filename, "r") error message,
-   see test_import_sys_stdout()
+Major tasks
+-----------
+
  * builtins should be read only
- * Deny: func.func_code, func.__code__, compile(), generator.gi_code
- * Deny builtins: 'execfile', 'reload', 'input', 'eval'
- * Check interaction with threads
- * Check interaction with signals, eg. SIGALARM and SIGTERM
-   http://mail.python.org/pipermail/python-dev/2009-February/086425.html
- * Check metaclass hack:
-   http://mail.python.org/pipermail/python-dev/2009-February/086437.html
-   http://mail.python.org/pipermail/python-dev/2009-February/086457.html
- * warnings imports modules
-   > if there are other non-user-initiated dynamically imported modules?
-   Grep the source for PyImport.
- * RuntimeError: maximum recursion depth exceeded
-   http://mail.python.org/pipermail/python-dev/2009-February/086463.html
- * Fix "raise" in interpreter.py
- * Limit CPU / memory usage
- * Use CPython sandbox: change frame builtins to get frame.f_restricted=1
- * Remove/Warn about unsafe frame locals, eg.
+ * Write a blacklist for ObjectProxy (eg. "__class__" attribute)
+ * Write a whitelist of modifiable attributes in ObjectProxy?
+   Problem of callback: have to be executed in the sandbox
+ * Write a cache for safe_import. Reuse sys.modules???
+
+Open questions
+--------------
+ 
+ * Deny creation of an arbitray code object? type(lambda: 0), func.func_code, 
+   func.__code__, compile(), generator.gi_code, ...
+ * Deny builtins: execfile?, reload?, input?, eval?
+ * Use CPython sandbox? change frame builtins to get frame.f_restricted=1
+   CPython sandbox has no open() whitelist and is not modular
+ * Remove/Warn about unsafe frame locals? Or if it's not possible, choose
+   another syntax to avoid this problem.
 
    secret=42
    with Sandbox():
@@ -28,12 +27,31 @@
    with Sandbox() as sandbox:
       print sandbox # should raise an error
 
-
    Problem: in a function, locals have their "cache" using LOAD_FAST
-   and STORE_FAST bytecodes. frame.f_locals is cached in frame.f_localsplus. 
+   and STORE_FAST bytecodes. frame.f_locals is cached in frame.f_localsplus, 
+   but this cache is not accessible in Python.
 
- * import sys; sys.setrecursionlimit(50)
- * write a cache for safe_import. Reuse sys.modules???
+Minor tasks
+-----------
+
  * interpreter.py: site module introduces help() builtin,
    type(help) may leak
+ * Improve type(open(...))(filename, "r") error message,
+   see test_import_sys_stdout()
+
+Todo later
+----------
+
+ * Check interaction with threads
+ * Check interaction with signals, eg. SIGALARM and SIGTERM
+   http://mail.python.org/pipermail/python-dev/2009-February/086425.html
+ * Check for function importing modules:
+   warnings imports modules
+   > if there are other non-user-initiated dynamically imported modules?
+   Grep the source for PyImport.
+ * RuntimeError: maximum recursion depth exceeded
+   import sys; sys.setrecursionlimit(50)
+   http://mail.python.org/pipermail/python-dev/2009-February/086463.html
+ * Fix "raise" in interpreter.py. Is it really a problem?
+ * Limit CPU / memory usage
 
