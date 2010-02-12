@@ -30,11 +30,32 @@ Protection of the sandbox itself:
  * Get type subclasses
 
 
-Options
-=======
+Configuration
+=============
 
- * open_whitelist: see safe_open()
- * import_whitelist: see safe_import()
+Use SandboxConfig class to configure your sandbox. Features are the most simply
+way to configure it.
+
+Features
+--------
+
+ - exit: sys.exit() and raise SystemExit()
+ - interpreter: give access to stdio streams, enable traceback, pydoc.help()
+ - regex: compile regex, match regex, search regex, etc. (re module)
+ - stdin, stdout, stderr: sys.stdin, sys.stdout and sys.stderr
+ - traceback: next calls to allowModule() will add the module filename to the
+   open() whitelist, so Python can print a traceback
+
+To enable a feature, use SandboxConfig('feature1', 'feature2', ...) or
+config.enable('feature').
+
+
+Other options
+-------------
+
+ - config.allowPath(path) allows to read a file from the specified path
+ - config.allowModule(name, symbol1, symbol2, ...) allows to import the
+   specified module, but give only access to the specified symbols
 
 
 Example

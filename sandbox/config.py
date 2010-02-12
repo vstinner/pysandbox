@@ -1,13 +1,3 @@
-"""
-Config features:
- - regex: compile regex, match regex, search regex, etc. (re module)
- - exit: sys.exit() and raise SystemExit()
- - interpreter: give access to stdio streams, enable traceback, pydoc.help()
- - traceback: next calls to allowModule() will add the module filename to the
-   open() whitelist
- - stdin, stdout, stderr: sys.stdin, sys.stdout and sys.stderr
-"""
-
 from os.path import realpath
 
 class SandboxConfig:
