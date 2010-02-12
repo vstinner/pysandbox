@@ -1,7 +1,7 @@
 pysandbox is a Python sandbox. By default, untrusted code executed in the
 sandbox cannot modify the environment (write a file, use print or import a
 module). But you can configure the sandbox to choose exactly which features are
-allowed or not, eg. import sys module and read file /etc/issue. 
+allowed or not, eg. import sys module and read file /etc/issue.
 
 Website: http://github.com/haypo/pysandbox/
 
@@ -10,14 +10,14 @@ Status
 ======
 
 pysanbox is under heavy development, and should not be used in production
-applications. 
+applications.
 
 pysanbox is tested on Python 2.5 and 2.6 on Debian Sid.
 
 See TODO file for the complete status.
 
 
-Blocked features 
+Blocked features
 ================
 
 Features:
@@ -78,6 +78,7 @@ See also
 Python
 ------
 
+ * http://wiki.python.org/moin/SandboxedPython
  * tav CPython patches:
    http://codereview.appspot.com/20051
    http://codereview.appspot.com/21043
@@ -127,6 +128,7 @@ Python-dev mailing list
 Other
 -----
 
+ * http://lua-users.org/wiki/SandBoxes
  * "Capability-based Financial Instruments"
    Mark S. Miller, Chip Morningstar and Bill Frantz, 2000
    http://www.erights.org/elib/capability/ode/index.html
