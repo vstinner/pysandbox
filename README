@@ -1,6 +1,10 @@
-pysandbox is a Python sandbox.
+pysandbox is a Python sandbox. By default, untrusted code executed in the
+sandbox cannot modify the environment (write a file, use print or import a
+module). But you can configure the sandbox to choose exactly which features are
+allowed or not, eg. import sys module and read file /etc/issue. 
 
 Website: http://github.com/haypo/pysandbox/
+
 
 Status
 ======
@@ -11,6 +15,7 @@ applications.
 pysanbox is tested on Python 2.5 and 2.6 on Debian Sid.
 
 See TODO file for the complete status.
+
 
 Blocked features 
 ================
