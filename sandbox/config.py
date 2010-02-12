@@ -1,4 +1,5 @@
 from os.path import realpath
+from os import sep as path_sep
 
 class SandboxConfig:
     def __init__(self, *features):
@@ -65,8 +66,15 @@ class SandboxConfig:
             self.allowModuleSourceCode(name)
 
     def allowPath(self, path):
-        path = realpath(path)
-        self.open_whitelist.add(path)
+        real = realpath(path)
+        if path.endswith(path_sep) and not real.endswith(path_sep):
+            # realpath() eats trailing separator
+            # (eg. /sym/link/ -> /real/path).
+            #
+            # Restore the suffix (/real/path -> /real/path/) to avoid
+            # matching unwanted path (eg. /real/path.evil.path).
+            real += path_sep
+        self.open_whitelist.add(real)
 
     def allowModuleSourceCode(self, name):
         """
