@@ -44,15 +44,14 @@ class SandboxConfig:
             self.allowModuleSourceCode('site')
             self.allowModuleSourceCode('sandbox')
             self.allowModule('sys',
-                'api_version', 'version', 'hexversion',
-                'stdin', 'stdout', 'stderr')
+                'api_version', 'version', 'hexversion')
             self.allowModule('pydoc', 'help')
         elif feature == 'traceback':
             # change allowModule() behaviour
             pass
         elif feature in ('stdin', 'stdout', 'stderr'):
-            # see ProtectStdio.enable()
-            pass
+            self.allowModule('sys', feature)
+            # ProtectStdio.enable() use also these features
         else:
             self.features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)
