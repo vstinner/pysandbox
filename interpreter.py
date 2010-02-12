@@ -9,7 +9,8 @@ class SandboxedInterpeter:
         self.config, self.options = self.parseOptions()
 
         self.config.enable('interpreter')
-        if 'traceback' in self.config.features:
+        if ('traceback' in self.config.features) \
+        and ('debug_sandbox' in self.config.features):
             self.config.allowPath(__file__)
 
     def parseOptions(self):

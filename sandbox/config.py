@@ -1,6 +1,17 @@
 from os.path import realpath
 from os import sep as path_sep
 
+def findLicenseFile():
+    # Adapted from setcopyright() from site.py
+    import os
+    here = os.path.dirname(os.__file__)
+    for filename in ["LICENSE.txt", "LICENSE"]:
+        for directory in (os.path.join(here, os.pardir), here, os.curdir):
+            fullname = os.path.join(directory, filename)
+            if os.path.exists(fullname):
+                return fullname
+    return None
+
 class SandboxConfig:
     def __init__(self, *features):
         # builtins whitelist: see CleanupBuiltins
@@ -19,6 +30,7 @@ class SandboxConfig:
             self.enable(feature)
 
     def enable(self, feature):
+        # If you add a new feature, update the README documentation
         if feature in self.features:
             return
         self.features.add(feature)
@@ -35,24 +47,32 @@ class SandboxConfig:
         elif feature == 'exit':
             self.allowModule('sys', 'exit')
             self.builtins_whitelist.add('exit')
-        elif feature == 'interpreter':
-            self.enable('traceback')
-            self.enable('stdin')
-            self.enable('stdout')
-            self.enable('stderr')
-            self.enable('exit')
-            self.allowModuleSourceCode('code')
-            self.allowModuleSourceCode('site')
-            self.allowModuleSourceCode('sandbox')
-            self.allowModule('sys',
-                'api_version', 'version', 'hexversion')
-            self.allowModule('pydoc', 'help')
         elif feature == 'traceback':
             # change allowModule() behaviour
             pass
         elif feature in ('stdin', 'stdout', 'stderr'):
             self.allowModule('sys', feature)
             # ProtectStdio.enable() use also these features
+        elif feature == 'site':
+            license_filename = findLicenseFile()
+            if license_filename:
+                self.allowPath(license_filename)
+            self.allowModuleSourceCode('site')
+        elif feature == 'interpreter':
+            # "Meta" feature + some extras
+            self.enable('traceback')
+            self.enable('stdin')
+            self.enable('stdout')
+            self.enable('stderr')
+            self.enable('exit')
+            self.enable('site')
+            self.allowModuleSourceCode('code')
+            self.allowModule('sys',
+                'api_version', 'version', 'hexversion')
+            self.allowModule('pydoc', 'help')
+        elif feature == 'debug_sandbox':
+            self.enable('traceback')
+            self.allowModuleSourceCode('sandbox')
         else:
             self.features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)
@@ -62,8 +82,7 @@ class SandboxConfig:
             self.import_whitelist[name] |= set(attributes)
         else:
             self.import_whitelist[name] = set(attributes)
-        if 'traceback' in self.features:
-            self.allowModuleSourceCode(name)
+        self.allowModuleSourceCode(name)
 
     def allowPath(self, path):
         real = realpath(path)
@@ -79,7 +98,10 @@ class SandboxConfig:
     def allowModuleSourceCode(self, name):
         """
         Allow reading the module source.
+        Do nothing if traceback is disabled.
         """
+        if 'traceback' not in self.features:
+            return
         module = __import__(name)
         for part in name.split(".")[1:]:
             module = getattr(module, part)
