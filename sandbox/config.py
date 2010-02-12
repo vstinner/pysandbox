@@ -1,3 +1,13 @@
+"""
+Config features:
+ - regex: compile regex, match regex, search regex, etc. (re module)
+ - exit: sys.exit() and raise SystemExit()
+ - interpreter: give access to stdio streams, enable traceback, pydoc.help()
+ - traceback: next calls to allowModule() will add the module filename to the
+   open() whitelist
+ - stdin, stdout, stderr: sys.stdin, sys.stdout and sys.stderr
+"""
+
 from os.path import realpath
 
 class SandboxConfig:
@@ -36,6 +46,9 @@ class SandboxConfig:
             self.builtins_whitelist.add('exit')
         elif feature == 'interpreter':
             self.enable('traceback')
+            self.enable('stdin')
+            self.enable('stdout')
+            self.enable('stderr')
             self.enable('exit')
             self.allowModuleSourceCode('code')
             self.allowModuleSourceCode('site')
@@ -46,6 +59,9 @@ class SandboxConfig:
             self.allowModule('pydoc', 'help')
         elif feature == 'traceback':
             # change allowModule() behaviour
+            pass
+        elif feature in ('stdin', 'stdout', 'stderr'):
+            # see ProtectStdio.enable()
             pass
         else:
             self.features.remove(feature)

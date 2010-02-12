@@ -21,3 +21,6 @@ Sandbox.PROTECTIONS.append(CleanupBuiltins)
 from .attributes import HideAttributes
 Sandbox.PROTECTIONS.append(HideAttributes)
 
+from .stdio import ProtectStdio 
+Sandbox.PROTECTIONS.append(ProtectStdio)
+
