@@ -11,17 +11,16 @@ class SafeModule(object):
         self.__name__ = module.__name__
         self.__doc__ = module.__doc__
 
-    @staticmethod
-    def create(module, attributes):
-        safe = SafeModule(module)
-        for attr in attributes:
-            value = getattr(module, attr)
-            value = proxy(value)
-            setattr(safe, attr, value)
-        return safe
-
     def __repr__(self):
         return "<SafeModule %s>" % (self.__name,)
+
+def createSafeModule(module, attributes):
+    safe = SafeModule(module)
+    for attr in attributes:
+        value = getattr(module, attr)
+        value = proxy(value)
+        setattr(safe, attr, value)
+    return safe
 
 def _safe_import(__import__, module_whitelist):
     """
@@ -33,6 +32,6 @@ def _safe_import(__import__, module_whitelist):
         except KeyError:
             raise ImportError('Import "%s" blocked by the sandbox' % name)
         module = __import__(name, globals, locals, fromlist, level)
-        return SafeModule.create(module, whitelist)
+        return createSafeModule(module, whitelist)
     return safe_import
 
