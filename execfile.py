@@ -12,7 +12,7 @@ def parseOptions():
     if not argv:
         parser.print_help()
         exit(1)
-    
+
     config.useOptparseOptions(options)
     return config, argv
 
@@ -25,7 +25,7 @@ def main():
 
     sys.argv = list(argv)
     with Sandbox(config):
-        exec content in {}
+        exec content in {'__builtins__': __builtins__}
 
 if __name__ == "__main__":
     main()
