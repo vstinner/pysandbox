@@ -1,5 +1,6 @@
 from os.path import realpath
 from os import sep as path_sep
+import sys
 
 def findLicenseFile():
     # Adapted from setcopyright() from site.py
@@ -102,13 +103,18 @@ class SandboxConfig:
         """
         if 'traceback' not in self.features:
             return
-        module = __import__(name)
-        for part in name.split(".")[1:]:
-            module = getattr(module, part)
+        old_sys_modules = sys.modules.copy()
         try:
-            filename = module.__file__
-        except AttributeError:
-            return
+            module = __import__(name)
+            for part in name.split(".")[1:]:
+                module = getattr(module, part)
+            try:
+                filename = module.__file__
+            except AttributeError:
+                return
+        finally:
+            sys.modules.clear()
+            sys.modules.update(old_sys_modules)
         if filename.endswith('.pyc'):
             filename = filename[:-1]
         if filename.endswith('__init__.py'):
