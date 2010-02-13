@@ -1,18 +1,15 @@
-from ctypes import (c_void_p, sizeof, string_at, c_size_t,
-    Structure, POINTER, cast, c_int, byref, CFUNCTYPE, c_char_p)
+from ctypes import Structure, cast, POINTER, CFUNCTYPE
+from ctypes import c_void_p, c_size_t, c_int,  c_char_p
 from ctypes import pythonapi
-from struct import unpack
 import sys
+
+Py_ssize_t = c_size_t
 
 Py_REF_DEBUG = hasattr(sys, "gettotalrefcount")
 Py_TRACE_REFS = Py_REF_DEBUG
 
-NULL = 0
-
 # Python 2.6 constant
 CO_MAXBLOCKS = 20
-
-Py_ssize_t = c_size_t
 
 class PyObject_HEAD(Structure):
     if Py_TRACE_REFS:
@@ -28,16 +25,8 @@ class PyObject_HEAD(Structure):
     )
 PyObject_HEAD_p = POINTER(PyObject_HEAD)
 
-
 PyObject_p = PyObject_HEAD_p
 PyObject_pp = POINTER(PyObject_p)
-
-class PyTryBlock(Structure):
-    _fields_ = (
-        ("b_type", c_int),
-        ("b_handler", c_int),
-        ("b_level", c_int),
-    )
 
 class PyObject_VAR_HEAD(Structure):
     _fields_ = PyObject_HEAD._fields_ + (
@@ -47,12 +36,20 @@ class PyObject_VAR_HEAD(Structure):
 destructor = CFUNCTYPE(None, c_void_p)
 
 class struct_typeobject(Structure):
-    _fields_ = PyObject_HEAD._fields_ + (
+    _fields_ = PyObject_VAR_HEAD._fields_ + (
 	("tp_name", c_char_p),
         ("tp_basicsize", Py_ssize_t),
 	("tp_itemsize", Py_ssize_t),
 	("tp_dealloc", destructor),
         # ... we don't need more
+    )
+struct_typeobject_p = POINTER(struct_typeobject)
+
+class PyTryBlock(Structure):
+    _fields_ = (
+        ("b_type", c_int),
+        ("b_handler", c_int),
+        ("b_level", c_int),
     )
 
 class PyFrameObject(Structure):
@@ -77,38 +74,72 @@ class PyFrameObject(Structure):
         ("f_localsplus", PyObject_pp),
     )
 
-# ob_refcnt, ob_type
-sizeof_PyObject_HEAD = sizeof(Py_ssize_t) + sizeof(c_void_p)
-if Py_TRACE_REFS:
-    # _ob_next, _ob_prev
-    sizeof_PyObject_HEAD += sizeof(c_void_p) * 2
-sizeof_PyObject_VAR_HEAD = sizeof_PyObject_HEAD + sizeof(Py_ssize_t)
-
-ssize_t = c_size_t
-
-def cobject_address(obj):
-    return id(obj)
-
-def get_cobject(ob, type=None):
+def cptr_at(addresss, type=None):
     if type is not None:
         type = POINTER(type)
     else:
-        type = PyObject_HEAD_p
-    ptr = cobject_address(ob)
-    return cast(c_void_p(ptr), type)[0]
+        type = PyObject_p
+    if isinstance(addresss, int):
+        addresss = c_void_p(addresss)
+    return cast(addresss, type)
 
-def Py_TYPE(ob):
+def cobject_at(address, type=None):
+    cobj_ptr = cptr_at(address, type)
+    return cobj_ptr.contents
+
+def pyobject_address(obj):
+    return id(obj)
+
+def pyobject_get_cptr(pyobj, type=None):
+    address = pyobject_address(pyobj)
+    return cptr_at(address, type)
+
+def pyobject_get_cobject(pyobj, type=None):
+    cptr = pyobject_get_cptr(pyobj, type)
+    return cptr.contents
+
+COUNT_ALLOCS = hasattr(pythonapi, 'inc_count')
+if COUNT_ALLOCS:
+    dec_count = pythonapi.dec_count
+
+def Py_TYPE(cobj_ptr):
     """
-    Get ob->ob_type (pointer to the type object)
+    Get op->ob_type as a struct_typeobject_p.
     """
-    ptr = get_cobject(ob).ob_type
-    print "ob_type=0x%x" % ptr
-    return cast(ptr, struct_typeobject)[0]
+    cobj = cobj_ptr.contents
+    return cast(cobj.ob_type, struct_typeobject_p)
+
+if Py_TRACE_REFS:
+    _Py_Dealloc = pythonapi._Py_Dealloc
+else:
+    def _Py_Dealloc(cobj_ptr):
+        type_address = Py_TYPE(cobj_ptr)
+        if COUNT_ALLOCS:
+            dec_count(type_address)
+        cobj_type = cobject_at(type_address, struct_typeobject)
+        cobj_type.tp_dealloc(cobj_ptr)
+
+def Py_DECREF(cobj_ptr):
+    cobj = cobj_ptr.contents
+    cobj.ob_refcnt -= 1
+    if cobj.ob_refcnt == 0:
+        _Py_Dealloc(cobj_ptr)
+
+def Py_INCREF(obj):
+    obj.ob_refcnt += 1
+
+def set_frame_builtins(frame, builtins):
+    cframe = pyobject_get_cobject(frame, PyFrameObject)
+    Py_DECREF(cframe.f_builtins)
+
+    cbuiltins = pyobject_get_cobject(builtins)
+    Py_INCREF(cbuiltins)
+    cframe.f_builtins = pyobject_get_cptr(builtins)
 
 class ClearFrameCache:
     def __init__(self, frame):
         self.frame = frame
-        self.cframe = get_cobject(self.frame, PyFrameObject)
+        self.cframe = pyobject_get_cobject(self.frame, PyFrameObject)
 
         # clear f_locals
         self.locals = frame.f_locals.copy()
@@ -122,7 +153,7 @@ class ClearFrameCache:
             print "CLEAR CACHE[%s]=%s" % (index, ptr)
             pythonapi._PyObject_Dump(ptr)
             self.cache.append(ptr)
-            self.cframe.f_localsplus[index] = cobject_address(42)
+            self.cframe.f_localsplus[index] = pyobject_address(42)
 
     def restore(self):
         # restore f_localsplus (LOAD_FAST/STORE_FAST cache)
@@ -130,38 +161,4 @@ class ClearFrameCache:
             self.cframe.f_localsplus[index] = ptr
         # restore f_locals
         self.frame.f_locals.update(self.locals)
-
-COUNT_ALLOCS = hasattr(pythonapi, 'inc_count')
-if COUNT_ALLOCS:
-    dec_count = pythonapi.dec_count
-
-if Py_TRACE_REFS:
-    _Py_Dealloc = pythonapi._Py_Dealloc
-else:
-    def _Py_Dealloc(obj):
-        objtype = Py_TYPE(obj)
-        if COUNT_ALLOCS:
-            dec_count(objtype)
-        objtype.tp_dealloc(obj)
-
-def Py_DECREF(obj):
-    # FIXME: Fix _Py_Dealloc()
-    if 1:
-        if obj.ob_refcnt == 1:
-            return
-        obj.ob_refcnt -= 1
-    else:
-        obj.ob_refcnt -= 1
-        if obj.ob_refcnt == 0:
-            _Py_Dealloc(obj)
-
-def Py_INCREF(obj):
-    obj.ob_refcnt += 1
-
-def set_frame_builtins(frame, builtins):
-    cframe = get_cobject(frame, PyFrameObject)
-    Py_DECREF(cframe.f_builtins.contents)
-    cbuiltins = get_cobject(builtins)
-    Py_INCREF(cbuiltins)
-    cframe.f_builtins = cast(cobject_address(builtins), PyObject_p)
 
