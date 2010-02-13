@@ -2,11 +2,21 @@ import __builtin__
 from types import FrameType
 from sys import _getframe
 
-from sandbox import BlockedFunction
+from sandbox import BlockedFunction, SandboxError
 from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
+
+def readOnlyDict():
+    raise SandboxError("Read only dictionary")
+
+class ReadOnlyDict(dict):
+    def __setitem__(self, key, value):
+        readOnlyDict()
+
+    def __delitem__(self, key):
+        readOnlyDict()
 
 class CleanupBuiltins:
     """
@@ -35,7 +45,8 @@ class CleanupBuiltins:
 
         frame = _getframe(2)
         frame_locals = self.get_frame_locals(frame)
-        frame_locals['__builtins__'] = self.builtin_dict.copy()
+        safe_builtins = ReadOnlyDict(self.builtin_dict.dict)
+        frame_locals['__builtins__'] = safe_builtins
 
     def disable(self, sandbox):
         self.builtin_dict.restore()
