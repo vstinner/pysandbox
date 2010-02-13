@@ -27,7 +27,8 @@ class CleanupBuiltins:
         self.builtin_dict = RestorableDict(__builtin__.__dict__)
 
     def enable(self, sandbox):
-        builtins_whitelist = sandbox.config.builtins_whitelist
+        self.frame = _getframe(2)
+        self.local_builtins = self.frame.f_locals['__builtins__']
 
         open_whitelist = sandbox.config.open_whitelist
         safe_open = _safe_open(open_whitelist)
@@ -37,17 +38,18 @@ class CleanupBuiltins:
         import_whitelist = sandbox.config.import_whitelist
         self.builtin_dict['__import__'] = _safe_import(__import__, import_whitelist)
 
-        if 'exit' not in builtins_whitelist:
+        if 'exit' not in sandbox.config.builtins_whitelist:
             def safe_exit(code=0):
                 raise BlockedFunction("exit")
             self.builtin_dict['exit'] = safe_exit
             del self.builtin_dict['SystemExit']
 
-        frame = _getframe(2)
-        frame_locals = self.get_frame_locals(frame)
         safe_builtins = ReadOnlyDict(self.builtin_dict.dict)
-        frame_locals['__builtins__'] = safe_builtins
+
+        self.frame_locals = self.get_frame_locals(self.frame)
+        self.frame_locals['__builtins__'] = safe_builtins
 
     def disable(self, sandbox):
         self.builtin_dict.restore()
+        self.frame_locals['__builtins__'] = self.local_builtins
 
