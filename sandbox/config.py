@@ -61,7 +61,6 @@ class SandboxConfig:
             self.allowModuleSourceCode('site')
         elif feature == 'interpreter':
             # "Meta" feature + some extras
-            self.enable('traceback')
             self.enable('stdin')
             self.enable('stdout')
             self.enable('stderr')
