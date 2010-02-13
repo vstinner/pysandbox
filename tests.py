@@ -16,13 +16,17 @@ def read_first_line(open):
     assert line.rstrip() == '#!/usr/bin/env python'
 
 def test_open_whitelist():
-    try:
-        with Sandbox():
+    from errno import EACCES
+
+    with Sandbox():
+        try:
             read_first_line(open)
-        assert False, "open whitelist doesn't work"
-    except SandboxError, err:
-        # Expect a safe_open() error
-        assert str(err).startswith('Deny access to file ')
+        except IOError, err:
+            # Expect a safe_open() error
+            assert err.errno == EACCES
+            assert err.args[1].startswith('Sandbox deny access to the file ')
+        else:
+            assert False
 
     config = SandboxConfig()
     config.open_whitelist.add(READ_FILENAME)
