@@ -61,7 +61,7 @@ def read_closure_secret():
         cell = func.__closure__[0]
     # Does Python < 2.5 have the cell_contents attribute?  See this recipe,
     # get_cell_value(), for version without the attribute:
-    # http://code.activestate.com/recipes/439096/ 
+    # http://code.activestate.com/recipes/439096/
     secret = cell.cell_contents
     assert secret == 42
 
@@ -148,7 +148,7 @@ def test_exit():
     try:
         exit(1)
     except SystemExit, err:
-        assert err.args[0] == 1 
+        assert err.args[0] == 1
     else:
         assert False
 
@@ -243,11 +243,37 @@ def test_subclasses():
     file = get_file_from_subclasses()
     read_first_line(file)
 
+def test_stdout():
+    import sys
+    from StringIO import StringIO
+
+    old_stdout = sys.stdout
+    sys.stdout = StringIO()
+    try:
+        with Sandbox():
+            try:
+                print "Hello Sandbox 1"
+            except SandboxError:
+                pass
+            else:
+                assert False
+
+        with Sandbox(SandboxConfig('stdout')):
+            print "Hello Sandbox 2"
+
+        print "Hello Sandbox 3"
+
+        output =  sys.stdout.getvalue()
+    finally:
+        sys.stdout = old_stdout
+
+    assert output == "Hello Sandbox 2\nHello Sandbox 3\n"
+
 def parseOptions():
     from optparse import OptionParser
 
     parser = OptionParser(usage="%prog [options]")
-    parser.add_option("--raise", 
+    parser.add_option("--raise",
         help="Don't catch exception",
         dest="raise_exception",
         action="store_true")
