@@ -1,4 +1,5 @@
 import __builtin__
+from types import FrameType
 from sys import _getframe
 
 from sandbox import BlockedFunction, SandboxError
@@ -21,12 +22,13 @@ class CleanupBuiltins:
     Deny unsafe builtins functions.
     """
     def __init__(self):
+        self.get_frame_locals = dictionary_of(FrameType)['f_locals'].__get__
         self.builtin_dict = RestorableDict(__builtin__.__dict__)
 
     def enable(self, sandbox):
         self.frame = _getframe(2)
-        self.frame_locals = self.frame.f_locals
-        self.local_builtins = self.frame_locals.get('__builtins__', None)
+        self.frame_locals = self.get_frame_locals(self.frame)
+        self.local_builtins = self.frame_locals.get('__builtins__')
 
         open_whitelist = sandbox.config.open_whitelist
         safe_open = _safe_open(open_whitelist)
@@ -44,11 +46,12 @@ class CleanupBuiltins:
 
         safe_builtins = ReadOnlyDict(self.builtin_dict.dict)
 
-        if self.local_builtins is not None:
-            self.frame_locals['__builtins__'] = safe_builtins
+        self.frame_locals['__builtins__'] = safe_builtins
 
     def disable(self, sandbox):
         self.builtin_dict.restore()
         if self.local_builtins is not None:
             self.frame_locals['__builtins__'] = self.local_builtins
+        else:
+            del self.frame_locals['__builtins__']
 
