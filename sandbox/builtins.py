@@ -3,6 +3,7 @@ from types import FrameType
 from sys import _getframe
 
 from sandbox import BlockedFunction, SandboxError
+from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
