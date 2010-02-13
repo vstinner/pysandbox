@@ -6,11 +6,12 @@ Major tasks
  * Write a whitelist of modifiable attributes in ObjectProxy?
    Problem of callback: have to be executed in the sandbox
  * Write a cache for safe_import. Reuse sys.modules???
+ * Write a proxy for MethodWrapper: sys.stdout.__repr__
 
 Open questions
 --------------
- 
- * Deny creation of an arbitray code object? type(lambda: 0), func.func_code, 
+
+ * Deny creation of an arbitray code object? type(lambda: 0), func.func_code,
    func.__code__, compile(), generator.gi_code, ...
  * Deny builtins: execfile?, reload?, input?, eval?
  * Use CPython sandbox? change frame builtins to get frame.f_restricted=1
@@ -28,7 +29,7 @@ Open questions
       print sandbox # should raise an error
 
    Problem: in a function, locals have their "cache" using LOAD_FAST
-   and STORE_FAST bytecodes. frame.f_locals is cached in frame.f_localsplus, 
+   and STORE_FAST bytecodes. frame.f_locals is cached in frame.f_localsplus,
    but this cache is not accessible in Python.
 
 Minor tasks
