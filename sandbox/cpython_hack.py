@@ -1,5 +1,5 @@
-from ctypes import (c_void_p, sizeof, string_at, c_size_t, 
-    Structure, POINTER, cast, c_int)
+from ctypes import (c_void_p, sizeof, string_at, c_size_t,
+    Structure, POINTER, cast, c_int, byref, CFUNCTYPE, c_char_p)
 from ctypes import pythonapi
 from struct import unpack
 import sys
@@ -13,8 +13,6 @@ NULL = 0
 CO_MAXBLOCKS = 20
 
 Py_ssize_t = c_size_t
-PyObject_p = c_void_p
-PyObject_pp = POINTER(PyObject_p)
 
 class PyObject_HEAD(Structure):
     if Py_TRACE_REFS:
@@ -30,6 +28,10 @@ class PyObject_HEAD(Structure):
     )
 PyObject_HEAD_p = POINTER(PyObject_HEAD)
 
+
+PyObject_p = PyObject_HEAD_p
+PyObject_pp = POINTER(PyObject_p)
+
 class PyTryBlock(Structure):
     _fields_ = (
         ("b_type", c_int),
@@ -42,8 +44,19 @@ class PyObject_VAR_HEAD(Structure):
         ("ob_size", Py_ssize_t),
     )
 
+destructor = CFUNCTYPE(None, c_void_p)
+
+class struct_typeobject(Structure):
+    _fields_ = PyObject_HEAD._fields_ + (
+	("tp_name", c_char_p),
+        ("tp_basicsize", Py_ssize_t),
+	("tp_itemsize", Py_ssize_t),
+	("tp_dealloc", destructor),
+        # ... we don't need more
+    )
+
 class PyFrameObject(Structure):
-    # Python 2.6 attributes 
+    # Python 2.6 attributes
     _fields_ = PyObject_VAR_HEAD._fields_ + (
         ("f_back", c_void_p),
         ("f_code", PyObject_p),
@@ -88,7 +101,9 @@ def Py_TYPE(ob):
     """
     Get ob->ob_type (pointer to the type object)
     """
-    return get_cobject(ob).ob_type
+    ptr = get_cobject(ob).ob_type
+    print "ob_type=0x%x" % ptr
+    return cast(ptr, struct_typeobject)[0]
 
 class ClearFrameCache:
     def __init__(self, frame):
@@ -100,10 +115,10 @@ class ClearFrameCache:
         frame.f_locals.clear()
 
         # clear f_localsplus (LOAD_FAST/STORE_FAST cache)
-        self.cache_size = 2 
+        self.cache_size = 2
         self.cache = []
         for index in xrange(self.cache_size):
-            ptr = self.cframe.f_localsplus[index] 
+            ptr = self.cframe.f_localsplus[index]
             print "CLEAR CACHE[%s]=%s" % (index, ptr)
             pythonapi._PyObject_Dump(ptr)
             self.cache.append(ptr)
@@ -115,4 +130,38 @@ class ClearFrameCache:
             self.cframe.f_localsplus[index] = ptr
         # restore f_locals
         self.frame.f_locals.update(self.locals)
+
+COUNT_ALLOCS = hasattr(pythonapi, 'inc_count')
+if COUNT_ALLOCS:
+    dec_count = pythonapi.dec_count
+
+if Py_TRACE_REFS:
+    _Py_Dealloc = pythonapi._Py_Dealloc
+else:
+    def _Py_Dealloc(obj):
+        objtype = Py_TYPE(obj)
+        if COUNT_ALLOCS:
+            dec_count(objtype)
+        objtype.tp_dealloc(obj)
+
+def Py_DECREF(obj):
+    # FIXME: Fix _Py_Dealloc()
+    if 1:
+        if obj.ob_refcnt == 1:
+            return
+        obj.ob_refcnt -= 1
+    else:
+        obj.ob_refcnt -= 1
+        if obj.ob_refcnt == 0:
+            _Py_Dealloc(obj)
+
+def Py_INCREF(obj):
+    obj.ob_refcnt += 1
+
+def set_frame_builtins(frame, builtins):
+    cframe = get_cobject(frame, PyFrameObject)
+    Py_DECREF(cframe.f_builtins.contents)
+    cbuiltins = get_cobject(builtins)
+    Py_INCREF(cbuiltins)
+    cframe.f_builtins = cast(cobject_address(builtins), PyObject_p)
 
