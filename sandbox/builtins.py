@@ -2,11 +2,14 @@ import __builtin__
 from types import FrameType
 from sys import _getframe
 
-from sandbox import BlockedFunction, SandboxError
+from sandbox import BlockedFunction, SandboxError, USE_CPYTHON_HACKS
 from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
+
+if USE_CPYTHON_HACKS:
+    from .cpython_hack import set_frame_builtins
 
 def readOnlyDict():
     raise SandboxError("Read only dictionary")
@@ -24,12 +27,14 @@ class CleanupBuiltins:
     """
     def __init__(self):
         self.get_frame_locals = dictionary_of(FrameType)['f_locals'].__get__
+        self.get_frame_builtins = dictionary_of(FrameType)['f_builtins'].__get__
         self.builtin_dict = RestorableDict(__builtin__.__dict__)
 
     def enable(self, sandbox):
         self.frame = _getframe(2)
         self.frame_locals = self.get_frame_locals(self.frame)
         self.local_builtins = self.frame_locals.get('__builtins__')
+        self.frame_builtins = self.get_frame_builtins(self.frame)
 
         open_whitelist = sandbox.config.open_whitelist
         safe_open = _safe_open(open_whitelist)
@@ -48,6 +53,8 @@ class CleanupBuiltins:
         safe_builtins = ReadOnlyDict(self.builtin_dict.dict)
 
         self.frame_locals['__builtins__'] = safe_builtins
+        if USE_CPYTHON_HACKS:
+            set_frame_builtins(self.frame, safe_builtins)
 
     def disable(self, sandbox):
         self.builtin_dict.restore()
@@ -55,4 +62,7 @@ class CleanupBuiltins:
             self.frame_locals['__builtins__'] = self.local_builtins
         else:
             del self.frame_locals['__builtins__']
+        if USE_CPYTHON_HACKS:
+            set_frame_builtins(self.frame, self.frame_builtins)
+
 

@@ -12,6 +12,8 @@ class Protection:
     def disable(self, sandbox):
         pass
 
+USE_CPYTHON_HACKS = False
+
 from .config import SandboxConfig
 from .sandbox_class import Sandbox
 
@@ -21,6 +23,6 @@ Sandbox.PROTECTIONS.append(CleanupBuiltins)
 from .attributes import HideAttributes
 Sandbox.PROTECTIONS.append(HideAttributes)
 
-from .stdio import ProtectStdio 
+from .stdio import ProtectStdio
 Sandbox.PROTECTIONS.append(ProtectStdio)
 

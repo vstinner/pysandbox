@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import with_statement
-from sandbox import Sandbox, SandboxError, SandboxConfig
+from sandbox import Sandbox, SandboxError, SandboxConfig, USE_CPYTHON_HACKS
 
 def test_valid_code():
     with Sandbox():
@@ -272,6 +272,28 @@ def test_stdout():
         sys.stdout = old_stdout
 
     assert output == "Hello Sandbox 2\nHello Sandbox 3\n"
+
+if USE_CPYTHON_HACKS:
+    def builtins_superglobal():
+        if isinstance(__builtins__, dict):
+            __builtins__['SUPERGLOBAL'] = 42
+            assert SUPERGLOBAL == 42
+            del __builtins__['SUPERGLOBAL']
+        else:
+            __builtins__.SUPERGLOBAL = 42
+            assert SUPERGLOBAL == 42
+            del __builtins__.SUPERGLOBAL
+
+    def test_modify_builtins():
+        with Sandbox():
+            try:
+                builtins_superglobal()
+            except NameError, err:
+                assert str(err) == "global name 'SUPERGLOBAL' is not defined"
+            else:
+                assert False
+
+        builtins_superglobal()
 
 def parseOptions():
     from optparse import OptionParser
