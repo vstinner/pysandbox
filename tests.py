@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import with_statement
-from sandbox import Sandbox, SandboxError, SandboxConfig, USE_CPYTHON_HACKS
+from sandbox import Sandbox, SandboxError, SandboxConfig
 
 def createSandboxConfig(*features):
     return SandboxConfig(*features)
@@ -281,27 +281,26 @@ def test_stdout():
 
     assert output == "Hello Sandbox 2\nHello Sandbox 3\n"
 
-if USE_CPYTHON_HACKS:
-    def builtins_superglobal():
-        if isinstance(__builtins__, dict):
-            __builtins__['SUPERGLOBAL'] = 42
-            assert SUPERGLOBAL == 42
-            del __builtins__['SUPERGLOBAL']
+def builtins_superglobal():
+    if isinstance(__builtins__, dict):
+        __builtins__['SUPERGLOBAL'] = 42
+        assert SUPERGLOBAL == 42
+        del __builtins__['SUPERGLOBAL']
+    else:
+        __builtins__.SUPERGLOBAL = 42
+        assert SUPERGLOBAL == 42
+        del __builtins__.SUPERGLOBAL
+
+def test_modify_builtins():
+    with createSandbox():
+        try:
+            builtins_superglobal()
+        except SandboxError, err:
+            assert str(err) == "Read only dictionary"
         else:
-            __builtins__.SUPERGLOBAL = 42
-            assert SUPERGLOBAL == 42
-            del __builtins__.SUPERGLOBAL
+            assert False
 
-    def test_modify_builtins():
-        with createSandbox():
-            try:
-                builtins_superglobal()
-            except NameError, err:
-                assert str(err) == "global name 'SUPERGLOBAL' is not defined"
-            else:
-                assert False
-
-        builtins_superglobal()
+    builtins_superglobal()
 
 def parseOptions():
     from optparse import OptionParser

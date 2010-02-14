@@ -35,6 +35,7 @@ class CleanupBuiltins:
         self.frame_locals = self.get_frame_locals(self.frame)
         self.local_builtins = self.frame_locals.get('__builtins__')
         self.frame_builtins = self.get_frame_builtins(self.frame)
+        self.frame_global_builtins = self.frame.f_globals['__builtins__']
 
         open_whitelist = sandbox.config.open_whitelist
         safe_open = _safe_open(open_whitelist)
@@ -53,6 +54,7 @@ class CleanupBuiltins:
         safe_builtins = ReadOnlyDict(self.builtin_dict.dict)
 
         self.frame_locals['__builtins__'] = safe_builtins
+        self.frame.f_globals['__builtins__'] = safe_builtins
         if USE_CPYTHON_HACKS:
             set_frame_builtins(self.frame, safe_builtins)
 
@@ -64,5 +66,6 @@ class CleanupBuiltins:
             del self.frame_locals['__builtins__']
         if USE_CPYTHON_HACKS:
             set_frame_builtins(self.frame, self.frame_builtins)
+        self.frame.f_globals['__builtins__'] = self.frame_global_builtins
 
 
