@@ -3,7 +3,10 @@ from __future__ import with_statement
 from sandbox import Sandbox, SandboxError, SandboxConfig
 
 def createSandboxConfig(*features):
+    if createSandboxConfig.debug:
+        features += ("stdout", "stderr")
     return SandboxConfig(*features)
+createSandboxConfig.debug = False
 
 def createSandbox():
     config = createSandboxConfig()
@@ -324,10 +327,7 @@ def main():
 
     options = parseOptions()
 
-    if options.debug: 
-        def createSandboxConfig(*features):
-            features += ("stdout", "stderr")
-            return SandboxConfig(*features)
+    createSandboxConfig.debug = options.debug
 
     # Get all tests
     all_tests = []
