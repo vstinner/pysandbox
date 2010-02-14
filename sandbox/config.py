@@ -72,6 +72,7 @@ class SandboxConfig:
             self.allowModule('pydoc', 'help')
         elif feature == 'debug_sandbox':
             self.enable('traceback')
+            self.allowModule('sys', '_getframe')
             self.allowModuleSourceCode('sandbox')
         else:
             self.features.remove(feature)
