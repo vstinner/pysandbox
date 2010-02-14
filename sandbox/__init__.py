@@ -12,8 +12,6 @@ class Protection:
     def disable(self, sandbox):
         pass
 
-USE_CPYTHON_HACKS = False
-
 from .config import SandboxConfig
 from .sandbox_class import Sandbox
 
