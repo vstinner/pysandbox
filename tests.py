@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import with_statement
-from sandbox import Sandbox, SandboxError, SandboxConfig
+from sandbox import Sandbox, SandboxError, SandboxConfig, USE_CPYTHON_HACKS
 
 def createSandboxConfig(*features):
     if createSandboxConfig.debug:
@@ -305,6 +305,16 @@ def test_modify_builtins():
 
     builtins_superglobal()
 
+if USE_CPYTHON_HACKS:
+    def test_exec_builtins():
+        from sandbox.builtins import ReadOnlyDict
+
+        with createSandbox():
+            result = []
+            exec "result.append(type(__builtins__))" in {'result': result}
+            builtin_type = result[0]
+            assert builtin_type == ReadOnlyDict
+
 def parseOptions():
     from optparse import OptionParser
 
@@ -358,7 +368,7 @@ def main():
         print "%s ERRORS!" % nerror
         exit(1)
     else:
-        print "All tests succeed"
+        print "%s tests succeed" % len(all_tests)
         exit(0)
 
 if __name__ == "__main__":
