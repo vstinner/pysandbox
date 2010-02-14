@@ -2,8 +2,15 @@
 from __future__ import with_statement
 from sandbox import Sandbox, SandboxError, SandboxConfig, USE_CPYTHON_HACKS
 
+def createSandboxConfig(*features):
+    return SandboxConfig(*features)
+
+def createSandbox():
+    config = createSandboxConfig()
+    return Sandbox(config)
+
 def test_valid_code():
-    with Sandbox():
+    with createSandbox():
         assert 1+2 == 3
 
 from os.path import realpath
@@ -18,7 +25,7 @@ def read_first_line(open):
 def test_open_whitelist():
     from errno import EACCES
 
-    with Sandbox():
+    with createSandbox():
         try:
             read_first_line(open)
         except IOError, err:
@@ -28,7 +35,7 @@ def test_open_whitelist():
         else:
             assert False
 
-    config = SandboxConfig()
+    config = createSandboxConfig()
     config.open_whitelist.add(READ_FILENAME)
     with Sandbox(config):
         read_first_line(open)
@@ -43,7 +50,7 @@ def test_write_file():
     from tempfile import NamedTemporaryFile
     with NamedTemporaryFile("wb") as tempfile:
         try:
-            with Sandbox():
+            with createSandbox():
                 write_file(tempfile.name)
             assert False, "writing to a file is not blocked"
         except ValueError, err:
@@ -70,7 +77,7 @@ def read_closure_secret():
     assert secret == 42
 
 def test_closure():
-    with Sandbox():
+    with createSandbox():
         try:
             read_closure_secret()
         except AttributeError, err:
@@ -82,7 +89,7 @@ def test_closure():
     read_closure_secret()
 
 def test_import():
-    with Sandbox():
+    with createSandbox():
         try:
             import os
         except ImportError, err:
@@ -98,7 +105,7 @@ def test_import():
     sys_version = sys.version
     del sys
 
-    config = SandboxConfig()
+    config = createSandboxConfig()
     config.allowModule('sys', 'version')
     with Sandbox(config):
         import sys
@@ -110,7 +117,7 @@ def get_file_from_stdout():
     return type(sys.stdout)
 
 def test_import_sys_stdout():
-    config = SandboxConfig()
+    config = createSandboxConfig()
     config.allowModule('sys', 'stdout')
     with Sandbox(config):
         file = get_file_from_stdout()
@@ -124,7 +131,7 @@ def test_import_sys_stdout():
     read_first_line(file)
 
 def test_exit():
-    with Sandbox():
+    with createSandbox():
         try:
             exit()
         except SandboxError, err:
@@ -132,7 +139,7 @@ def test_exit():
         else:
             assert False
 
-    config = SandboxConfig("exit")
+    config = createSandboxConfig("exit")
     with Sandbox(config):
         try:
             exit(1)
@@ -157,7 +164,7 @@ def test_exit():
         assert False
 
 def test_sytem_exit():
-    with Sandbox():
+    with createSandbox():
         try:
             raise SystemExit()
         except NameError, err:
@@ -165,7 +172,7 @@ def test_sytem_exit():
         except:
             assert False
 
-    config = SandboxConfig("exit")
+    config = createSandboxConfig("exit")
     with Sandbox(config):
         try:
             raise SystemExit()
@@ -192,7 +199,7 @@ def get_sandbox_from_func_globals():
     return func_globals['Sandbox']
 
 def test_func_globals():
-    with Sandbox():
+    with createSandbox():
         try:
             get_sandbox_from_func_globals()
         except AttributeError, err:
@@ -215,7 +222,7 @@ def get_import_from_func_locals(safe_import, exc_info):
 def test_func_locals():
     import sys
 
-    with Sandbox():
+    with createSandbox():
         try:
             get_import_from_func_locals(__import__, sys.exc_info)
         except AttributeError, err:
@@ -236,7 +243,7 @@ def get_file_from_subclasses():
     raise ValueError("Unable to get file type")
 
 def test_subclasses():
-    with Sandbox():
+    with createSandbox():
         try:
             get_file_from_subclasses()
         except AttributeError, err:
@@ -254,7 +261,8 @@ def test_stdout():
     old_stdout = sys.stdout
     sys.stdout = StringIO()
     try:
-        with Sandbox():
+        config = SandboxConfig()
+        with Sandbox(config):
             try:
                 print "Hello Sandbox 1"
             except SandboxError:
@@ -262,7 +270,7 @@ def test_stdout():
             else:
                 assert False
 
-        with Sandbox(SandboxConfig('stdout')):
+        with Sandbox(createSandboxConfig('stdout')):
             print "Hello Sandbox 2"
 
         print "Hello Sandbox 3"
@@ -285,7 +293,7 @@ if USE_CPYTHON_HACKS:
             del __builtins__.SUPERGLOBAL
 
     def test_modify_builtins():
-        with Sandbox():
+        with createSandbox():
             try:
                 builtins_superglobal()
             except NameError, err:
@@ -303,6 +311,9 @@ def parseOptions():
         help="Don't catch exception",
         dest="raise_exception",
         action="store_true")
+    parser.add_option("--debug",
+        help="Enable debug mode (enable stdout and stderr features)",
+        action="store_true")
     options, argv = parser.parse_args()
     if argv:
         parser.print_help()
@@ -310,7 +321,14 @@ def parseOptions():
     return options
 
 def main():
+    global createSandboxConfig
+
     options = parseOptions()
+
+    if options.debug: 
+        def createSandboxConfig(*features):
+            features += ("stdout", "stderr")
+            return SandboxConfig(*features)
 
     # Get all tests
     all_tests = []
