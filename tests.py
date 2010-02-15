@@ -314,6 +314,8 @@ if USE_CPYTHON_HACKS:
             exec "result.append(type(__builtins__))" in {'result': result}
             builtin_type = result[0]
             assert builtin_type == ReadOnlyDict
+else:
+    print "(disable test_exec_builtins, USE_CPYTHON_HACKS=False)"
 
 def parseOptions():
     from optparse import OptionParser
