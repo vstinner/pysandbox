@@ -1,3 +1,9 @@
+Known issues
+------------
+
+ * Enable USE_CPYTHON_HACKS option?
+ * "with" frame locals are not protected by the proxy (see above)
+
 Major tasks
 -----------
 
