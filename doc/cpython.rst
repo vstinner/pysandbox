@@ -3,7 +3,7 @@ frame.f_restricted: True if frame.builtins is not interpreter.builtins
 Restricted
 ----------
 
- * function: 
+ * function:
    - block read/write: func_closure, __closure__, __globals__
    - block write: func_doc, __doc, __module__
 
@@ -12,11 +12,11 @@ Restricted
 
  * method:
    - block read: __self__
-   - block write: __module__ 
+   - block write: __module__
 
  * function:
-   - block read/write: __dict__, func_dict, func_code, __code__, func_defaults, 
-     __defaults__ 
+   - block read/write: __dict__, func_dict, func_code, __code__, func_defaults,
+     __defaults__
    - block write: __name__, func_name
 
  * class:
@@ -30,6 +30,5 @@ Restricted
  * open()
 
  * PyEval_GetRestricted:
-   - pickler: use copy_reg.dipatch_table 
-
+   - pickler: use copy_reg.dipatch_table
 

@@ -21,28 +21,41 @@ class SandboxConfig:
          - SandboxConfig('interpreter', cpython_restricted=True)
         """
 
-        # builtins whitelist: see CleanupBuiltins
-        self.builtins_whitelist = set()
-
         # open() whitelist: see safe_open()
-        self.open_whitelist = set()
+        self._open_whitelist = set()
 
         # import whitelist: see safe_import()
-        self.import_whitelist = {}
+        self._import_whitelist = {}
 
         # list of enabled features
-        self.features = set()
+        self._features = set()
 
-        self.cpython_restricted = kw.get('cpython_restricted', False)
+        self._cpython_restricted = kw.get('cpython_restricted', False)
 
         for feature in features:
             self.enable(feature)
 
+    @property
+    def features(self):
+        return self._features
+
+    @property
+    def import_whitelist(self):
+        return self._import_whitelist
+
+    @property
+    def open_whitelist(self):
+        return self._open_whitelist
+
+    @property
+    def cpython_restricted(self):
+        return self._cpython_restricted
+
     def enable(self, feature):
         # If you add a new feature, update the README documentation
-        if feature in self.features:
+        if feature in self._features:
             return
-        self.features.add(feature)
+        self._features.add(feature)
 
         if feature == 'regex':
             self.allowModule('re',
@@ -55,16 +68,15 @@ class SandboxConfig:
             self.allowModule('sre_parse', 'parse')
         elif feature == 'exit':
             self.allowModule('sys', 'exit')
-            self.builtins_whitelist.add('exit')
         elif feature == 'traceback':
-            if self.cpython_restricted:
+            if self._cpython_restricted:
                 raise ValueError("traceback feature is incompatible with the CPython restricted mode")
             # change allowModule() behaviour
         elif feature in ('stdin', 'stdout', 'stderr'):
             self.allowModule('sys', feature)
             # ProtectStdio.enable() use also these features
         elif feature == 'site':
-            if 'traceback' in self.features:
+            if 'traceback' in self._features:
                 license_filename = findLicenseFile()
                 if license_filename:
                     self.allowPath(license_filename)
@@ -85,18 +97,18 @@ class SandboxConfig:
             self.allowModule('sys', '_getframe')
             self.allowModuleSourceCode('sandbox')
         else:
-            self.features.remove(feature)
+            self._features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)
 
     def allowModule(self, name, *attributes):
-        if name in self.import_whitelist:
-            self.import_whitelist[name] |= set(attributes)
+        if name in self._import_whitelist:
+            self._import_whitelist[name] |= set(attributes)
         else:
-            self.import_whitelist[name] = set(attributes)
+            self._import_whitelist[name] = set(attributes)
         self.allowModuleSourceCode(name)
 
     def allowPath(self, path):
-        if self.cpython_restricted:
+        if self._cpython_restricted:
             raise ValueError("open_whitelist is incompatible with the CPython restricted mode")
         real = realpath(path)
         if path.endswith(path_sep) and not real.endswith(path_sep):
@@ -106,14 +118,14 @@ class SandboxConfig:
             # Restore the suffix (/real/path -> /real/path/) to avoid
             # matching unwanted path (eg. /real/path.evil.path).
             real += path_sep
-        self.open_whitelist.add(real)
+        self._open_whitelist.add(real)
 
     def allowModuleSourceCode(self, name):
         """
         Allow reading the module source.
         Do nothing if traceback is disabled.
         """
-        if 'traceback' not in self.features:
+        if 'traceback' not in self._features:
             return
         old_sys_modules = sys.modules.copy()
         try:

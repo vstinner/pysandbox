@@ -61,7 +61,7 @@ class CleanupBuiltins:
         self.builtin_dict['__import__'] = _safe_import(__import__, import_whitelist)
 
         # Replace exit function
-        if 'exit' not in config.builtins_whitelist:
+        if 'exit' not in config.features:
             def safe_exit(code=0):
                 raise BlockedFunction("exit")
             self.builtin_dict['exit'] = safe_exit

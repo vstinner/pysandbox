@@ -40,7 +40,7 @@ if USE_CPYTHON_HACKS:
                 assert False
 
         config = createSandboxConfig()
-        config.open_whitelist.add(READ_FILENAME)
+        config.allowPath(READ_FILENAME)
         with Sandbox(config):
             read_first_line(open)
 
