@@ -23,8 +23,8 @@ def main():
         content = fp.read()
 
     sys.argv = list(argv)
-    with Sandbox(config):
-        exec content in {'__builtins__': __builtins__}
+    sandbox = Sandbox(config)
+    sandbox.execute(content)
 
 if __name__ == "__main__":
     main()
