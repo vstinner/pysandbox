@@ -14,10 +14,11 @@ SAFE_TYPES = (
 def createObjectProxy(obj, SandboxError=SandboxError,
 isinstance=isinstance, MethodType=MethodType):
     obj_class = obj.__class__
-    obj_class_doc = proxy(obj_class.__doc__)
 
     class ObjectProxy:
-        __doc__ = obj_class_doc 
+        __name__ = proxy(obj_class.__name__)
+        __doc__ = proxy(obj_class.__doc__)
+        __module__ = proxy(obj_class.__module__)
 
         def __getattr__(self, name):
             value = getattr(obj, name)
@@ -29,11 +30,6 @@ isinstance=isinstance, MethodType=MethodType):
 
         def __setattr__(self, name, value):
             raise SandboxError("Read only object proxy")
-
-    for attr in ("__name__", "__module__"):
-        value = getattr(obj_class, attr)
-        value = proxy(value)
-        setattr(ObjectProxy, attr, value)
 
     return ObjectProxy()
 
