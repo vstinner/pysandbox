@@ -11,6 +11,32 @@ SAFE_TYPES = (
     builtin_function_or_method, FunctionType, 
 )
 
+def readOnlyError():
+    raise SandboxError("Sandbox deny modify operation on a read only object")
+
+class ReadOnlyDict(dict):
+    def __setitem__(self, key, value):
+        readOnlyError()
+
+    def __delitem__(self, key):
+        readOnlyError()
+
+class ReadOnlyList(list):
+    def append(self, value):
+        readOnlyError()
+
+    def remove(self, value):
+        readOnlyError()
+
+    def __setitem__(self, key, value):
+        readOnlyError()
+
+    def __setslice__(self, start, end, value):
+        readOnlyError()
+
+    def __delitem__(self, key):
+        readOnlyError()
+
 def createObjectProxy(obj, SandboxError=SandboxError,
 isinstance=isinstance, MethodType=MethodType):
     obj_class = obj.__class__
@@ -29,7 +55,7 @@ isinstance=isinstance, MethodType=MethodType):
             return value
 
         def __setattr__(self, name, value):
-            raise SandboxError("Read only object proxy")
+            readOnlyError()
 
     return ObjectProxy()
 
@@ -44,11 +70,11 @@ ClassType=ClassType, InstanceType=InstanceType, TypeError=TypeError):
                 proxy(item)
                 for item in value)
         elif isinstance(value, list):
-            return list(
+            return ReadOnlyList(
                 proxy(item)
                 for item in value)
         elif isinstance(value, dict):
-            return dict(
+            return ReadOnlyDict(
                 (proxy(key), proxy(value))
                 for key, value in value.iteritems())
         elif isinstance(value, (file, ClassType, InstanceType)):

@@ -8,18 +8,9 @@ from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
+from .proxy import ReadOnlyDict
 if USE_CPYTHON_HACKS:
     from .cpython_hack import set_frame_builtins, set_interp_builtins
-
-def readOnlyDict():
-    raise SandboxError("Read only dictionary")
-
-class ReadOnlyDict(dict):
-    def __setitem__(self, key, value):
-        readOnlyDict()
-
-    def __delitem__(self, key):
-        readOnlyDict()
 
 class CleanupBuiltins:
     """
