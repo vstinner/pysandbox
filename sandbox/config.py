@@ -1,5 +1,5 @@
-from os.path import realpath
 from os import sep as path_sep
+from os.path import realpath
 import sys
 
 def findLicenseFile():
@@ -14,7 +14,13 @@ def findLicenseFile():
     return None
 
 class SandboxConfig:
-    def __init__(self, *features):
+    def __init__(self, *features, **kw):
+        """
+        Usage:
+         - SandboxConfig('stdout', 'stderr')
+         - SandboxConfig('interpreter', cpython_restricted=True)
+        """
+
         # builtins whitelist: see CleanupBuiltins
         self.builtins_whitelist = set()
 
@@ -26,6 +32,8 @@ class SandboxConfig:
 
         # list of enabled features
         self.features = set()
+
+        self.cpython_restricted = kw.get('cpython_restricted', False)
 
         for feature in features:
             self.enable(feature)
@@ -49,15 +57,17 @@ class SandboxConfig:
             self.allowModule('sys', 'exit')
             self.builtins_whitelist.add('exit')
         elif feature == 'traceback':
+            if self.cpython_restricted:
+                raise ValueError("traceback feature is incompatible with the CPython restricted mode")
             # change allowModule() behaviour
-            pass
         elif feature in ('stdin', 'stdout', 'stderr'):
             self.allowModule('sys', feature)
             # ProtectStdio.enable() use also these features
         elif feature == 'site':
-            license_filename = findLicenseFile()
-            if license_filename:
-                self.allowPath(license_filename)
+            if 'traceback' in self.features:
+                license_filename = findLicenseFile()
+                if license_filename:
+                    self.allowPath(license_filename)
             self.allowModuleSourceCode('site')
         elif feature == 'interpreter':
             # "Meta" feature + some extras
@@ -86,6 +96,8 @@ class SandboxConfig:
         self.allowModuleSourceCode(name)
 
     def allowPath(self, path):
+        if self.cpython_restricted:
+            raise ValueError("open_whitelist is incompatible with the CPython restricted mode")
         real = realpath(path)
         if path.endswith(path_sep) and not real.endswith(path_sep):
             # realpath() eats trailing separator

@@ -12,8 +12,7 @@ class Protection:
     def disable(self, sandbox):
         pass
 
-USE_CPYTHON_RESTRICTED = True
-SET_FRAME_BUILTINS = True
+USE_CPYTHON_HACKS = True
 
 from .config import SandboxConfig
 from .sandbox_class import Sandbox

@@ -7,7 +7,6 @@ Known issues
 Major tasks
 -----------
 
- * builtins should be read only
  * Write a blacklist for ObjectProxy (eg. "__class__" attribute)
  * Write a whitelist of modifiable attributes in ObjectProxy?
    Problem of callback: have to be executed in the sandbox
@@ -20,8 +19,6 @@ Open questions
  * Deny creation of an arbitray code object? type(lambda: 0), func.func_code,
    func.__code__, compile(), generator.gi_code, ...
  * Deny builtins: execfile?, reload?, input?, eval?
- * Use CPython sandbox? change frame builtins to get frame.f_restricted=1
-   CPython sandbox has no open() whitelist and is not modular
  * Remove/Warn about unsafe frame locals? Or if it's not possible, choose
    another syntax to avoid this problem.
 

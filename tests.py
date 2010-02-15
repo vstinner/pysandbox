@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 from __future__ import with_statement
-from sandbox import (Sandbox, SandboxError, SandboxConfig,
-    SET_FRAME_BUILTINS, USE_CPYTHON_RESTRICTED)
+from sandbox import Sandbox, SandboxError, SandboxConfig, USE_CPYTHON_HACKS
 
-def createSandboxConfig(*features):
+def createSandboxConfig(*features, **kw):
     if createSandboxConfig.debug:
         features += ("stdout", "stderr")
-    return SandboxConfig(*features)
+    return SandboxConfig(*features, **kw)
 createSandboxConfig.debug = False
 
 def createSandbox():
@@ -26,7 +25,7 @@ def read_first_line(open):
         line = fp.readline()
     assert line.rstrip() == '#!/usr/bin/env python'
 
-if not USE_CPYTHON_RESTRICTED:
+if USE_CPYTHON_HACKS:
     def test_open_whitelist():
         from errno import EACCES
 
@@ -46,8 +45,47 @@ if not USE_CPYTHON_RESTRICTED:
             read_first_line(open)
 
         read_first_line(open)
+
+    def test_exec_builtins():
+        from sandbox.builtins import ReadOnlyDict
+
+        with createSandbox():
+            result = []
+            exec "result.append(type(__builtins__))" in {'result': result}
+            builtin_type = result[0]
+            assert builtin_type == ReadOnlyDict
+
+    def test_frame_restricted():
+        from sys import _getframe
+
+        config = createSandboxConfig(cpython_restricted=True)
+        with Sandbox(config):
+            frame = _getframe()
+            assert frame.f_restricted == True
+
+        config = createSandboxConfig(cpython_restricted=False)
+        with Sandbox(config):
+            frame = _getframe()
+            assert frame.f_restricted == False
+
+        frame = _getframe()
+        assert frame.f_restricted == False
+
+    def test_module_frame_restricted():
+        from sys import _getframe
+        from test_restricted import _test_restricted
+
+        config = createSandboxConfig(cpython_restricted=True)
+        with Sandbox(config):
+            restricted = _test_restricted(_getframe)
+            assert restricted == True
+
+        config = createSandboxConfig(cpython_restricted=False)
+        with Sandbox(config):
+            restricted = _test_restricted(_getframe)
+            assert restricted == False
 else:
-    print "USE_CPYTHON_RESTRICTED=True: disable test_open_whitelist()"
+    print "USE_CPYTHON_HACKS=False: disable test_open_whitelist(), test_exec_builtins(), test_frame_restricted(), test_module_frame_restricted()"
 
 def write_file(filename):
     with open(filename, "w") as fp:
@@ -308,42 +346,6 @@ def test_modify_builtins():
             assert False
 
     builtins_superglobal()
-
-if SET_FRAME_BUILTINS:
-    def test_exec_builtins():
-        from sandbox.builtins import ReadOnlyDict
-
-        with createSandbox():
-            result = []
-            exec "result.append(type(__builtins__))" in {'result': result}
-            builtin_type = result[0]
-            assert builtin_type == ReadOnlyDict
-else:
-    print "SET_FRAME_BUILTINS=False: disable exec_builtins test"
-
-if USE_CPYTHON_RESTRICTED == SET_FRAME_BUILTINS:
-    def test_frame_restricted():
-        from sys import _getframe
-
-        with createSandbox():
-            frame = _getframe()
-            assert frame.f_restricted == True
-
-        frame = _getframe()
-        assert frame.f_restricted == False
-else:
-    print "USE_CPYTHON_RESTRICTED != SET_FRAME_BUILTINS: disable test_frame_restricted()"
-
-if USE_CPYTHON_RESTRICTED:
-    def test_module_frame_restricted():
-        from sys import _getframe
-        from test_restricted import _test_restricted
-
-        with createSandbox():
-            restricted = _test_restricted(_getframe)
-            assert restricted == True
-else:
-    print "USE_CPYTHON_RESTRICTED=False: disable frame_restricted test"
 
 def parseOptions():
     from optparse import OptionParser

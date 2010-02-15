@@ -26,6 +26,7 @@ Features:
  * Import modules
  * Exit Python
  * Access stdin, stdout or stderr
+ * __builtins__ is read only
 
 Protection of the sandbox itself:
 
@@ -60,6 +61,7 @@ config.enable('feature').
 Other options
 -------------
 
+ - cpython_restricted: if True, use CPython restricted mode (disabled by default)
  - config.allowPath(path) allows to read a file from the specified path
  - config.allowModule(name, symbol1, symbol2, ...) allows to import the
    specified module, but give only access to the specified symbols
