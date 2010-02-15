@@ -314,8 +314,18 @@ if USE_CPYTHON_HACKS:
             exec "result.append(type(__builtins__))" in {'result': result}
             builtin_type = result[0]
             assert builtin_type == ReadOnlyDict
+
+    def test_frame_restricted():
+        from sys import _getframe
+
+        with createSandbox():
+            frame = _getframe()
+            assert frame.f_restricted == True 
+
+        frame = _getframe()
+        assert frame.f_restricted == False 
 else:
-    print "(disable test_exec_builtins, USE_CPYTHON_HACKS=False)"
+    print "USE_CPYTHON_HACKS=False: disable exec_builtins and frame_restricted tests"
 
 def parseOptions():
     from optparse import OptionParser
