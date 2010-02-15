@@ -31,14 +31,18 @@ class SandboxedInterpeter:
             print "Sandbox config:"
             pprint(self.config.__dict__)
         else:
-            print "Enabled features: %s" % ', '.join(sorted(self.config.features))
+            features = ', '.join(sorted(self.config.features))
+            print "Enabled features: %s" % features
             print "CPython restricted mode enabled."
         print
 
+    def interact(self):
+        InteractiveConsole().interact("Try to break the sandbox!")
+
     def main(self):
         self.dumpConfig()
-        with Sandbox(self.config):
-            InteractiveConsole().interact("Try to break the sandbox!")
+        sandbox = Sandbox(self.config)
+        sandbox.call(self.interact)
 
 if __name__ == "__main__":
     SandboxedInterpeter().main()
