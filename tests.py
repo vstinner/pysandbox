@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import with_statement
-from sandbox import Sandbox, SandboxError, SandboxConfig, USE_CPYTHON_HACKS
+from sandbox import (Sandbox, SandboxError, SandboxConfig,
+    SET_FRAME_BUILTINS, USE_CPYTHON_RESTRICTED)
 
 def createSandboxConfig(*features):
     if createSandboxConfig.debug:
@@ -25,25 +26,28 @@ def read_first_line(open):
         line = fp.readline()
     assert line.rstrip() == '#!/usr/bin/env python'
 
-def test_open_whitelist():
-    from errno import EACCES
+if not USE_CPYTHON_RESTRICTED:
+    def test_open_whitelist():
+        from errno import EACCES
 
-    with createSandbox():
-        try:
+        with createSandbox():
+            try:
+                read_first_line(open)
+            except IOError, err:
+                # Expect a safe_open() error
+                assert err.errno == EACCES
+                assert err.args[1].startswith('Sandbox deny access to the file ')
+            else:
+                assert False
+
+        config = createSandboxConfig()
+        config.open_whitelist.add(READ_FILENAME)
+        with Sandbox(config):
             read_first_line(open)
-        except IOError, err:
-            # Expect a safe_open() error
-            assert err.errno == EACCES
-            assert err.args[1].startswith('Sandbox deny access to the file ')
-        else:
-            assert False
 
-    config = createSandboxConfig()
-    config.open_whitelist.add(READ_FILENAME)
-    with Sandbox(config):
         read_first_line(open)
-
-    read_first_line(open)
+else:
+    print "USE_CPYTHON_RESTRICTED=True: disable test_open_whitelist()"
 
 def write_file(filename):
     with open(filename, "w") as fp:
@@ -305,7 +309,7 @@ def test_modify_builtins():
 
     builtins_superglobal()
 
-if USE_CPYTHON_HACKS:
+if SET_FRAME_BUILTINS:
     def test_exec_builtins():
         from sandbox.builtins import ReadOnlyDict
 
@@ -314,26 +318,32 @@ if USE_CPYTHON_HACKS:
             exec "result.append(type(__builtins__))" in {'result': result}
             builtin_type = result[0]
             assert builtin_type == ReadOnlyDict
+else:
+    print "SET_FRAME_BUILTINS=False: disable exec_builtins test"
 
+if USE_CPYTHON_RESTRICTED == SET_FRAME_BUILTINS:
     def test_frame_restricted():
         from sys import _getframe
 
         with createSandbox():
             frame = _getframe()
-            assert frame.f_restricted == True 
+            assert frame.f_restricted == True
 
         frame = _getframe()
-        assert frame.f_restricted == False 
+        assert frame.f_restricted == False
 else:
-    print "USE_CPYTHON_HACKS=False: disable exec_builtins and frame_restricted tests"
+    print "USE_CPYTHON_RESTRICTED != SET_FRAME_BUILTINS: disable test_frame_restricted()"
 
-def test_module_frame_restricted():
-    from sys import _getframe
-    from test_restricted import _test_restricted
+if USE_CPYTHON_RESTRICTED:
+    def test_module_frame_restricted():
+        from sys import _getframe
+        from test_restricted import _test_restricted
 
-    with createSandbox():
-        restricted = _test_restricted(_getframe)
-        assert restricted == True
+        with createSandbox():
+            restricted = _test_restricted(_getframe)
+            assert restricted == True
+else:
+    print "USE_CPYTHON_RESTRICTED=False: disable frame_restricted test"
 
 def parseOptions():
     from optparse import OptionParser
