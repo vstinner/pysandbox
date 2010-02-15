@@ -5,7 +5,7 @@ from optparse import OptionParser
 
 def parseOptions():
 
-    parser = OptionParser(usage="%prog [options] -- script.py [arg1 arg2 ...]")
+    parser = OptionParser(usage="%prog [options] -- script.py [script options] [arg1 arg2 ...]")
     SandboxConfig.createOptparseOptions(parser)
     options, argv = parser.parse_args()
     if not argv:

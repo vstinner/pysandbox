@@ -26,7 +26,6 @@ Features:
  * Import modules
  * Exit Python
  * Access stdin, stdout or stderr
- * __builtins__ is read only
 
 Protection of the sandbox itself:
 
@@ -34,6 +33,7 @@ Protection of the sandbox itself:
  * Read function globals
  * Read frame locals
  * Get type subclasses
+ * __builtins__ is read only
 
 
 Configuration
