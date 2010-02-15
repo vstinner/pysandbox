@@ -91,7 +91,6 @@ class SandboxConfig:
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')
-            self.allowModule('pydoc', 'help')
         elif feature == 'debug_sandbox':
             self.enable('traceback')
             self.allowModule('sys', '_getframe')
