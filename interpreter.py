@@ -13,10 +13,8 @@ class SandboxedInterpeter:
             self.config.allowPath(__file__)
 
     def parseOptions(self):
-        config = SandboxConfig()
-
         parser = OptionParser(usage="%prog [options]")
-        config.createOptparseOptions(parser)
+        SandboxConfig.createOptparseOptions(parser)
         parser.add_option("--verbose", "-v", help="Verbose mode",
             action="store_true", default=False)
         options, argv = parser.parse_args()
@@ -24,7 +22,7 @@ class SandboxedInterpeter:
             parser.print_help()
             exit(1)
 
-        config.useOptparseOptions(options)
+        config = SandboxConfig.fromOptparseOptions(options)
         return config, options
 
     def dumpConfig(self):
@@ -34,6 +32,7 @@ class SandboxedInterpeter:
             pprint(self.config.__dict__)
         else:
             print "Enabled features: %s" % ', '.join(sorted(self.config.features))
+            print "CPython restricted mode enabled."
         print
 
     def main(self):

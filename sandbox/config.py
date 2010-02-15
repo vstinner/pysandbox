@@ -145,21 +145,32 @@ class SandboxConfig:
             filename = filename[:-11]
         self.allowPath(filename)
 
-    def createOptparseOptions(self, parser):
-        parser.add_option("--features", help="List of enabled features separated by a comma",
+    @staticmethod
+    def createOptparseOptions(parser):
+        parser.add_option("--features",
+            help="List of enabled features separated by a comma",
             type="str")
+        parser.add_option("--restricted",
+            help="Enable CPython restricted mode",
+            action="store_true")
         parser.add_option("--allow-path",
             help="Allow reading files from PATH",
             action="append", type="str")
 
-    def useOptparseOptions(self, options):
+    @staticmethod
+    def fromOptparseOptions(options):
+        kw = {}
+        if options.restricted:
+            kw['cpython_restricted'] = True
+        config = SandboxConfig(**kw)
         if options.features:
             for feature in options.features.split(","):
                 feature = feature.strip()
                 if not feature:
                     continue
-                self.enable(feature)
+                config.enable(feature)
         if options.allow_path:
             for path in options.allow_path:
-                self.allowPath(path)
+                config.allowPath(path)
+        return config
 

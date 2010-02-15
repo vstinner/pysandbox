@@ -4,16 +4,15 @@ from sandbox import Sandbox, SandboxConfig
 from optparse import OptionParser
 
 def parseOptions():
-    config = SandboxConfig()
 
     parser = OptionParser(usage="%prog [options] -- script.py [arg1 arg2 ...]")
-    config.createOptparseOptions(parser)
+    SandboxConfig.createOptparseOptions(parser)
     options, argv = parser.parse_args()
     if not argv:
         parser.print_help()
         exit(1)
 
-    config.useOptparseOptions(options)
+    config = SandboxConfig.fromOptparseOptions(options)
     return config, argv
 
 def main():
