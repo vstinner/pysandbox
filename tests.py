@@ -327,6 +327,14 @@ if USE_CPYTHON_HACKS:
 else:
     print "USE_CPYTHON_HACKS=False: disable exec_builtins and frame_restricted tests"
 
+def test_module_frame_restricted():
+    from sys import _getframe
+    from test_restricted import _test_restricted
+
+    with createSandbox():
+        restricted = _test_restricted(_getframe)
+        assert restricted == True
+
 def parseOptions():
     from optparse import OptionParser
 
