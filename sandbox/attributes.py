@@ -22,8 +22,9 @@ class HideAttributes:
         self.type_dict = RestorableDict(dictionary_of(type))
 
     def enable(self, sandbox):
-        del self.function_dict['func_closure']
-        del self.function_dict['func_globals']
+        if version_info < (3, 0):
+            del self.function_dict['func_closure']
+            del self.function_dict['func_globals']
         if version_info >= (2, 6):
             del self.function_dict['__closure__']
             del self.function_dict['__globals__']
