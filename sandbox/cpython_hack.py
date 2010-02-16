@@ -2,6 +2,7 @@ from ctypes import Structure, cast, POINTER, CFUNCTYPE
 from ctypes import c_void_p, c_size_t, c_int,  c_char_p
 from ctypes import pythonapi
 import sys
+from sys import version_info
 
 Py_ssize_t = c_size_t
 
@@ -11,27 +12,59 @@ Py_TRACE_REFS = Py_REF_DEBUG
 # Python 2.6 constant
 CO_MAXBLOCKS = 20
 
-class PyObject_HEAD(Structure):
-    if Py_TRACE_REFS:
-        _fields_ = (
-            ("_ob_next", c_void_p), # struct _object*
-            ("_ob_prev", c_void_p), # struct _object*
+if version_info >= (3, 0):
+    # Python 3.x structures
+
+    class PyObject(Structure):
+        if Py_TRACE_REFS:
+            _fields_ = (
+                ("_ob_next", c_void_p), # PyObject*
+                ("_ob_prev", c_void_p), # PyObject*
+            )
+        else:
+            _fields_ = tuple()
+        _fields_ += (
+            ("ob_refcnt", Py_ssize_t),
+            ("ob_type", c_void_p), # PyTypeObject*
         )
-    else:
-        _fields_ = tuple()
-    _fields_ += (
-	("ob_refcnt", Py_ssize_t),
-        ("ob_type", c_void_p), # struct _typeobject*
-    )
-PyObject_HEAD_p = POINTER(PyObject_HEAD)
 
-PyObject_p = PyObject_HEAD_p
+    PyObject_p = POINTER(PyObject)
+    PyObject_pp = POINTER(PyObject_p)
+
+    class PyVarObject(Structure):
+        _fields_ = (
+            ("ob_base", PyObject),
+            ("ob_size", Py_ssize_t),
+        )
+
+    class PyObject_VAR_HEAD(Structure):
+        _fields_ = (
+            ("ob_base", PyVarObject),
+        )
+
+else:
+    # Python 2.x structures
+
+    class PyObject_HEAD(Structure):
+        if Py_TRACE_REFS:
+            _fields_ = (
+                ("_ob_next", c_void_p), # PyObject_HEAD*
+                ("_ob_prev", c_void_p), # PyObject_HEAD*
+            )
+        else:
+            _fields_ = tuple()
+        _fields_ += (
+            ("ob_refcnt", Py_ssize_t),
+            ("ob_type", c_void_p), # PyTypeObject*
+        )
+    PyObject_p = POINTER(PyObject_HEAD)
+
+    class PyObject_VAR_HEAD(Structure):
+        _fields_ = PyObject_HEAD._fields_ + (
+            ("ob_size", Py_ssize_t),
+        )
+
 PyObject_pp = POINTER(PyObject_p)
-
-class PyObject_VAR_HEAD(Structure):
-    _fields_ = PyObject_HEAD._fields_ + (
-        ("ob_size", Py_ssize_t),
-    )
 
 destructor = CFUNCTYPE(None, c_void_p)
 
@@ -44,8 +77,12 @@ class PyTypeObject(Structure):
         # ... (we don't need to know more to hack CPython)
     )
 
-    def __repr__(self):
-        return "<type %s>" % self.tp_name
+    if version_info >= (3, 0):
+        def __repr__(self):
+            return "<type %s>" % self.tp_name.decode("ASCII")
+    else:
+        def __repr__(self):
+            return "<type %s>" % self.tp_name
 PyTypeObject_p = POINTER(PyTypeObject)
 
 class PyTryBlock(Structure):
@@ -56,11 +93,17 @@ class PyTryBlock(Structure):
     )
 
 class PyInterpreterState(Structure):
-    # Python 2.6 attributes
+    # Python 2.6 and 3.1 attributes
     _fields_ = (
         ("next", c_void_p),
         ("tstate_head", c_void_p),
         ("modules", PyObject_p),
+    )
+    if version_info >= (3, 0):
+        _fields_ += (
+            ("modules_by_index", PyObject_p),
+        )
+    _fields_ += (
         ("sysdict", PyObject_p),
         ("builtins", PyObject_p),
         # ... (we don't need to know more to hack CPython)
@@ -138,7 +181,7 @@ COUNT_ALLOCS = hasattr(pythonapi, 'inc_count')
 if COUNT_ALLOCS:
     dec_count = pythonapi.dec_count
 
-def Py_TYPE(cobj_ptr):
+def cptr_type(cobj_ptr):
     """
     Get op->ob_type as a PyTypeObject_p.
     """
@@ -149,7 +192,7 @@ if Py_TRACE_REFS:
     _Py_Dealloc = pythonapi._Py_Dealloc
 else:
     def _Py_Dealloc(cobj_ptr):
-        type_address = Py_TYPE(cobj_ptr)
+        type_address = cptr_type(cobj_ptr)
         if COUNT_ALLOCS:
             dec_count(type_address)
         cobj_type = cobject_at(type_address, PyTypeObject)
@@ -190,7 +233,7 @@ class ClearFrameCache:
         self.cache = []
         for index in xrange(self.cache_size):
             ptr = self.cframe.f_localsplus[index]
-            print "CLEAR CACHE[%s]=%s" % (index, ptr)
+            print("CLEAR CACHE[%s]=%s" % (index, ptr))
             pythonapi._PyObject_Dump(ptr)
             self.cache.append(ptr)
             self.cframe.f_localsplus[index] = pyobject_address(42)
