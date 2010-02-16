@@ -119,7 +119,6 @@ def cobject_at(address, type=None):
 def cobject_setattr(cobj, name, value):
     cvalue = pyobject_get_cobject(value)
     old_value = getattr(cobj, name)
-    old_value_type = Py_TYPE(old_value).contents
     Py_DECREF(old_value)
     Py_INCREF(cvalue)
     setattr(cobj, name, pyobject_get_cptr(value))

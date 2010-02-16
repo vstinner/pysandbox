@@ -3,7 +3,7 @@ from types import FrameType
 from sys import _getframe, version_info
 import sys
 
-from sandbox import BlockedFunction, SandboxError, USE_CPYTHON_HACKS
+from sandbox import BlockedFunction, USE_CPYTHON_HACKS
 from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
