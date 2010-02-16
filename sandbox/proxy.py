@@ -1,6 +1,5 @@
 from types import FunctionType, ClassType, InstanceType, MethodType
 from sandbox import SandboxError
-from .guard import guard
 
 builtin_function_or_method = type(len)
 
