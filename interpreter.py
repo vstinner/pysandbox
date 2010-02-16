@@ -34,6 +34,8 @@ class SandboxedInterpeter:
             features = ', '.join(sorted(self.config.features))
             print "Enabled features: %s" % features
             print "CPython restricted mode enabled."
+        if 'help' not in self.config.features:
+            print "(use --features=help to enable the help function)"
         print
 
     def interact(self):

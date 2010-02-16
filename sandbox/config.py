@@ -90,7 +90,6 @@ class SandboxConfig:
             self.enable('stderr')
             self.enable('exit')
             self.enable('site')
-            self.enable('help')
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')
