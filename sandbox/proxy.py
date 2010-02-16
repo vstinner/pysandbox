@@ -41,10 +41,6 @@ isinstance=isinstance, MethodType=MethodType):
     obj_class = obj.__class__
 
     class ObjectProxy:
-        __name__ = proxy(obj_class.__name__)
-        __doc__ = proxy(obj_class.__doc__)
-        __module__ = proxy(obj_class.__module__)
-
         def __getattr__(self, name):
             value = getattr(obj, name)
             if isinstance(value, MethodType):
