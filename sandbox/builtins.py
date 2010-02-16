@@ -1,6 +1,6 @@
 import __builtin__
 from types import FrameType
-from sys import _getframe
+from sys import _getframe, version_info
 import sys
 
 from sandbox import BlockedFunction, SandboxError, USE_CPYTHON_HACKS
@@ -45,7 +45,8 @@ class CleanupBuiltins:
         open_whitelist = config.open_whitelist
         safe_open = _safe_open(open_whitelist)
         self.builtin_dict['open'] = safe_open
-        self.builtin_dict['file'] = safe_open
+        if version_info < (3, 0):
+            self.builtin_dict['file'] = safe_open
 
         # Replace __import__ function
         import_whitelist = config.import_whitelist
