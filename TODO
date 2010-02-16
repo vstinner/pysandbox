@@ -7,6 +7,11 @@ Known issues
 Major tasks
 -----------
 
+ * Python3:
+   - fix proxy.py: Python3 has no builtin file type
+   - fix proxy.py: Python3 has no types.ClassType nor types.InstanceType 
+   - fix safe_open.py: open() doesn't accept buffering=None
+   - fix builtins.py: Python3 has no __builtin__ module
  * Write a blacklist for ObjectProxy (eg. "__class__" attribute)
  * Write a whitelist of modifiable attributes in ObjectProxy?
    Problem of callback: have to be executed in the sandbox

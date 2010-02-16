@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import with_statement
 from sandbox import Sandbox, SandboxError, SandboxConfig, USE_CPYTHON_HACKS
+from sys import version_info
 
 def createSandboxConfig(*features, **kw):
     if createSandboxConfig.debug:
@@ -54,38 +55,42 @@ if USE_CPYTHON_HACKS:
             exec "result.append(type(__builtins__))" in {'result': result}
             builtin_type = result[0]
             assert builtin_type == ReadOnlyDict
+else:
+    print "USE_CPYTHON_HACKS=False: disable test_open_whitelist(), test_exec_builtins()"
 
-    def test_frame_restricted():
-        from sys import _getframe
+if version_info < (3, 0):
+    if USE_CPYTHON_HACKS:
+        def test_frame_restricted():
+            from sys import _getframe
 
-        config = createSandboxConfig(cpython_restricted=True)
-        with Sandbox(config):
-            frame = _getframe()
-            assert frame.f_restricted == True
+            config = createSandboxConfig(cpython_restricted=True)
+            with Sandbox(config):
+                frame = _getframe()
+                assert frame.f_restricted == True
 
-        config = createSandboxConfig(cpython_restricted=False)
-        with Sandbox(config):
+            config = createSandboxConfig(cpython_restricted=False)
+            with Sandbox(config):
+                frame = _getframe()
+                assert frame.f_restricted == False
+
             frame = _getframe()
             assert frame.f_restricted == False
 
-        frame = _getframe()
-        assert frame.f_restricted == False
+        def test_module_frame_restricted():
+            from sys import _getframe
+            from test_restricted import _test_restricted
 
-    def test_module_frame_restricted():
-        from sys import _getframe
-        from test_restricted import _test_restricted
+            config = createSandboxConfig(cpython_restricted=True)
+            with Sandbox(config):
+                restricted = _test_restricted(_getframe)
+                assert restricted == True
 
-        config = createSandboxConfig(cpython_restricted=True)
-        with Sandbox(config):
-            restricted = _test_restricted(_getframe)
-            assert restricted == True
-
-        config = createSandboxConfig(cpython_restricted=False)
-        with Sandbox(config):
-            restricted = _test_restricted(_getframe)
-            assert restricted == False
-else:
-    print "USE_CPYTHON_HACKS=False: disable test_open_whitelist(), test_exec_builtins(), test_frame_restricted(), test_module_frame_restricted()"
+            config = createSandboxConfig(cpython_restricted=False)
+            with Sandbox(config):
+                restricted = _test_restricted(_getframe)
+                assert restricted == False
+    else:
+        print "USE_CPYTHON_HACKS=False: disable test_frame_restricted(), test_module_frame_restricted()"
 
 def write_file(filename):
     with open(filename, "w") as fp:
@@ -281,23 +286,25 @@ def test_func_locals():
     myimport = get_import_from_func_locals(safe_import, sys.exc_info)
     assert myimport is builtin_import
 
-def get_file_from_subclasses():
-    for subtype in object.__subclasses__():
-        if subtype.__name__ == "file":
-            return subtype
-    raise ValueError("Unable to get file type")
+# Python 3.x has builtin file type 
+if version_info < (3, 0):
+    def get_file_from_subclasses():
+        for subtype in object.__subclasses__():
+            if subtype.__name__ == "file":
+                return subtype
+        raise ValueError("Unable to get file type")
 
-def test_subclasses():
-    with createSandbox():
-        try:
-            get_file_from_subclasses()
-        except AttributeError, err:
-            assert str(err) == "type object 'object' has no attribute '__subclasses__'"
-        else:
-            assert False
+    def test_subclasses():
+        with createSandbox():
+            try:
+                get_file_from_subclasses()
+            except AttributeError, err:
+                assert str(err) == "type object 'object' has no attribute '__subclasses__'"
+            else:
+                assert False
 
-    file = get_file_from_subclasses()
-    read_first_line(file)
+        file = get_file_from_subclasses()
+        read_first_line(file)
 
 def test_stdout():
     import sys
