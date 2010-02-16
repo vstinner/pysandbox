@@ -41,6 +41,10 @@ class SandboxedInterpeter:
 
     def main(self):
         self.dumpConfig()
+        if 'help' in self.config.features:
+            # Import pydoc here because it uses a lot of modules 
+            # blocked by the sandbox
+            import pydoc
         sandbox = Sandbox(self.config)
         sandbox.call(self.interact)
 

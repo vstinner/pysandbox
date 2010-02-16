@@ -43,6 +43,8 @@ Open questions
 Minor tasks
 -----------
 
+ * Write a whitelist for sys.path?
+ * Clear sys.modules?
  * interpreter.py: site module introduces help() builtin,
    type(help) may leak
  * Improve type(open(...))(filename, "r") error message,

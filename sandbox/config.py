@@ -81,6 +81,8 @@ class SandboxConfig:
                 if license_filename:
                     self.allowPath(license_filename)
             self.allowModuleSourceCode('site')
+        elif feature == 'help':
+            self.allowModule('pydoc', 'help')
         elif feature == 'interpreter':
             # "Meta" feature + some extras
             self.enable('stdin')
@@ -88,6 +90,7 @@ class SandboxConfig:
             self.enable('stderr')
             self.enable('exit')
             self.enable('site')
+            self.enable('help')
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')
