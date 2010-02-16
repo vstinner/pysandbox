@@ -11,7 +11,7 @@ SAFE_TYPES = (
 )
 
 def readOnlyError():
-    raise SandboxError("Sandbox deny modify operation on a read only object")
+    raise SandboxError("Read only object")
 
 class ReadOnlyDict(dict):
     def __setitem__(self, key, value):

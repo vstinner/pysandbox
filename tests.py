@@ -348,7 +348,7 @@ def test_modify_builtins():
         try:
             builtins_superglobal()
         except SandboxError, err:
-            assert str(err) == "Sandbox deny modify operation on a read only object"
+            assert str(err) == "Read only object"
         else:
             assert False
 
