@@ -37,6 +37,8 @@ class ReadOnlyList(list):
         readOnlyError()
 
 def createMethodProxy(method_wrapper):
+    # Use object with __slots__ to deny the modification of attributes
+    # and the creation of new attributes
     class MethodProxy(object):
         __slots__ = ("__name__", "__doc__")
         __doc__ = method_wrapper.__doc__
@@ -50,6 +52,8 @@ def createMethodProxy(method_wrapper):
 
 def createObjectProxy(real_object, readOnlyError=readOnlyError,
 isinstance=isinstance, MethodType=MethodType):
+    # Use object with __slots__ to deny the modification of attributes
+    # and the creation of new attributes
     class ObjectProxy(object):
         __doc__ = real_object.__doc__
         __slots__ = tuple()
@@ -68,6 +72,7 @@ isinstance=isinstance, MethodType=MethodType):
         def __delattr__(self, name):
             readOnlyError()
 
+    # Copy some methods because object has default implementations
     for name in ('__repr__', '__str__', '__hash__', '__call__'):
         if not hasattr(real_object, name):
             continue
