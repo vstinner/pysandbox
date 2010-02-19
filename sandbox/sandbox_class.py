@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from .config import SandboxConfig
 from .proxy import proxy
 
@@ -35,7 +36,7 @@ class Sandbox:
            exec code in globals, locals
         """
         if globals is not None:
-            globals = proxy(globals) 
+            globals = proxy(globals)
         if locals is not None:
             locals = proxy(locals)
         with self:
