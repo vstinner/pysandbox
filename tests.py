@@ -286,7 +286,7 @@ def test_func_locals():
     myimport = get_import_from_func_locals(safe_import, sys.exc_info)
     assert myimport is builtin_import
 
-# Python 3.x has builtin file type 
+# Python 3.x has builtin file type
 if version_info < (3, 0):
     def get_file_from_subclasses():
         for subtype in object.__subclasses__():
@@ -332,6 +332,44 @@ def test_stdout():
         sys.stdout = old_stdout
 
     assert output == "Hello Sandbox 2\nHello Sandbox 3\n"
+
+def test_objectproxy():
+    class Person:
+        def __init__(self, name):
+            self.name = name
+
+    person = Person("haypo")
+
+    def setName(person):
+        person.name = "victor"
+
+    sandbox = createSandbox()
+    try:
+        sandbox.call(setName, person)
+    except SandboxError, err:
+        assert str(err) == 'Read only object'
+    else:
+        assert False
+
+    def setDict(person):
+        person.__dict__['name'] = "victor"
+
+    try:
+        sandbox.call(setDict, person)
+    except SandboxError, err:
+        assert str(err) == 'Read only object'
+    else:
+        assert False
+
+    def object_setattr(person):
+        object.__setattr__(person, 'name', "victor")
+
+    try:
+        sandbox.call(object_setattr, person)
+    except AttributeError, err:
+        assert str(err) == "'ObjectProxy' object has no attribute 'name'"
+    else:
+        assert False
 
 def builtins_superglobal():
     if isinstance(__builtins__, dict):

@@ -5,9 +5,9 @@ builtin_function_or_method = type(len)
 
 SAFE_TYPES = (
     type(None), bool,
-    int, long, 
-    str, unicode, 
-    builtin_function_or_method, FunctionType, 
+    int, long,
+    str, unicode,
+    builtin_function_or_method, FunctionType,
 )
 
 def readOnlyError():
@@ -36,11 +36,13 @@ class ReadOnlyList(list):
     def __delitem__(self, key):
         readOnlyError()
 
-def createObjectProxy(obj, SandboxError=SandboxError,
+def createObjectProxy(obj, readOnlyError=readOnlyError,
 isinstance=isinstance, MethodType=MethodType):
     obj_class = obj.__class__
 
-    class ObjectProxy:
+    class ObjectProxy(object):
+        __slots__ = tuple()
+
         def __getattr__(self, name):
             value = getattr(obj, name)
             if isinstance(value, MethodType):
