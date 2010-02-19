@@ -36,15 +36,26 @@ class ReadOnlyList(list):
     def __delitem__(self, key):
         readOnlyError()
 
-def createObjectProxy(obj, readOnlyError=readOnlyError,
-isinstance=isinstance, MethodType=MethodType):
-    obj_class = obj.__class__
+def createMethodProxy(method_wrapper):
+    class MethodProxy(object):
+        __slots__ = ("__name__", "__doc__")
+        __doc__ = method_wrapper.__doc__
+        def __call__(self, *args, **kw):
+            value = method_wrapper(*args, **kw)
+            value = proxy(value)
+            return value
+    func = MethodProxy()
+    func.__name__ = method_wrapper.__name__
+    return func
 
+def createObjectProxy(real_object, readOnlyError=readOnlyError,
+isinstance=isinstance, MethodType=MethodType):
     class ObjectProxy(object):
+        __doc__ = real_object.__doc__
         __slots__ = tuple()
 
         def __getattr__(self, name):
-            value = getattr(obj, name)
+            value = getattr(real_object, name)
             if isinstance(value, MethodType):
                 value = MethodType(value.im_func, self, self.__class__)
             else:
@@ -53,6 +64,16 @@ isinstance=isinstance, MethodType=MethodType):
 
         def __setattr__(self, name, value):
             readOnlyError()
+
+        def __delattr__(self, name):
+            readOnlyError()
+
+    for name in ('__repr__', '__str__', '__hash__', '__call__'):
+        if not hasattr(real_object, name):
+            continue
+        func = getattr(real_object, name)
+        func = createMethodProxy(func)
+        setattr(ObjectProxy, name, func)
 
     return ObjectProxy()
 

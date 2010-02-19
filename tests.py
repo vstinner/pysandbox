@@ -333,27 +333,79 @@ def test_stdout():
 
     assert output == "Hello Sandbox 2\nHello Sandbox 3\n"
 
-def test_objectproxy():
+def test_read_objectproxy():
+    class Person:
+        __doc__ = 'Person doc'
+
+        def __str__(self):
+            "Convert to string"
+            return "str"
+
+        def __repr__(self):
+            return "repr"
+
+        def __hash__(self):
+            return 42
+
+    person = Person()
+
+    def testPerson(person):
+        assert person.__doc__ == 'Person doc'
+
+        assert person.__str__() == "str"
+        assert person.__repr__() == "repr"
+        assert person.__hash__() == 42
+
+        assert person.__str__.__name__ == "__str__"
+        assert person.__str__.__doc__ == "Convert to string"
+
+    testPerson(person)
+
+    sandbox = createSandbox()
+    sandbox.call(testPerson, person)
+
+def test_modify_objectproxy():
     class Person:
         def __init__(self, name):
             self.name = name
 
-    person = Person("haypo")
-
-    def setName(person):
+    # Attribute
+    def setAttr(person):
         person.name = "victor"
 
+    person = Person("haypo")
     sandbox = createSandbox()
     try:
-        sandbox.call(setName, person)
+        sandbox.call(setAttr, person)
     except SandboxError, err:
         assert str(err) == 'Read only object'
     else:
         assert False
 
+    setAttr(person)
+    assert person.name == "victor"
+
+    # Delete attribute
+    def delAttr(person):
+        del person.name
+
+    person = Person("haypo")
+    sandbox = createSandbox()
+    try:
+        sandbox.call(delAttr, person)
+    except SandboxError, err:
+        assert str(err) == 'Read only object'
+    else:
+        assert False
+
+    delAttr(person)
+    assert hasattr(person, 'name') == False
+
+    # Dictionary
     def setDict(person):
         person.__dict__['name'] = "victor"
 
+    person = Person("haypo")
     try:
         sandbox.call(setDict, person)
     except SandboxError, err:
@@ -361,15 +413,8 @@ def test_objectproxy():
     else:
         assert False
 
-    def object_setattr(person):
-        object.__setattr__(person, 'name', "victor")
-
-    try:
-        sandbox.call(object_setattr, person)
-    except AttributeError, err:
-        assert str(err) == "'ObjectProxy' object has no attribute 'name'"
-    else:
-        assert False
+    setDict(person)
+    assert person.name == "victor"
 
 def builtins_superglobal():
     if isinstance(__builtins__, dict):
