@@ -5,7 +5,7 @@ Restricted
 
  * function:
    - block read/write: func_closure, __closure__, __globals__
-   - block write: func_doc, __doc, __module__
+   - block write: func_doc, __doc__, __module__
 
  * instance method:
    - block read/write: im_class, im_func, __func__, im_self, __self
