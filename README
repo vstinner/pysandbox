@@ -68,6 +68,9 @@ are hidden (eg. method.__self__), other are read only (eg. func.__doc__).
 CPython restricted mode is disabled by default. The restricted mode is
 incompatible with SandboxConfig "traceback" feature and allowPath() method.
 
+The restricted mode doesn't exist in Python3 anymore, it was removed with
+bastion and rexec modules.
+
 Other options
 -------------
 
