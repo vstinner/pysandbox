@@ -13,19 +13,23 @@ SAFE_TYPES = (
 def readOnlyError():
     raise SandboxError("Read only object")
 
-class ReadOnlyDict(dict):
-    def __setitem__(self, key, value):
-        readOnlyError()
+class Proxy(object):
+    __slots__ = tuple()
 
-    def __delitem__(self, key):
-        readOnlyError()
+def copyProxyMethods(real_object, proxy_class):
+    # Copy methods from the real object because object has default
+    # implementations
+    for name in ('__repr__', '__str__', '__hash__', '__call__'):
+        if not hasattr(real_object, name):
+            continue
+        func = getattr(real_object, name)
+        func = createMethodProxy(func)
+        setattr(proxy_class, name, func)
 
-class ReadOnlyList(list):
-    def append(self, value):
-        readOnlyError()
+class ReadOnlySequence(Proxy):
+    # Child classes have to implement: __iter__, __getitem__, __len__
 
-    def remove(self, value):
-        readOnlyError()
+    __slots__ = tuple()
 
     def __setitem__(self, key, value):
         readOnlyError()
@@ -34,6 +38,69 @@ class ReadOnlyList(list):
         readOnlyError()
 
     def __delitem__(self, key):
+        readOnlyError()
+
+    def __delslice__(self, start, end):
+        readOnlyError()
+
+def createReadOnlyDict(data):
+    class ReadOnlyDict(ReadOnlySequence):
+        def __getitem__(self, index):
+            value = data.__getitem__(index)
+            return proxy(value)
+
+    copyProxyMethods(data, ReadOnlyDict)
+    return ReadOnlyDict()
+
+def createReadOnlyList(data):
+    class ReadOnlyList(ReadOnlySequence):
+        __slots__ = tuple()
+        __doc__ = data.__doc__
+
+        # FIXME: __contains__, count, index, __reversed__
+        # FIXME: __add__, __iadd__, __imul__, __mul__, __rmul__
+        # FIXME: compare: __eq__, __ge__, __gt__, __le__, __lt__, __ne__
+        # FIXME: other: __reduce__, __reduce_ex__
+
+        def append(self, value):
+            readOnlyError()
+
+        def extend(self, iterable):
+            readOnlyError()
+
+        def __getitem__(self, index):
+            value = data.__getitem__(index)
+            return proxy(value)
+
+        def __getslice__(self, start, end):
+            value = data.__getslice__(start, end)
+            return proxy(value)
+
+        def insert(self, index, object):
+            readOnlyError()
+
+        def pop(self, index=None):
+            readOnlyError()
+
+        def remove(self, value):
+            readOnlyError()
+
+        def reverse(self, value):
+            readOnlyError()
+
+        def sort(self, cmp=None, key=None, reverse=False):
+            readOnlyError()
+
+    copyProxyMethods(data, ReadOnlyList)
+    return ReadOnlyList()
+
+class ReadOnlyObject(Proxy):
+    __slots__ = tuple()
+
+    def __setattr__(self, name, value):
+        readOnlyError()
+
+    def __delattr__(self, name):
         readOnlyError()
 
 def createMethodProxy(method_wrapper):
@@ -54,9 +121,9 @@ def createObjectProxy(real_object, readOnlyError=readOnlyError,
 isinstance=isinstance, MethodType=MethodType):
     # Use object with __slots__ to deny the modification of attributes
     # and the creation of new attributes
-    class ObjectProxy(object):
-        __doc__ = real_object.__doc__
+    class ObjectProxy(ReadOnlyObject):
         __slots__ = tuple()
+        __doc__ = real_object.__doc__
 
         def __getattr__(self, name):
             value = getattr(real_object, name)
@@ -66,20 +133,7 @@ isinstance=isinstance, MethodType=MethodType):
                 value = proxy(value)
             return value
 
-        def __setattr__(self, name, value):
-            readOnlyError()
-
-        def __delattr__(self, name):
-            readOnlyError()
-
-    # Copy some methods because object has default implementations
-    for name in ('__repr__', '__str__', '__hash__', '__call__'):
-        if not hasattr(real_object, name):
-            continue
-        func = getattr(real_object, name)
-        func = createMethodProxy(func)
-        setattr(ObjectProxy, name, func)
-
+    copyProxyMethods(real_object, ObjectProxy)
     return ObjectProxy()
 
 def _proxy(safe_types=SAFE_TYPES, file=file,
@@ -93,13 +147,9 @@ ClassType=ClassType, InstanceType=InstanceType, TypeError=TypeError):
                 proxy(item)
                 for item in value)
         elif isinstance(value, list):
-            return ReadOnlyList(
-                proxy(item)
-                for item in value)
+            return createReadOnlyList(value)
         elif isinstance(value, dict):
-            return ReadOnlyDict(
-                (proxy(key), proxy(value))
-                for key, value in value.iteritems())
+            return createReadOnlyDict(value)
         elif isinstance(value, (file, ClassType, InstanceType)):
             return createObjectProxy(value)
         else:

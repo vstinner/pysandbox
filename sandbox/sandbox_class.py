@@ -2,6 +2,11 @@ from __future__ import with_statement
 from .config import SandboxConfig
 from .proxy import proxy
 
+def keywordsProxy(keywords):
+    return dict(
+        (key, proxy(value))
+        for key, value in keywords.iteritems())
+
 class Sandbox:
     PROTECTIONS = []
 
@@ -25,7 +30,7 @@ class Sandbox:
         Call a function in the sandbox.
         """
         args = proxy(args)
-        kw = proxy(kw)
+        kw = keywordsProxy(kw)
         with self:
             func(*args, **kw)
 
@@ -48,7 +53,8 @@ class Sandbox:
         The callback takes no argument.
         """
         args = proxy(args)
-        kw = proxy(kw)
+        kw = keywordsProxy(kw)
+        print kw
         sandbox = self
         def callback():
             with sandbox:
