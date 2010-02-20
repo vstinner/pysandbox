@@ -8,42 +8,9 @@ from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
-from .proxy import readOnlyError, createObjectProxy
+from .proxy import ReadOnlyBuiltins, createObjectProxy
 if USE_CPYTHON_HACKS:
     from .cpython_hack import set_frame_builtins, set_interp_builtins
-
-# Use a blacklist instead of a whitelist policy because __builtins__ HAVE TO
-# inherit from dict: Python/ceval.c uses PyDict_SetItem() and an inlined
-# version of PyDict_GetItem().
-#
-# Don't proxy __getattr__ because I suppose that __builtins__ only contains
-# safe functions (not mutable objects).
-class ReadOnlyBuiltins(dict):
-    __slots__ = tuple()
-
-    def clear(self):
-        readOnlyError()
-
-    def __delitem__(self, key):
-        readOnlyError()
-
-    def pop(self, key, default=None):
-        readOnlyError()
-
-    def popitem(self):
-        readOnlyError()
-
-    def setdefault(self, key, value):
-        readOnlyError()
-
-    def __setitem__(self, key, value):
-        readOnlyError()
-
-    def __setslice__(self, start, end, value):
-        readOnlyError()
-
-    def update(self, dict, **kw):
-        readOnlyError()
 
 class CleanupBuiltins:
     """

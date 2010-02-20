@@ -1,6 +1,6 @@
 from __future__ import with_statement
 from .config import SandboxConfig
-from .proxy import proxy
+from .proxy import proxy, createDictProxy
 
 def keywordsProxy(keywords):
     return dict(
@@ -41,9 +41,9 @@ class Sandbox:
            exec code in globals, locals
         """
         if globals is not None:
-            globals = proxy(globals)
+            globals = createDictProxy(globals)
         if locals is not None:
-            locals = proxy(locals)
+            locals = createDictProxy(locals)
         with self:
             exec code in globals, locals
 
