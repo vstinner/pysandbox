@@ -10,6 +10,8 @@ except ImportError:
 from .cpython import dictionary_of
 from .restorable_dict import RestorableDict
 
+builtin_function = type(len)
+
 class HideAttributes:
     """
     Hide unsafe frame attributes from the Python space:
@@ -20,6 +22,7 @@ class HideAttributes:
         self.function_dict = RestorableDict(dictionary_of(FunctionType))
         self.frame_dict = RestorableDict(dictionary_of(FrameType))
         self.type_dict = RestorableDict(dictionary_of(type))
+        self.builtin_func_dict = RestorableDict(dictionary_of(builtin_function))
 
     def enable(self, sandbox):
         if version_info < (3, 0):
@@ -30,11 +33,13 @@ class HideAttributes:
             del self.function_dict['__globals__']
         del self.frame_dict['f_locals']
         del self.type_dict['__subclasses__']
+        del self.builtin_func_dict['__self__']
 
     def disable(self, sandbox):
         self.function_dict.restore()
         self.frame_dict.restore()
         self.type_dict.restore()
+        self.builtin_func_dict.restore()
         # Python 2.6+ uses a method cache: clear it to avoid errors
         _clear_type_cache()
 
