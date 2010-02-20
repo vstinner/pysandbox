@@ -163,6 +163,26 @@ def test_import_whitelist():
         assert sys.__name__ == 'sys'
         assert sys.version == sys_version
 
+def test_readonly_import():
+    config = createSandboxConfig()
+    config.allowModule('sys', 'version')
+    with Sandbox(config):
+        import sys
+
+        try:
+            sys.version = '3000'
+        except SandboxError, err:
+            assert str(err) == "Read only object"
+        else:
+            assert False
+
+        try:
+            object.__setattr__(sys, 'version', '3000')
+        except AttributeError, err:
+            assert str(err) == "'SafeModule' object has no attribute 'version'"
+        else:
+            assert False
+
 def get_file_from_stdout():
     import sys
     return type(sys.stdout)

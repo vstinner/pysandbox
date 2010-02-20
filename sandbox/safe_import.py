@@ -1,33 +1,34 @@
 from .proxy import proxy, readOnlyError
 
-class SafeModule(object):
-    def __init__(self, module, attributes):
-        _set = object.__setattr__
-        name_repr = repr(module.__name__)
-        try:
-            _set(self, '__file',  module.__file__)
-            name_repr += " from %r" % self.__file__
-        except AttributeError:
-            name_repr += " (built-in)"
-        _set(self, '__name_repr',  name_repr)
-        _set(self, '__name__', module.__name__)
-        _set(self, '__doc__', module.__doc__)
-        for key, value in attributes.iteritems():
-            _set(self, key, value)
+def createSafeModule(real_module, attributes):
+    attributes = tuple(attributes) + ('__file__',)
 
-    def __setattr__(self, name, value):
-        readOnlyError()
+    name_repr = repr(real_module.__name__)
+    if hasattr(real_module, '__file__'):
+        attributes += ('__file__',)
+        name_repr += " from %r" % real_module.__file__
+    else:
+        name_repr += " (built-in)"
 
-    def __repr__(self):
-        return "<SafeModule %s>" % (self.__name_repr,)
+    class SafeModule(object):
+        __doc__ = real_module.__doc__
+        __name__ = real_module.__name__
+        __slots__ = tuple()
 
-def createSafeModule(module, attributes):
-    safe_attributes = {}
-    for attr in attributes:
-        value = getattr(module, attr)
-        value = proxy(value)
-        safe_attributes[attr] = value
-    return SafeModule(module, safe_attributes)
+        def __getattr__(self, name):
+            if name not in attributes:
+                raise AttributeError("SafeModule %r has no attribute %r" % (self.__name__, name))
+            value = getattr(real_module, name)
+            value = proxy(value)
+            return value
+
+        def __setattr__(self, name, value):
+            readOnlyError()
+
+        def __repr__(self):
+            return "<SafeModule %s>" % (name_repr,)
+
+    return SafeModule()
 
 def _safe_import(__import__, module_whitelist):
     """
