@@ -48,13 +48,13 @@ if USE_CPYTHON_HACKS:
         read_first_line(open)
 
     def test_exec_builtins():
-        from sandbox.builtins import ReadOnlyDict
+        from sandbox.builtins import ReadOnlyBuiltins
 
         with createSandbox():
             result = []
             exec "result.append(type(__builtins__))" in {'result': result}
             builtin_type = result[0]
-            assert builtin_type == ReadOnlyDict
+            assert builtin_type == ReadOnlyBuiltins
 else:
     print "USE_CPYTHON_HACKS=False: disable test_open_whitelist(), test_exec_builtins()"
 
@@ -150,6 +150,7 @@ def test_import():
     # import is allowed outside the sandbox
     import os
 
+def test_import_whitelist():
     # sys.version is allowed by the sandbox
     import sys
     sys_version = sys.version
