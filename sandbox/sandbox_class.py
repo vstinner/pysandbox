@@ -1,6 +1,7 @@
 from __future__ import with_statement
 from .config import SandboxConfig
-from .proxy import proxy, createDictProxy
+from .proxy import proxy
+from .blacklist_proxy import createDictProxy
 
 def keywordsProxy(keywords):
     return dict(

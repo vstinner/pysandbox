@@ -8,7 +8,8 @@ from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
-from .proxy import ReadOnlyBuiltins, createObjectProxy
+from .proxy import createObjectProxy
+from .blacklist_proxy import ReadOnlyBuiltins
 if USE_CPYTHON_HACKS:
     from .cpython_hack import set_frame_builtins, set_interp_builtins
 
