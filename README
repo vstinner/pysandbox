@@ -71,6 +71,9 @@ incompatible with SandboxConfig "traceback" feature and allowPath() method.
 The restricted mode doesn't exist in Python3 anymore, it was removed with
 bastion and rexec modules.
 
+CPython restricted mode was removed in Python 3.0:
+http://svn.python.org/view?view=rev&revision=55301
+
 Other options
 -------------
 
