@@ -2,7 +2,7 @@
 Proxies using a blacklist policy.
 """
 
-from .read_only_view import readOnlyError, readOnly
+from .proxy import readOnlyError
 
 # Use a blacklist instead of a whitelist policy because __builtins__ HAVE TO
 # inherit from dict: Python/ceval.c uses PyDict_SetItem() and an inlined
