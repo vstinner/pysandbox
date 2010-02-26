@@ -4,6 +4,7 @@ from .proxy import proxy
 from .blacklist_proxy import createDictProxy
 
 def keywordsProxy(keywords):
+    # Dont proxy keys because function keywords must be strings
     return dict(
         (key, proxy(value))
         for key, value in keywords.iteritems())
@@ -55,7 +56,6 @@ class Sandbox:
         """
         args = proxy(args)
         kw = keywordsProxy(kw)
-        print kw
         sandbox = self
         def callback():
             with sandbox:
