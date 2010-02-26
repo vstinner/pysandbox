@@ -18,9 +18,6 @@ SAFE_TYPES = (
 def readOnlyError():
     raise SandboxError("Read only object")
 
-class Proxy(object):
-    __slots__ = tuple()
-
 def copyProxyMethods(real_object, proxy_class):
     # Copy methods from the real object because the object type has default
     # implementations
@@ -32,7 +29,7 @@ def copyProxyMethods(real_object, proxy_class):
             func = createMethodProxy(func)
         setattr(proxy_class, name, func)
 
-class ReadOnlySequence(Proxy):
+class ReadOnlySequence(object):
     __slots__ = tuple()
 
     # Child classes have to implement: __iter__, __getitem__, __len__
@@ -203,7 +200,7 @@ def createReadOnlyObject(real_object, readOnlyError=readOnlyError,
 isinstance=isinstance, MethodType=MethodType):
     # Use object with __slots__ to deny the modification of attributes
     # and the creation of new attributes
-    class ReadOnlyObject(Proxy):
+    class ReadOnlyObject(object):
         __slots__ = tuple()
         __doc__ = real_object.__doc__
 
