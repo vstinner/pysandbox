@@ -489,6 +489,7 @@ def main():
         if not name.startswith("test"):
             continue
         all_tests.append(value)
+    all_tests.sort(key=lambda func: func.__name__)
 
     # Run tests
     nerror = 0

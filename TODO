@@ -44,6 +44,7 @@ Open questions
 Minor tasks
 -----------
 
+ * isinstance(createReadOnlyList(...), list) is False
  * Write a whitelist for sys.path?
  * Clear sys.modules?
  * Improve type(open(...))(filename, "r") error message,
