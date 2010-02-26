@@ -19,12 +19,16 @@ class HideAttributes:
      * function.xxx
     """
     def __init__(self):
+        self.dict_dict = RestorableDict(dictionary_of(dict))
         self.function_dict = RestorableDict(dictionary_of(FunctionType))
         self.frame_dict = RestorableDict(dictionary_of(FrameType))
         self.type_dict = RestorableDict(dictionary_of(type))
         self.builtin_func_dict = RestorableDict(dictionary_of(builtin_function))
 
     def enable(self, sandbox):
+        # Blacklist dict.__setitem__() to protect ReadOnlyBuiltins
+        # FIXME: Use a cleaner fix?
+        del self.dict_dict['__setitem__']
         if version_info < (3, 0):
             del self.function_dict['func_closure']
             del self.function_dict['func_globals']
@@ -36,6 +40,7 @@ class HideAttributes:
         del self.builtin_func_dict['__self__']
 
     def disable(self, sandbox):
+        self.dict_dict.restore()
         self.function_dict.restore()
         self.frame_dict.restore()
         self.type_dict.restore()

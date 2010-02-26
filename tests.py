@@ -458,6 +458,20 @@ def test_modify_builtins():
 
     builtins_superglobal()
 
+def builtins_dict_superglobal():
+    dict.__setitem__(__builtins__, 'SUPERGLOBAL', 42)
+    assert SUPERGLOBAL == 42
+    del __builtins__['SUPERGLOBAL']
+
+def test_modify_builtins_dict():
+    with createSandbox():
+        try:
+            builtins_dict_superglobal()
+        except AttributeError, err:
+            assert str(err) == "type object 'dict' has no attribute '__setitem__'"
+        else:
+            assert False
+
 def parseOptions():
     from optparse import OptionParser
 

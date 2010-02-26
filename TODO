@@ -1,8 +1,6 @@
 Known issues
 ------------
 
- * dict.__setitem__(__builtins__, 'SUPERGLOBAL', 42)
- * Enable USE_CPYTHON_HACKS option?
  * "with" frame locals are not protected by the proxy (see above)
 
 Major tasks
