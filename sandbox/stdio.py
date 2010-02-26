@@ -1,11 +1,14 @@
 import sys
 from sandbox import SandboxError
 
-def createNoWrite(name):
+def createNoAttribute(name):
     def _blocked():
         raise SandboxError("Block access to sys.%s" % name)
 
-    class NoWrite:
+    # FIXME:
+    #class NoAttribute(object):
+    #    __slots__ = tuple()
+    class NoAttribute:
         def __getattr__(self, name):
             _blocked()
 
@@ -14,13 +17,12 @@ def createNoWrite(name):
 
         def __delattr__(self, name):
             _blocked()
-    return NoWrite()
+    return NoAttribute()
 
 class ProtectStdio:
     """
-    Hide unsafe frame attributes from the Python space:
-     * frame.xxx
-     * function.xxx
+    If stdin / stdout / stderr feature is disable, replace sys.stdin /
+    sys.stdout / sys.stderr by a dummy object with no attribute.
     """
     def __init__(self):
         self.sys = sys
@@ -30,15 +32,15 @@ class ProtectStdio:
 
         self.stdin = self.sys.stdin
         if 'stdin' not in features:
-            self.sys.stdin = createNoWrite("stdin") 
+            self.sys.stdin = createNoAttribute("stdin")
 
         self.stdout = self.sys.stdout
         if 'stdout' not in features:
-            self.sys.stdout = createNoWrite("stdout") 
+            self.sys.stdout = createNoAttribute("stdout")
 
         self.stderr = self.sys.stderr
         if 'stderr' not in features:
-            self.sys.stderr = createNoWrite("stderr") 
+            self.sys.stderr = createNoAttribute("stderr")
 
     def disable(self, sandbox):
         self.sys.stdin = self.stdin
