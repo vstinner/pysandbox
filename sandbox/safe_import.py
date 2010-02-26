@@ -19,11 +19,12 @@ def createSafeModule(real_module, attributes):
             readOnlyError()
 
         def __getattr__(self, name):
+            if type(name) is not str:
+                raise TypeError("expect string, not %s" % type(name).__name__)
             if name not in attributes:
                 raise AttributeError("SafeModule %r has no attribute %r" % (self.__name__, name))
             value = getattr(real_module, name)
-            value = proxy(value)
-            return value
+            return proxy(value)
 
         def __setattr__(self, name, value):
             readOnlyError()

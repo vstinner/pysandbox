@@ -1,13 +1,6 @@
 Known issues
 ------------
 
- * Check types in whitelist:
-
-   class Str(str):
-      def __eq__(self, other):
-         return True
-   getattr(sys, Str("_getframe"))
-
  * "with" frame locals are not protected by the proxy (see above)
 
 Major tasks
