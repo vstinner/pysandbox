@@ -4,6 +4,7 @@ Proxies using a whitelist policy.
 
 from types import FunctionType, ClassType, InstanceType, MethodType
 from sandbox import SandboxError
+from sys import version_info
 
 builtin_function_or_method = type(len)
 
@@ -21,7 +22,7 @@ class Proxy(object):
     __slots__ = tuple()
 
 def copyProxyMethods(real_object, proxy_class):
-    # Copy methods from the real object because object has default
+    # Copy methods from the real object because the object type has default
     # implementations
     for name in ('__repr__', '__str__', '__hash__', '__call__'):
         if not hasattr(real_object, name):
@@ -31,9 +32,9 @@ def copyProxyMethods(real_object, proxy_class):
         setattr(proxy_class, name, func)
 
 class ReadOnlySequence(Proxy):
-    # Child classes have to implement: __iter__, __getitem__, __len__
-
     __slots__ = tuple()
+
+    # Child classes have to implement: __iter__, __getitem__, __len__
 
     def __setitem__(self, key, value):
         readOnlyError()
@@ -49,9 +50,75 @@ class ReadOnlySequence(Proxy):
 
 def createReadOnlyDict(data):
     class ReadOnlyDict(ReadOnlySequence):
+        __slots__ = tuple()
+        __doc__ = data.__doc__
+
+        # FIXME: fromkeys
+        # FIXME: compare: __cmp__, __eq__', __ge__, __gt__, __le__, __lt__, __ne__,
+        # FIXME: other __reduce__, __reduce_ex__
+
+        def clear(self):
+            readOnlyError()
+
+        def __contains__(self, key):
+            return (key in data)
+
+        def copy(self):
+            return dict(item for item in self.iteritems())
+
+        def get(self, key, default=None):
+            if key not in data:
+                return default
+            value = data[key]
+            return proxy(value)
+
         def __getitem__(self, index):
             value = data.__getitem__(index)
             return proxy(value)
+
+        if version_info < (3, 0):
+            def has_key(self, key):
+                return (key in data)
+
+        def items(self):
+            return list(self.iteritems())
+
+        def __iter__(self):
+            return self.iterkeys()
+
+        def iteritems(self):
+            for item in data.iteritems():
+                key, value = item
+                yield (proxy(key), proxy(value))
+
+        def iterkeys(self):
+            for key in data.iterkeys():
+                yield proxy(key)
+
+        def itervalues(self):
+            for value in data.itervalues():
+                yield proxy(value)
+
+        def keys(self):
+            return list(self.iterkeys())
+
+        def __len__(self):
+            return len(data)
+
+        def pop(self, key, default=None):
+            readOnlyError()
+
+        def popitem(self):
+            readOnlyError()
+
+        def setdefault(self, key, default=None):
+            readOnlyError()
+
+        def update(self, other, **items):
+            readOnlyError()
+
+        def values(self):
+            return list(self.itervalues())
 
     copyProxyMethods(data, ReadOnlyDict)
     return ReadOnlyDict()
@@ -61,13 +128,18 @@ def createReadOnlyList(data):
         __slots__ = tuple()
         __doc__ = data.__doc__
 
-        # FIXME: __contains__, count, index, __reversed__
-        # FIXME: __add__, __iadd__, __imul__, __mul__, __rmul__
+        # FIXME: operators: __add__, __iadd__, __imul__, __mul__, __rmul__
         # FIXME: compare: __eq__, __ge__, __gt__, __le__, __lt__, __ne__
         # FIXME: other: __reduce__, __reduce_ex__
 
         def append(self, value):
             readOnlyError()
+
+        def __contains__(self, value):
+            return (value in data)
+
+        def count(self, value):
+            return data.count(value)
 
         def extend(self, iterable):
             readOnlyError()
@@ -80,8 +152,18 @@ def createReadOnlyList(data):
             value = data.__getslice__(start, end)
             return proxy(value)
 
+        def index(self, value):
+            return data.index(value)
+
         def insert(self, index, object):
             readOnlyError()
+
+        def __iter__(self):
+            for value in data:
+                yield proxy(value)
+
+        def __len__(self):
+            return len(data)
 
         def pop(self, index=None):
             readOnlyError()
@@ -91,6 +173,10 @@ def createReadOnlyList(data):
 
         def reverse(self, value):
             readOnlyError()
+
+        def __reversed__(self):
+            for value in data.__reversed__():
+                yield proxy(value)
 
         def sort(self, cmp=None, key=None, reverse=False):
             readOnlyError()
