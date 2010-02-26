@@ -6,7 +6,6 @@ Known issues
 Major tasks
 -----------
 
- * Remove sandbox.guard
  * safe_import(): from_list default value is mutable
  * It's no more needed to copy globals type/functions in closure because
    __builtins__ is read only: need to cleanup sandbox/*.py (eg. safe_open.py)
