@@ -220,10 +220,10 @@ isinstance=isinstance, MethodType=MethodType):
     copyProxyMethods(real_object, ReadOnlyObject)
     return ReadOnlyObject()
 
-def _proxy(safe_types=SAFE_TYPES, file=file,
-ClassType=ClassType, InstanceType=InstanceType, TypeError=TypeError):
+def _proxy():
+    file_type = file
     def proxy(value):
-        if isinstance(value, safe_types):
+        if isinstance(value, SAFE_TYPES):
             # Safe type, no need to create a proxy
             return value
         elif isinstance(value, tuple):
@@ -234,12 +234,11 @@ ClassType=ClassType, InstanceType=InstanceType, TypeError=TypeError):
             return createReadOnlyList(value)
         elif isinstance(value, dict):
             return createReadOnlyDict(value)
-        elif isinstance(value, (file, ClassType, InstanceType)):
+        elif isinstance(value, (file_type, ClassType, InstanceType)):
             return createReadOnlyObject(value)
         else:
             raise TypeError("Unable to proxy a value of type %s" % type(value))
     return proxy
-
 proxy = _proxy()
 del _proxy
 

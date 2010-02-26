@@ -7,8 +7,6 @@ Major tasks
 -----------
 
  * safe_import(): from_list default value is mutable
- * It's no more needed to copy globals type/functions in closure because
-   __builtins__ is read only: need to cleanup sandbox/*.py (eg. safe_open.py)
  * SandboxConfig.allowModuleSourceCode(): don't import the module just to get
    the filename
  * safe_open() should not use createReadOnlyObject(), but just hide the real
