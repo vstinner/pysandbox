@@ -28,7 +28,8 @@ def copyProxyMethods(real_object, proxy_class):
         if not hasattr(real_object, name):
             continue
         func = getattr(real_object, name)
-        func = createMethodProxy(func)
+        if func is not None:
+            func = createMethodProxy(func)
         setattr(proxy_class, name, func)
 
 class ReadOnlySequence(Proxy):
