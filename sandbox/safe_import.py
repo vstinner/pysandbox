@@ -15,6 +15,9 @@ def createSafeModule(real_module, attributes):
         __name__ = real_module.__name__
         __slots__ = tuple()
 
+        def __delattr__(self, name):
+            readOnlyError()
+
         def __getattr__(self, name):
             if name not in attributes:
                 raise AttributeError("SafeModule %r has no attribute %r" % (self.__name__, name))
