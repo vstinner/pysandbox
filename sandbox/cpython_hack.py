@@ -134,11 +134,13 @@ class PyFrameObject(Structure):
         ("f_exc_value", PyObject_p),
         ("f_exc_traceback", PyObject_p),
         ("f_tstate", PyThreadState_p),
-        ("f_lasti", c_int),
-        ("f_lineno", c_int),
-        ("f_iblock", c_int),
-        ("f_blockstack", PyTryBlock * CO_MAXBLOCKS),
-        ("f_localsplus", PyObject_pp),
+        # ... (we don't need to know more to hack CPython)
+
+        #("f_lasti", c_int),
+        #("f_lineno", c_int),
+        #("f_iblock", c_int),
+        #("f_blockstack", PyTryBlock * CO_MAXBLOCKS),
+        #("f_localsplus", PyObject_pp),
     )
 
 def cptr_at(addresss, type=None):
@@ -219,29 +221,28 @@ def set_interp_builtins(frame, builtins):
     cinterp = ctstate.interp.contents
     cobject_setattr(cinterp, "builtins", builtins)
 
-class ClearFrameCache:
-    def __init__(self, frame):
-        self.frame = frame
-        self.cframe = pyobject_get_cobject(self.frame, PyFrameObject)
-
-        # clear f_locals
-        self.locals = frame.f_locals.copy()
-        frame.f_locals.clear()
-
-        # clear f_localsplus (LOAD_FAST/STORE_FAST cache)
-        self.cache_size = 2
-        self.cache = []
-        for index in xrange(self.cache_size):
-            ptr = self.cframe.f_localsplus[index]
-            print("CLEAR CACHE[%s]=%s" % (index, ptr))
-            pythonapi._PyObject_Dump(ptr)
-            self.cache.append(ptr)
-            self.cframe.f_localsplus[index] = pyobject_address(42)
-
-    def restore(self):
-        # restore f_localsplus (LOAD_FAST/STORE_FAST cache)
-        for index, ptr in enumerate(self.cache):
-            self.cframe.f_localsplus[index] = ptr
-        # restore f_locals
-        self.frame.f_locals.update(self.locals)
-
+# class ClearFrameCache:
+#     def __init__(self, frame):
+#         self.frame = frame
+#         self.cframe = pyobject_get_cobject(self.frame, PyFrameObject)
+#
+#         # clear f_locals
+#         self.locals = frame.f_locals.copy()
+#         frame.f_locals.clear()
+#
+#         # clear f_localsplus (LOAD_FAST/STORE_FAST cache)
+#         self.cache_size = 2
+#         self.cache = []
+#         for index in xrange(self.cache_size):
+#             ptr = self.cframe.f_localsplus[index]
+#             pythonapi._PyObject_Dump(ptr)
+#             self.cache.append(ptr)
+#             self.cframe.f_localsplus[index] = pyobject_address(42)
+#
+#     def restore(self):
+#         # restore f_localsplus (LOAD_FAST/STORE_FAST cache)
+#         for index, ptr in enumerate(self.cache):
+#             self.cframe.f_localsplus[index] = ptr
+#         # restore f_locals
+#         self.frame.f_locals.update(self.locals)
+#
