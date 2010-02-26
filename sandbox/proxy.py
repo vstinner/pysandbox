@@ -18,6 +18,19 @@ SAFE_TYPES = (
 def readOnlyError():
     raise SandboxError("Read only object")
 
+def createMethodProxy(method_wrapper):
+    # Use object with __slots__ to deny the modification of attributes
+    # and the creation of new attributes
+    class MethodProxy(object):
+        __slots__ = ("__name__", "__doc__")
+        __doc__ = method_wrapper.__doc__
+        def __call__(self, *args, **kw):
+            value = method_wrapper(*args, **kw)
+            return proxy(value)
+    func = MethodProxy()
+    func.__name__ = method_wrapper.__name__
+    return func
+
 def copyProxyMethods(real_object, proxy_class):
     # Copy methods from the real object because the object type has default
     # implementations
@@ -40,10 +53,10 @@ class ReadOnlySequence(object):
     def __setitem__(self, key, value):
         readOnlyError()
 
-def createReadOnlyDict(data):
+def createReadOnlyDict(real_dict):
     class ReadOnlyDict(ReadOnlySequence):
         __slots__ = tuple()
-        __doc__ = data.__doc__
+        __doc__ = real_dict.__doc__
 
         # FIXME: fromkeys
         # FIXME: compare: __cmp__, __eq__', __ge__, __gt__, __le__, __lt__, __ne__,
@@ -53,24 +66,24 @@ def createReadOnlyDict(data):
             readOnlyError()
 
         def __contains__(self, key):
-            return (key in data)
+            return (key in real_dict)
 
         def copy(self):
             return dict(item for item in self.iteritems())
 
         def get(self, key, default=None):
-            if key not in data:
+            if key not in real_dict:
                 return default
-            value = data[key]
+            value = real_dict[key]
             return proxy(value)
 
         def __getitem__(self, index):
-            value = data.__getitem__(index)
+            value = real_dict.__getitem__(index)
             return proxy(value)
 
         if version_info < (3, 0):
             def has_key(self, key):
-                return (key in data)
+                return (key in real_dict)
 
         def items(self):
             return list(self.iteritems())
@@ -79,23 +92,23 @@ def createReadOnlyDict(data):
             return self.iterkeys()
 
         def iteritems(self):
-            for item in data.iteritems():
+            for item in real_dict.iteritems():
                 key, value = item
                 yield (proxy(key), proxy(value))
 
         def iterkeys(self):
-            for key in data.iterkeys():
+            for key in real_dict.iterkeys():
                 yield proxy(key)
 
         def itervalues(self):
-            for value in data.itervalues():
+            for value in real_dict.itervalues():
                 yield proxy(value)
 
         def keys(self):
             return list(self.iterkeys())
 
         def __len__(self):
-            return len(data)
+            return len(real_dict)
 
         def pop(self, key, default=None):
             readOnlyError()
@@ -112,13 +125,13 @@ def createReadOnlyDict(data):
         def values(self):
             return list(self.itervalues())
 
-    copyProxyMethods(data, ReadOnlyDict)
+    copyProxyMethods(real_dict, ReadOnlyDict)
     return ReadOnlyDict()
 
-def createReadOnlyList(data):
+def createReadOnlyList(real_list):
     class ReadOnlyList(ReadOnlySequence):
         __slots__ = tuple()
-        __doc__ = data.__doc__
+        __doc__ = real_list.__doc__
 
         # FIXME: operators: __add__, __iadd__, __imul__, __mul__, __rmul__
         # FIXME: compare: __eq__, __ge__, __gt__, __le__, __lt__, __ne__
@@ -128,10 +141,10 @@ def createReadOnlyList(data):
             readOnlyError()
 
         def __contains__(self, value):
-            return (value in data)
+            return (value in real_list)
 
         def count(self, value):
-            return data.count(value)
+            return real_list.count(value)
 
         def __delslice__(self, start, end):
             readOnlyError()
@@ -140,25 +153,25 @@ def createReadOnlyList(data):
             readOnlyError()
 
         def __getitem__(self, index):
-            value = data.__getitem__(index)
+            value = real_list.__getitem__(index)
             return proxy(value)
 
         def __getslice__(self, start, end):
-            value = data.__getslice__(start, end)
+            value = real_list.__getslice__(start, end)
             return proxy(value)
 
         def index(self, value):
-            return data.index(value)
+            return real_list.index(value)
 
         def insert(self, index, object):
             readOnlyError()
 
         def __iter__(self):
-            for value in data:
+            for value in real_list:
                 yield proxy(value)
 
         def __len__(self):
-            return len(data)
+            return len(real_list)
 
         def pop(self, index=None):
             readOnlyError()
@@ -170,7 +183,7 @@ def createReadOnlyList(data):
             readOnlyError()
 
         def __reversed__(self):
-            for value in data.__reversed__():
+            for value in real_list.__reversed__():
                 yield proxy(value)
 
         def __setslice__(self, start, end, value):
@@ -179,22 +192,8 @@ def createReadOnlyList(data):
         def sort(self, cmp=None, key=None, reverse=False):
             readOnlyError()
 
-    copyProxyMethods(data, ReadOnlyList)
+    copyProxyMethods(real_list, ReadOnlyList)
     return ReadOnlyList()
-
-def createMethodProxy(method_wrapper):
-    # Use object with __slots__ to deny the modification of attributes
-    # and the creation of new attributes
-    class MethodProxy(object):
-        __slots__ = ("__name__", "__doc__")
-        __doc__ = method_wrapper.__doc__
-        def __call__(self, *args, **kw):
-            value = method_wrapper(*args, **kw)
-            value = proxy(value)
-            return value
-    func = MethodProxy()
-    func.__name__ = method_wrapper.__name__
-    return func
 
 def createReadOnlyObject(real_object, readOnlyError=readOnlyError,
 isinstance=isinstance, MethodType=MethodType):
