@@ -185,15 +185,6 @@ def createReadOnlyList(data):
     copyProxyMethods(data, ReadOnlyList)
     return ReadOnlyList()
 
-class ReadOnlyObject(Proxy):
-    __slots__ = tuple()
-
-    def __setattr__(self, name, value):
-        readOnlyError()
-
-    def __delattr__(self, name):
-        readOnlyError()
-
 def createMethodProxy(method_wrapper):
     # Use object with __slots__ to deny the modification of attributes
     # and the creation of new attributes
@@ -208,13 +199,16 @@ def createMethodProxy(method_wrapper):
     func.__name__ = method_wrapper.__name__
     return func
 
-def createObjectProxy(real_object, readOnlyError=readOnlyError,
+def createReadOnlyObject(real_object, readOnlyError=readOnlyError,
 isinstance=isinstance, MethodType=MethodType):
     # Use object with __slots__ to deny the modification of attributes
     # and the creation of new attributes
-    class ObjectProxy(ReadOnlyObject):
+    class ReadOnlyObject(Proxy):
         __slots__ = tuple()
         __doc__ = real_object.__doc__
+
+        def __delattr__(self, name):
+            readOnlyError()
 
         def __getattr__(self, name):
             value = getattr(real_object, name)
@@ -224,8 +218,11 @@ isinstance=isinstance, MethodType=MethodType):
                 value = proxy(value)
             return value
 
-    copyProxyMethods(real_object, ObjectProxy)
-    return ObjectProxy()
+        def __setattr__(self, name, value):
+            readOnlyError()
+
+    copyProxyMethods(real_object, ReadOnlyObject)
+    return ReadOnlyObject()
 
 def _proxy(safe_types=SAFE_TYPES, file=file,
 ClassType=ClassType, InstanceType=InstanceType, TypeError=TypeError):
@@ -242,7 +239,7 @@ ClassType=ClassType, InstanceType=InstanceType, TypeError=TypeError):
         elif isinstance(value, dict):
             return createReadOnlyDict(value)
         elif isinstance(value, (file, ClassType, InstanceType)):
-            return createObjectProxy(value)
+            return createReadOnlyObject(value)
         else:
             raise TypeError("Unable to proxy a value of type %s" % type(value))
     return proxy

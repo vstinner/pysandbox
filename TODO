@@ -9,6 +9,10 @@ Major tasks
  * Remove sandbox.guard
  * It's no more needed to copy globals type/functions in closure because
    __builtins__ is read only: need to cleanup sandbox/*.py (eg. safe_open.py)
+ * SandboxConfig.allowModuleSourceCode(): don't import the module just to get
+   the filename
+ * safe_open() should not use createReadOnlyObject(), but just hide the real
+   type
  * Python3:
    - fix proxy.py: Python3 has no builtin file type
    - fix proxy.py: Python3 has no types.ClassType nor types.InstanceType
@@ -18,7 +22,6 @@ Major tasks
  * Write a whitelist of modifiable attributes in ObjectProxy?
    Problem of callback: have to be executed in the sandbox
  * Write a cache for safe_import. Reuse sys.modules???
- * Write a proxy for MethodWrapper: sys.stdout.__repr__
 
 Open questions
 --------------

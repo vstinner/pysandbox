@@ -8,7 +8,7 @@ from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
-from .proxy import createObjectProxy
+from .proxy import createReadOnlyObject
 from .blacklist_proxy import ReadOnlyBuiltins
 if USE_CPYTHON_HACKS:
     from .cpython_hack import set_frame_builtins, set_interp_builtins
@@ -64,7 +64,7 @@ class CleanupBuiltins:
         help_func = self.builtin_dict.dict.get('help')
         if help_func:
             if 'help' in config.features:
-                self.builtin_dict['help'] = createObjectProxy(help_func)
+                self.builtin_dict['help'] = createReadOnlyObject(help_func)
             else:
                 del self.builtin_dict['help']
 

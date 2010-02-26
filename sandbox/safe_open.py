@@ -1,6 +1,6 @@
 from os.path import realpath
 from .guard import guard
-from .proxy import createObjectProxy
+from .proxy import createReadOnlyObject
 from errno import EACCES
 
 def _safe_open(open_whitelist,
@@ -20,6 +20,6 @@ IOError=IOError, EACCES=EACCES):
 
         fileobj = open_file(filename, mode, buffering)
 
-        return createObjectProxy(fileobj)
+        return createReadOnlyObject(fileobj)
     return safe_open
 
