@@ -206,7 +206,7 @@ def test_exit():
         try:
             exit()
         except SandboxError, err:
-            assert str(err) == "Function exit() blocked by the sandbox"
+            assert str(err) == "exit() function blocked by the sandbox"
         else:
             assert False
 

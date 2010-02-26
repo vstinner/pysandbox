@@ -3,7 +3,7 @@ from types import FrameType
 from sys import _getframe, version_info
 import sys
 
-from sandbox import BlockedFunction, USE_CPYTHON_HACKS
+from sandbox import SandboxError, USE_CPYTHON_HACKS
 from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
@@ -56,7 +56,7 @@ class CleanupBuiltins:
         # Replace exit function
         if 'exit' not in config.features:
             def safe_exit(code=0):
-                raise BlockedFunction("exit")
+                raise SandboxError("exit() function blocked by the sandbox")
             self.builtin_dict['exit'] = safe_exit
             del self.builtin_dict['SystemExit']
 
