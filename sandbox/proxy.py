@@ -37,16 +37,10 @@ class ReadOnlySequence(Proxy):
 
     # Child classes have to implement: __iter__, __getitem__, __len__
 
-    def __setitem__(self, key, value):
-        readOnlyError()
-
-    def __setslice__(self, start, end, value):
-        readOnlyError()
-
     def __delitem__(self, key):
         readOnlyError()
 
-    def __delslice__(self, start, end):
+    def __setitem__(self, key, value):
         readOnlyError()
 
 def createReadOnlyDict(data):
@@ -142,6 +136,9 @@ def createReadOnlyList(data):
         def count(self, value):
             return data.count(value)
 
+        def __delslice__(self, start, end):
+            readOnlyError()
+
         def extend(self, iterable):
             readOnlyError()
 
@@ -178,6 +175,9 @@ def createReadOnlyList(data):
         def __reversed__(self):
             for value in data.__reversed__():
                 yield proxy(value)
+
+        def __setslice__(self, start, end, value):
+            readOnlyError()
 
         def sort(self, cmp=None, key=None, reverse=False):
             readOnlyError()
