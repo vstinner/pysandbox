@@ -46,6 +46,8 @@ Open questions
 Minor tasks
 -----------
 
+ * Write a test using class.mro()?
+ * __builtins__ can be redefined
  * isinstance(createReadOnlyList(...), list) is False
  * Write a whitelist for sys.path?
  * Clear sys.modules?
