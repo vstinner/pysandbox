@@ -534,6 +534,13 @@ def test_timeout():
     config.timeout = 0.1
     Sandbox(config).call(denial_of_service)
 
+def test_execute():
+    code = "assert globals().keys() == locals().keys() == ['__builtins__']"
+    createSandbox().execute(code)
+
+    code = "assert globals().keys() == locals().keys() == ['a']"
+    createSandbox().execute(code, globals={'a': 0})
+
 def parseOptions():
     from optparse import OptionParser
 

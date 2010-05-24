@@ -39,14 +39,42 @@ class ReadOnlyBuiltins(dict):
         readOnlyError()
 
 def createDictProxy(data):
+    # createReadOnlyDict() cannot be used for globals and locals because these
+    # objects have to inherit from dict
     class DictProxy(ReadOnlyBuiltins):
         """
         Read only proxified dictionary used for exec locals and globals.
         """
         __slots__ = tuple()
 
-        def __getitem__(self, index):
-            value = data.__getitem__(index)
+        def __getitem__(self, key):
+            value = data.__getitem__(key)
             return proxy(value)
+
+        def get(self, key, default):
+            try:
+                value = data[key]
+            except KeyError:
+                return default
+            else:
+                return proxy(value)
+
+        def keys(self):
+            return data.keys()
+
+        def iterkeys(self):
+            return data.iterkeys()
+
+        def values(self):
+            return data.values()
+
+        def itervalues(self):
+            return data.itervalues()
+
+        def items(self):
+            return data.items()
+
+        def iteritems(self):
+            return data.iteritems()
     return DictProxy()
 

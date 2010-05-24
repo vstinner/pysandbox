@@ -10,6 +10,9 @@ def keywordsProxy(keywords):
         (key, proxy(value))
         for key, value in keywords.iteritems())
 
+def _call_exec(code, globals, locals):
+    exec code in globals, locals
+
 class Sandbox:
     PROTECTIONS = []
 
@@ -52,16 +55,17 @@ class Sandbox:
         execute the code in the sandbox:
 
            exec code in globals, locals
+
+        Use globals={} by default to get an empty namespace.
         """
         if globals is not None:
             globals = createDictProxy(globals)
+        else:
+            globals = {}
         if locals is not None:
             locals = createDictProxy(locals)
 
-        def call_exec(code, globals, locals):
-            exec code in globals, locals
-
-        self._call(call_exec, (code, globals, locals), {})
+        self._call(_call_exec, (code, globals, locals), {})
 
     def createCallback(self, func, *args, **kw):
         """
