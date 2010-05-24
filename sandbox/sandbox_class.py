@@ -2,6 +2,7 @@ from __future__ import with_statement
 from .config import SandboxConfig
 from .proxy import proxy
 from .blacklist_proxy import createDictProxy
+from .timeout import limitedTime
 
 def keywordsProxy(keywords):
     # Dont proxy keys because function keywords must be strings
@@ -28,9 +29,13 @@ class Sandbox:
             protection.disable(self)
 
     def _call(self, func, args, kw):
+        timeout = self.config.timeout
         self._enable()
         try:
-            return func(*args, **kw)
+            if timeout is not None:
+                return limitedTime(timeout, func, *args, **kw)
+            else:
+                return func(*args, **kw)
         finally:
             self._disable()
 
@@ -53,11 +58,10 @@ class Sandbox:
         if locals is not None:
             locals = createDictProxy(locals)
 
-        self._enable()
-        try:
+        def call_exec(code, globals, locals):
             exec code in globals, locals
-        finally:
-            self._disable()
+
+        self._call(call_exec, (code, globals, locals), {})
 
     def createCallback(self, func, *args, **kw):
         """

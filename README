@@ -26,6 +26,7 @@ Features:
  * Import modules
  * Exit Python
  * Access stdin, stdout or stderr
+ * Timeout
 
 Protection of the sandbox itself:
 
@@ -79,6 +80,8 @@ http://svn.python.org/view?view=rev&revision=55301
 Other options
 -------------
 
+ - config.timeout: timeout in seconds. Use None to disable the timeout. Default
+   timeout value is 5 seconds.
  - config.allowPath(path) allows to read a file from the specified path
  - config.allowModule(name, symbol1, symbol2, ...) allows to import the
    specified module, but give only access to the specified symbols

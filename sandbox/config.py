@@ -2,6 +2,8 @@ from os import sep as path_sep
 from os.path import realpath
 import sys
 
+DEFAULT_TIMEOUT = 5.0
+
 def findLicenseFile():
     # Adapted from setcopyright() from site.py
     import os
@@ -31,6 +33,9 @@ class SandboxConfig:
         self._features = set()
 
         self._cpython_restricted = kw.get('cpython_restricted', False)
+
+        # Timeout in seconds: use None to disable the timeout
+        self.timeout = kw.get('timeout', DEFAULT_TIMEOUT)
 
         for feature in features:
             self.enable(feature)
@@ -147,7 +152,7 @@ class SandboxConfig:
         self.allowPath(filename)
 
     @staticmethod
-    def createOptparseOptions(parser):
+    def createOptparseOptions(parser, default_timeout=DEFAULT_TIMEOUT):
         parser.add_option("--features",
             help="List of enabled features separated by a comma",
             type="str")
@@ -157,12 +162,24 @@ class SandboxConfig:
         parser.add_option("--allow-path",
             help="Allow reading files from PATH",
             action="append", type="str")
+        if default_timeout is not None:
+            text = "Timeout in seconds, use 0 to disable the timeout"
+            text += " (default: %.1f seconds)" % default_timeout
+        else:
+            text = "Timeout in seconds (default: no timeout)"
+        parser.add_option("--timeout",
+            help=text,
+            type="float", default=default_timeout)
 
     @staticmethod
     def fromOptparseOptions(options):
         kw = {}
         if options.restricted:
             kw['cpython_restricted'] = True
+        if options.timeout:
+            kw['timeout'] = options.timeout
+        else:
+            kw['timeout'] = None
         config = SandboxConfig(**kw)
         if options.features:
             for feature in options.features.split(","):

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import with_statement
-from sandbox import Sandbox, SandboxError, SandboxConfig, USE_CPYTHON_HACKS
+from sandbox import (Sandbox, SandboxConfig,
+    SandboxError, Timeout,
+    USE_CPYTHON_HACKS)
 from sys import version_info
 
 def createSandboxConfig(*features, **kw):
@@ -519,6 +521,18 @@ def test_del_builtin():
     config = createSandboxConfig()
     config.allowModule('sys')
     Sandbox(config).call(del_builtin_denied)
+
+def test_timeout():
+    def denial_of_service():
+        try:
+            while 1:
+                pass
+        except Timeout:
+            pass
+
+    config = createSandboxConfig()
+    config.timeout = 0.1
+    Sandbox(config).call(denial_of_service)
 
 def parseOptions():
     from optparse import OptionParser

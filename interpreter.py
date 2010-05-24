@@ -14,8 +14,10 @@ class SandboxedInterpeter:
 
     def parseOptions(self):
         parser = OptionParser(usage="%prog [options]")
-        SandboxConfig.createOptparseOptions(parser)
-        parser.add_option("--verbose", "-v", help="Verbose mode",
+        SandboxConfig.createOptparseOptions(parser,
+            default_timeout=None)
+        parser.add_option("--verbose", "-v",
+            help="Verbose mode",
             action="store_true", default=False)
         options, argv = parser.parse_args()
         if argv:
@@ -44,7 +46,7 @@ class SandboxedInterpeter:
     def main(self):
         self.dumpConfig()
         if 'help' in self.config.features:
-            # Import pydoc here because it uses a lot of modules 
+            # Import pydoc here because it uses a lot of modules
             # blocked by the sandbox
             import pydoc
         sandbox = Sandbox(self.config)

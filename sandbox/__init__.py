@@ -22,3 +22,4 @@ Sandbox.PROTECTIONS.append(HideAttributes)
 from .stdio import ProtectStdio
 Sandbox.PROTECTIONS.append(ProtectStdio)
 
+from .timeout import Timeout
