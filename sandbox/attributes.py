@@ -26,9 +26,11 @@ class HideAttributes:
         self.builtin_func_dict = RestorableDict(dictionary_of(builtin_function))
 
     def enable(self, sandbox):
-        # Blacklist dict.__setitem__() to protect ReadOnlyBuiltins
+        # Blacklist dict.__setitem__() and dict.__delitem__() to protect
+        # ReadOnlyBuiltins
         # FIXME: Use a cleaner fix?
         del self.dict_dict['__setitem__']
+        del self.dict_dict['__delitem__']
         if version_info < (3, 0):
             del self.function_dict['func_closure']
             del self.function_dict['func_globals']

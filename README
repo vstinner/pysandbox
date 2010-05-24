@@ -34,7 +34,8 @@ Protection of the sandbox itself:
  * Read frame locals
  * Get type subclasses
  * __builtins__ is read only
- * Deny access to dict.__setitem__
+ * Deny access to dict.__setitem__ and dict.__delitem__:
+   use d[key]=value and del d[key] instead
 
 
 Configuration

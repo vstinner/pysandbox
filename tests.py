@@ -496,6 +496,30 @@ def test_modify_builtins_dict():
             assert False
     createSandbox().call(readonly_builtins_dict)
 
+def del_builtin_import():
+    import_func = __builtins__['__import__']
+    dict.__delitem__(__builtins__, '__import__')
+    try:
+        try:
+            import sys
+        except NameError, err:
+            assert str(err) == "type object 'dict' has no attribute '__setitem__'"
+    finally:
+        __builtins__['__import__'] = import_func
+
+def test_del_builtin():
+    def del_builtin_denied():
+        try:
+            del_builtin_import()
+        except AttributeError, err:
+            assert str(err) == "type object 'dict' has no attribute '__delitem__'"
+        else:
+            assert False
+
+    config = createSandboxConfig()
+    config.allowModule('sys')
+    Sandbox(config).call(del_builtin_denied)
+
 def parseOptions():
     from optparse import OptionParser
 
