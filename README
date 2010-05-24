@@ -86,10 +86,22 @@ Other options
 Example
 =======
 
-Code:
+With call() method: ::
 
-   with Sandbox():
-      ... execute unsafe code here ...
+    from sandbox import Sandbox
+
+    def func(a, b):
+        return a + b
+
+    sandbox = Sandbox()
+    print sandbox.call(func, 1, 2)
+
+With execute() method: ::
+
+    from sandbox import Sandbox, SandboxConfig
+    sandbox = Sandbox(SandboxConfig('stdout'))
+    sandbox.execute('print("Code executed in the sandbox")')
+
 
 
 See also

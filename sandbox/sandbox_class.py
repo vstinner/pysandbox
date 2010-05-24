@@ -19,13 +19,24 @@ class Sandbox:
             self.config = SandboxConfig()
         self.protections = [protection() for protection in self.PROTECTIONS]
 
-    def __enter__(self):
+    def _enable(self):
         for protection in self.protections:
             protection.enable(self)
+    __enter__ = _enable
 
-    def __exit__(self, type, value, traceback):
+    def _disable(self):
         for protection in reversed(self.protections):
             protection.disable(self)
+
+    def __exit__(self, type, value, traceback):
+        self._disable()
+
+    def _call(self, func, args, kw):
+        self._enable()
+        try:
+            return func(*args, **kw)
+        finally:
+            self._disable()
 
     def call(self, func, *args, **kw):
         """
@@ -33,8 +44,7 @@ class Sandbox:
         """
         args = proxy(args)
         kw = keywordsProxy(kw)
-        with self:
-            func(*args, **kw)
+        return self._call(func, args, kw)
 
     def execute(self, code, globals=None, locals=None):
         """
@@ -46,8 +56,12 @@ class Sandbox:
             globals = createDictProxy(globals)
         if locals is not None:
             locals = createDictProxy(locals)
-        with self:
+
+        self._enable()
+        try:
             exec code in globals, locals
+        finally:
+            self._disable()
 
     def createCallback(self, func, *args, **kw):
         """
@@ -56,9 +70,7 @@ class Sandbox:
         """
         args = proxy(args)
         kw = keywordsProxy(kw)
-        sandbox = self
         def callback():
-            with sandbox:
-                func(*args, **kw)
+            return self._call(func, args, kw)
         return callback
 
