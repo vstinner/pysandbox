@@ -1,34 +1,25 @@
 pysandbox is a Python sandbox. By default, untrusted code executed in the
 sandbox cannot modify the environment (write a file, use print or import a
 module). But you can configure the sandbox to choose exactly which features are
-allowed or not, eg. import sys module and read file /etc/issue.
+allowed or not, eg. import sys module and read /etc/issue file.
 
 Website: http://github.com/haypo/pysandbox/
 
 
-Status
-======
+Features
+========
 
-pysanbox is under heavy development, and should not be used in production
-applications.
-
-pysanbox is tested on Python 2.5 and 2.6 on Debian Sid.
-
-See TODO file for the complete status.
-
-
-Blocked features
-================
-
-Features:
+Blocked Python functions:
 
  * Read, write, or create a file
  * Import modules
  * Exit Python
  * Access stdin, stdout or stderr
- * Timeout
 
-Protection of the sandbox itself:
+A timeout of 5 seconds if used by default. You can enable all of these
+functions by setting the sandbox configuration.
+
+Protection on the namespace:
 
  * Read function closure
  * Read function globals
@@ -42,24 +33,24 @@ Protection of the sandbox itself:
 Configuration
 =============
 
-Use SandboxConfig class to configure your sandbox. Features are the most simply
+Use SandboxConfig class to configure your sandbox. Features are the most simple
 way to configure it.
 
 Features
 --------
 
- - "debug_sandbox": enable traceback on the sandbox itself
+To enable a feature, use SandboxConfig('feature1', 'feature2', ...) or
+config.enable('feature'). Available features:
+
+ - "debug_sandbox": enable traceback of the sandbox itself
  - "exit": sys.exit() and raise SystemExit()
  - "help": pydoc.help(), use "import pydoc" outside the sandbox to use it
- - "interpreter": give access to stdio streams, enable traceback
+ - "interpreter": give access to standard streams, enable traceback
  - "regex": compile regex, match regex, search regex, etc. (re module)
  - "site": allow to read the license file
  - "stdin", "stdout", "stderr": sys.stdin, sys.stdout and sys.stderr
  - "traceback": next calls to allowModule() will add the module filename to the
-   open() whitelist, so Python can print a traceback
-
-To enable a feature, use SandboxConfig('feature1', 'feature2', ...) or
-config.enable('feature').
+   open() whitelist, so Python can display a traceback with the source code
 
 CPython restricted mode
 -----------------------
@@ -72,10 +63,7 @@ CPython restricted mode is disabled by default. The restricted mode is
 incompatible with SandboxConfig "traceback" feature and allowPath() method.
 
 The restricted mode doesn't exist in Python3 anymore, it was removed with
-bastion and rexec modules.
-
-CPython restricted mode was removed in Python 3.0:
-http://svn.python.org/view?view=rev&revision=55301
+bastion and rexec modules: http://svn.python.org/view?view=rev&revision=55301
 
 Other options
 -------------
@@ -106,6 +94,27 @@ With execute() method: ::
     sandbox = Sandbox(SandboxConfig('stdout'))
     sandbox.execute('print("Code executed in the sandbox")')
 
+
+
+Limitations
+===========
+
+pysandbox is a sandbox for the Python namespace, not a sandbox between Python
+and the operating system. It doesn't protect your system against Python
+security vulnerabilities: vulnerabilities in modules/functions available in
+your sandbox (depend on your sandbox configuration). By default, only few
+functions are exposed to the sandbox namespace which limits the attack surface.
+
+pysandbox is unable to limit the memory of the sandbox process: you have to use
+your own protection.
+
+
+Status
+======
+
+pysanbox is tested on Python 2.5 and 2.6 on Debian Sid.
+
+See TODO file for the complete status.
 
 
 See also
