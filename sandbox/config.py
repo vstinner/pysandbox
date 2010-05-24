@@ -88,6 +88,7 @@ class SandboxConfig:
             self.allowModuleSourceCode('site')
         elif feature == 'help':
             self.allowModule('pydoc', 'help')
+            self.enable('regex')
         elif feature == 'interpreter':
             # "Meta" feature + some extras
             self.enable('stdin')
