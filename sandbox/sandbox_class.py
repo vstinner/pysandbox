@@ -22,14 +22,10 @@ class Sandbox:
     def _enable(self):
         for protection in self.protections:
             protection.enable(self)
-    __enter__ = _enable
 
     def _disable(self):
         for protection in reversed(self.protections):
             protection.disable(self)
-
-    def __exit__(self, type, value, traceback):
-        self._disable()
 
     def _call(self, func, args, kw):
         self._enable()

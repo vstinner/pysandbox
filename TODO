@@ -1,8 +1,3 @@
-Known issues
-------------
-
- * "with" frame locals are not protected by the proxy (see above)
-
 Major tasks
 -----------
 
@@ -27,21 +22,6 @@ Open questions
  * Deny creation of an arbitray code object? type(lambda: 0), func.func_code,
    func.__code__, compile(), generator.gi_code, ...
  * Deny builtins: execfile?, reload?, input?, eval?
- * Remove/Warn about unsafe frame locals? Or if it's not possible, choose
-   another syntax to avoid this problem.
-
-   secret=42
-   with Sandbox():
-      print secret # should raise an error
-
-   or
-
-   with Sandbox() as sandbox:
-      print sandbox # should raise an error
-
-   Problem: in a function, locals have their "cache" using LOAD_FAST
-   and STORE_FAST bytecodes. frame.f_locals is cached in frame.f_localsplus,
-   but this cache is not accessible in Python.
 
 Minor tasks
 -----------

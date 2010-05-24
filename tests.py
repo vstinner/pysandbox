@@ -14,8 +14,9 @@ def createSandbox():
     return Sandbox(config)
 
 def test_valid_code():
-    with createSandbox():
+    def valid_code():
         assert 1+2 == 3
+    createSandbox().call(valid_code)
 
 from os.path import realpath
 READ_FILENAME = realpath(__file__)
@@ -30,7 +31,7 @@ if USE_CPYTHON_HACKS:
     def test_open_whitelist():
         from errno import EACCES
 
-        with createSandbox():
+        def access_denied():
             try:
                 read_first_line(open)
             except IOError, err:
@@ -39,22 +40,23 @@ if USE_CPYTHON_HACKS:
                 assert err.args[1].startswith('Sandbox deny access to the file ')
             else:
                 assert False
+        createSandbox().call(access_denied)
 
         config = createSandboxConfig()
         config.allowPath(READ_FILENAME)
-        with Sandbox(config):
-            read_first_line(open)
+        Sandbox(config).call(read_first_line, open)
 
         read_first_line(open)
 
     def test_exec_builtins():
         from sandbox.builtins import ReadOnlyBuiltins
 
-        with createSandbox():
+        def check_builtins_type():
             result = []
             exec "result.append(type(__builtins__))" in {'result': result}
             builtin_type = result[0]
             assert builtin_type == ReadOnlyBuiltins
+        createSandbox().call(check_builtins_type)
 else:
     print "USE_CPYTHON_HACKS=False: disable test_open_whitelist(), test_exec_builtins()"
 
@@ -64,14 +66,16 @@ if version_info < (3, 0):
             from sys import _getframe
 
             config = createSandboxConfig(cpython_restricted=True)
-            with Sandbox(config):
+            def check_frame_restricted():
                 frame = _getframe()
                 assert frame.f_restricted == True
+            Sandbox(config).call(check_frame_restricted)
 
             config = createSandboxConfig(cpython_restricted=False)
-            with Sandbox(config):
+            def check_frame_not_restricted():
                 frame = _getframe()
                 assert frame.f_restricted == False
+            Sandbox(config).call(check_frame_not_restricted)
 
             frame = _getframe()
             assert frame.f_restricted == False
@@ -81,14 +85,16 @@ if version_info < (3, 0):
             from test_restricted import _test_restricted
 
             config = createSandboxConfig(cpython_restricted=True)
-            with Sandbox(config):
+            def check_module_restricted():
                 restricted = _test_restricted(_getframe)
                 assert restricted == True
+            Sandbox(config).call(check_module_restricted)
 
             config = createSandboxConfig(cpython_restricted=False)
-            with Sandbox(config):
+            def check_module_not_restricted():
                 restricted = _test_restricted(_getframe)
                 assert restricted == False
+            Sandbox(config).call(check_module_not_restricted)
     else:
         print "USE_CPYTHON_HACKS=False: disable test_frame_restricted(), test_module_frame_restricted()"
 
@@ -99,12 +105,14 @@ def write_file(filename):
 def test_write_file():
     from tempfile import NamedTemporaryFile
     with NamedTemporaryFile("wb") as tempfile:
-        try:
-            with createSandbox():
+        def write_denied():
+            try:
                 write_file(tempfile.name)
-            assert False, "writing to a file is not blocked"
-        except ValueError, err:
-            assert str(err) == "Only read modes are allowed."
+            except ValueError, err:
+                assert str(err) == "Only read modes are allowed."
+            else:
+                assert False, "writing to a file is not blocked"
+        createSandbox().call(write_denied)
 
     with NamedTemporaryFile("wb") as tempfile:
         write_file(tempfile.name)
@@ -127,25 +135,27 @@ def read_closure_secret():
     assert secret == 42
 
 def test_closure():
-    with createSandbox():
+    def check_closure():
         try:
             read_closure_secret()
         except AttributeError, err:
             assert str(err) == "'function' object has no attribute '__closure__'"
         else:
             assert False, "func_closure is present"
+    createSandbox().call(check_closure)
 
     # closure are readable outside the sandbox
     read_closure_secret()
 
 def test_import():
-    with createSandbox():
+    def import_blocked():
         try:
             import os
         except ImportError, err:
             assert str(err) == 'Import "os" blocked by the sandbox'
         else:
             assert False
+    createSandbox().call(import_blocked)
 
     # import is allowed outside the sandbox
     import os
@@ -158,15 +168,16 @@ def test_import_whitelist():
 
     config = createSandboxConfig()
     config.allowModule('sys', 'version')
-    with Sandbox(config):
+    def import_sys():
         import sys
         assert sys.__name__ == 'sys'
         assert sys.version == sys_version
+    Sandbox(config).call(import_sys)
 
 def test_readonly_import():
     config = createSandboxConfig()
     config.allowModule('sys', 'version')
-    with Sandbox(config):
+    def readonly_module():
         import sys
 
         try:
@@ -182,6 +193,7 @@ def test_readonly_import():
             assert str(err) == "'SafeModule' object has no attribute 'version'"
         else:
             assert False
+    Sandbox(config).call(readonly_module)
 
 def get_file_from_stdout():
     import sys
@@ -190,28 +202,30 @@ def get_file_from_stdout():
 def test_import_sys_stdout():
     config = createSandboxConfig()
     config.allowModule('sys', 'stdout')
-    with Sandbox(config):
+    def get_file_object():
         file = get_file_from_stdout()
         try:
             read_first_line(file)
         except TypeError, err:
             return str(err) == 'object.__new__() takes no parameters'
         assert False
+    Sandbox(config).call(get_file_object)
 
     file = get_file_from_stdout()
     read_first_line(file)
 
 def test_exit():
-    with createSandbox():
+    def exit_noarg():
         try:
             exit()
         except SandboxError, err:
             assert str(err) == "exit() function blocked by the sandbox"
         else:
             assert False
+    createSandbox().call(exit_noarg)
 
     config = createSandboxConfig("exit")
-    with Sandbox(config):
+    def exit_1():
         try:
             exit(1)
         except SystemExit, err:
@@ -226,6 +240,7 @@ def test_exit():
             assert err.args[0] == "bye"
         else:
             assert False
+    Sandbox(config).call(exit_1)
 
     try:
         exit(1)
@@ -235,22 +250,24 @@ def test_exit():
         assert False
 
 def test_sytem_exit():
-    with createSandbox():
+    def system_exit_denied():
         try:
             raise SystemExit()
         except NameError, err:
             assert str(err) == "global name 'SystemExit' is not defined"
         except:
             assert False
+    createSandbox().call(system_exit_denied)
 
     config = createSandboxConfig("exit")
-    with Sandbox(config):
+    def system_exit_allowed():
         try:
             raise SystemExit()
         except SystemExit:
             pass
         else:
             assert False
+    Sandbox(config).call(system_exit_allowed)
 
     try:
         raise SystemExit()
@@ -270,13 +287,14 @@ def get_sandbox_from_func_globals():
     return func_globals['Sandbox']
 
 def test_func_globals():
-    with createSandbox():
+    def func_globals_denied():
         try:
             get_sandbox_from_func_globals()
         except AttributeError, err:
             assert str(err) == "'function' object has no attribute '__globals__'"
         else:
             assert False
+    createSandbox().call(func_globals_denied)
 
     assert get_sandbox_from_func_globals() is Sandbox
 
@@ -293,13 +311,14 @@ def get_import_from_func_locals(safe_import, exc_info):
 def test_func_locals():
     import sys
 
-    with createSandbox():
+    def frame_locals_denied():
         try:
             get_import_from_func_locals(__import__, sys.exc_info)
         except AttributeError, err:
             assert str(err) == "'frame' object has no attribute 'f_locals'"
         else:
             assert False
+    createSandbox().call(frame_locals_denied)
 
     builtin_import = __import__
     from sandbox.safe_import import _safe_import
@@ -316,13 +335,14 @@ if version_info < (3, 0):
         raise ValueError("Unable to get file type")
 
     def test_subclasses():
-        with createSandbox():
+        def subclasses_denied():
             try:
                 get_file_from_subclasses()
             except AttributeError, err:
                 assert str(err) == "type object 'object' has no attribute '__subclasses__'"
             else:
                 assert False
+        createSandbox().call(subclasses_denied)
 
         file = get_file_from_subclasses()
         read_first_line(file)
@@ -335,16 +355,18 @@ def test_stdout():
     sys.stdout = StringIO()
     try:
         config = SandboxConfig()
-        with Sandbox(config):
+        def print_denied():
             try:
                 print "Hello Sandbox 1"
             except SandboxError:
                 pass
             else:
                 assert False
+        Sandbox(config).call(print_denied)
 
-        with Sandbox(createSandboxConfig('stdout')):
+        def print_allowed():
             print "Hello Sandbox 2"
+        Sandbox(createSandboxConfig('stdout')).call(print_allowed)
 
         print "Hello Sandbox 3"
 
@@ -448,13 +470,14 @@ def builtins_superglobal():
         del __builtins__.SUPERGLOBAL
 
 def test_modify_builtins():
-    with createSandbox():
+    def readonly_builtins():
         try:
             builtins_superglobal()
         except SandboxError, err:
             assert str(err) == "Read only object"
         else:
             assert False
+    createSandbox().call(readonly_builtins)
 
     builtins_superglobal()
 
@@ -464,13 +487,14 @@ def builtins_dict_superglobal():
     del __builtins__['SUPERGLOBAL']
 
 def test_modify_builtins_dict():
-    with createSandbox():
+    def readonly_builtins_dict():
         try:
             builtins_dict_superglobal()
         except AttributeError, err:
             assert str(err) == "type object 'dict' has no attribute '__setitem__'"
         else:
             assert False
+    createSandbox().call(readonly_builtins_dict)
 
 def parseOptions():
     from optparse import OptionParser
