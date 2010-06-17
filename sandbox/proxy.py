@@ -10,7 +10,7 @@ builtin_function_or_method = type(len)
 
 SAFE_TYPES = (
     type(None), bool,
-    int, long,
+    int, long, float,
     str, unicode,
     builtin_function_or_method, FunctionType,
 )
