@@ -23,6 +23,7 @@ Protection on the namespace:
 
  * Read function closure
  * Read function globals
+ * Read function code
  * Read frame locals
  * Get type subclasses
  * __builtins__ is read only

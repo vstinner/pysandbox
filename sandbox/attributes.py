@@ -34,9 +34,11 @@ class HideAttributes:
         if version_info < (3, 0):
             del self.function_dict['func_closure']
             del self.function_dict['func_globals']
+            del self.function_dict['func_code']
         if version_info >= (2, 6):
             del self.function_dict['__closure__']
             del self.function_dict['__globals__']
+            del self.function_dict['__code__']
         del self.frame_dict['f_locals']
         del self.type_dict['__subclasses__']
         del self.builtin_func_dict['__self__']

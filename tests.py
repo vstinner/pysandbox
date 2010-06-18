@@ -541,6 +541,27 @@ def test_execute():
     code = "assert globals().keys() == locals().keys() == ['a']"
     createSandbox().execute(code, globals={'a': 0})
 
+def replace_func_code():
+    def add(x, y):
+        return x + y
+    def substract(x, y):
+        return x - y
+    try:
+        add.func_code = substract.func_code
+    except AttributeError:
+        add.__code__ = substract.__code__
+    return add(52, 10)
+
+def test_func_code():
+    try:
+        createSandbox().call(replace_func_code)
+    except AttributeError, err:
+        assert str(err) == "'function' object has no attribute '__code__'"
+    else:
+        assert False
+
+    assert replace_func_code() == 42
+
 def parseOptions():
     from optparse import OptionParser
 
