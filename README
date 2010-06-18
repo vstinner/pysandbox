@@ -51,6 +51,7 @@ config.enable('feature'). Available features:
  - "stdin", "stdout", "stderr": sys.stdin, sys.stdout and sys.stderr
  - "traceback": next calls to allowModule() will add the module filename to the
    open() whitelist, so Python can display a traceback with the source code
+ - "unicodedata": unicodedata module, required for u'\N{ATOM SYMBOL}' syntax
 
 CPython restricted mode
 -----------------------

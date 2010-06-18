@@ -108,6 +108,16 @@ class SandboxConfig:
                 'absolute_import', 'braces', 'division', 'generators',
                 'nested_scopes', 'print_function', 'unicode_literals',
                 'with_statement')
+        elif feature == 'unicodedata':
+            self.allowModule('unicodedata',
+                # C API is used for u'\N{ATOM SYMBOL}': Python have to be
+                # allowed to import it because it cannot be used in the sandbox
+                'ucnhash_CAPI',
+                # other functions
+                'bidirectional', 'category', 'combining', 'decimal',
+                'decomposition', 'digit', 'east_asian_width', 'lookup',
+                'mirrored', 'name', 'normalize', 'numeric',
+                'unidata_version')
         else:
             self._features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)
