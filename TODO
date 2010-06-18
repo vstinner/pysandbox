@@ -19,8 +19,8 @@ Major tasks
 Open questions
 --------------
 
- * Deny creation of an arbitray code object? type(lambda: 0), func.func_code,
-   func.__code__, compile(), generator.gi_code, ...
+ * Deny creation of an arbitray code object? type(lambda: 0), compile(),
+   generator.gi_code, ...
  * Deny builtins: execfile?, reload?, input?, eval?
 
 Minor tasks

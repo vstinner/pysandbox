@@ -103,6 +103,11 @@ class SandboxConfig:
             self.enable('traceback')
             self.allowModule('sys', '_getframe')
             self.allowModuleSourceCode('sandbox')
+        elif feature == 'future':
+            self.allowModule('__future__',
+                'absolute_import', 'braces', 'division', 'generators',
+                'nested_scopes', 'print_function', 'unicode_literals',
+                'with_statement')
         else:
             self._features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)

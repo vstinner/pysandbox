@@ -21,11 +21,9 @@ functions by setting the sandbox configuration.
 
 Protection on the namespace:
 
- * Read function closure
- * Read function globals
- * Read function code
- * Read frame locals
- * Get type subclasses
+ * Deny access to function closure, globals or code
+ * Deny access to frame locals
+ * Deny access to types subclasses
  * __builtins__ is read only
  * Deny access to dict.__setitem__ and dict.__delitem__:
    use d[key]=value and del d[key] instead
@@ -45,6 +43,7 @@ config.enable('feature'). Available features:
 
  - "debug_sandbox": enable traceback of the sandbox itself
  - "exit": sys.exit() and raise SystemExit()
+ - "future": from __future__ import ...
  - "help": pydoc.help(), use "import pydoc" outside the sandbox to use it
  - "interpreter": give access to standard streams, enable traceback
  - "regex": compile regex, match regex, search regex, etc. (re module)
