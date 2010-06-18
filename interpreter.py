@@ -49,6 +49,9 @@ class SandboxedInterpeter:
             # Import pydoc here because it uses a lot of modules
             # blocked by the sandbox
             import pydoc
+        import sys
+        sys.ps1 = '\nsandbox>>> '
+        sys.ps2 = '.......... '
         sandbox = Sandbox(self.config)
         sandbox.call(self.interact)
 
