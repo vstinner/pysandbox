@@ -6,11 +6,13 @@ from optparse import OptionParser
 
 class SandboxedInterpeter:
     def __init__(self):
+        self.sandbox_locals = None
         self.config, self.options = self.parseOptions()
 
         self.config.enable('interpreter')
         if 'traceback' in self.config.features:
             self.config.allowPath(__file__)
+
 
     def parseOptions(self):
         parser = OptionParser(usage="%prog [options]")
@@ -40,8 +42,16 @@ class SandboxedInterpeter:
             print "(use --features=help to enable the help function)"
         print
 
+    def displayhook(self, result):
+        if result is None:
+            return
+        self.sandbox_locals['_'] = result
+        print(repr(result))
+
     def interact(self):
-        InteractiveConsole().interact("Try to break the sandbox!")
+        console = InteractiveConsole()
+        self.sandbox_locals = console.locals
+        console.interact("Try to break the sandbox!")
 
     def main(self):
         self.dumpConfig()
@@ -52,6 +62,7 @@ class SandboxedInterpeter:
         import sys
         sys.ps1 = '\nsandbox>>> '
         sys.ps2 = '.......... '
+        sys.displayhook = self.displayhook
         sandbox = Sandbox(self.config)
         sandbox.call(self.interact)
 
