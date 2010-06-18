@@ -1,6 +1,7 @@
 Major tasks
 -----------
 
+ * .execute(code, locals={}) deny creation of new local variables
  * Write a whitelist for builtin functions
  * interpreter.py has a quit() builtin function (instance of site.Quitter)
    which is not protected by a proxy

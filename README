@@ -9,15 +9,15 @@ Website: http://github.com/haypo/pysandbox/
 Features
 ========
 
-Blocked Python functions:
+Blocked Python functions (by default):
 
- * Read, write, or create a file
- * Import modules
- * Exit Python
- * Access stdin, stdout or stderr
+ * Deny access to the file system
+ * Deny importing Python modules
+ * Deny exiting Python
+ * Deny access to stdin, stdout or stderr
 
 A timeout of 5 seconds if used by default. You can enable all of these
-functions by setting the sandbox configuration.
+features by setting the sandbox configuration.
 
 Protection on the namespace:
 
@@ -95,6 +95,15 @@ With execute() method: ::
     sandbox = Sandbox(SandboxConfig('stdout'))
     sandbox.execute('print("Code executed in the sandbox")')
 
+execute() with a local variable: ::
+
+    from sandbox import Sandbox, SandboxConfig
+    sandbox = Sandbox(SandboxConfig('stdout'))
+    sandbox.execute('print(data)', locals={'data': [1, 2, 3]})    # ok
+    sandbox.execute('data.append(4)', locals={'data': [1, 2, 3]}) # error
+
+Objects passed to .call() globals/locals and .execute() arguments are
+proxified: they are replaced by read-only views of the objects.
 
 
 Limitations
