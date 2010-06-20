@@ -34,6 +34,54 @@ class SandboxConfig:
 
         self._cpython_restricted = kw.get('cpython_restricted', False)
 
+        self._builtins_whitelist = set((
+            # exceptions
+            'ArithmeticError', 'AssertionError', 'AttributeError',
+            'BufferError', 'BytesWarning', 'DeprecationWarning', 'EOFError',
+            'EnvironmentError', 'Exception', 'FloatingPointError',
+            'FutureWarning', 'GeneratorExit', 'IOError', 'ImportError',
+            'ImportWarning', 'IndentationError', 'IndexError', 'KeyError',
+            'LookupError', 'MemoryError', 'NameError', 'NotImplemented',
+            'NotImplementedError', 'OSError', 'OverflowError',
+            'PendingDeprecationWarning', 'ReferenceError', 'RuntimeError',
+            'RuntimeWarning', 'StandardError', 'StopIteration', 'SyntaxError',
+            'SyntaxWarning', 'SystemError', 'TabError', 'TypeError',
+            'UnboundLocalError', 'UnicodeDecodeError', 'UnicodeEncodeError',
+            'UnicodeError', 'UnicodeTranslateError', 'UnicodeWarning',
+            'UserWarning', 'ValueError', 'Warning', 'ZeroDivisionError',
+            # blocked: BaseException (enabled by interpreter feature),
+            #          Ellipsis, KeyboardInterrupt (enabled by interpreter
+            #          feature), SystemExit (enabled by exit feature)
+
+            # constants
+            'False', 'None', 'True',
+            '__doc__', '__name__', '__package__', 'copyright', 'license', 'credits',
+            # blocked: __debug__
+
+            # types
+            'basestring', 'bytearray', 'bytes', 'complex', 'dict', 'file',
+            'float', 'frozenset', 'int', 'list', 'long', 'object', 'set',
+            'str', 'tuple', 'unicode',
+            # note: file is replaced by safe_open()
+
+            # functions
+            '__import__', 'abs', 'all', 'any', 'apply', 'bin', 'bool',
+            'buffer', 'callable', 'chr', 'classmethod', 'cmp', 'compile',
+            'coerce', 'delattr', 'dir', 'divmod', 'enumerate', 'eval', 'exit',
+            'filter', 'format', 'getattr', 'globals', 'hasattr', 'hash', 'hex',
+            'id', 'input', 'isinstance', 'issubclass', 'iter', 'len', 'locals',
+            'map', 'max', 'min', 'next', 'oct', 'open', 'ord', 'pow', 'print',
+            'property', 'quit', 'range', 'raw_input', 'reduce', 'repr',
+            'reversed', 'round', 'setattr', 'slice', 'sorted', 'staticmethod',
+            'sum', 'super', 'type', 'unichr', 'vars', 'xrange', 'zip',
+            # blocked: execfile, intern, help (from site module, enabled by
+            #          help feature), reload
+            # note: reload is useless because we don't have access to real
+            #       module objects
+            # note: exit is replaced by safe_exit()
+            # note: open is replaced by safe_open()
+        ))
+
         # Timeout in seconds: use None to disable the timeout
         self.timeout = kw.get('timeout', DEFAULT_TIMEOUT)
 
@@ -42,19 +90,23 @@ class SandboxConfig:
 
     @property
     def features(self):
-        return self._features
+        return self._features.copy()
 
     @property
     def import_whitelist(self):
-        return self._import_whitelist
+        return self._import_whitelist.copy()
 
     @property
     def open_whitelist(self):
-        return self._open_whitelist
+        return self._open_whitelist.copy()
 
     @property
     def cpython_restricted(self):
         return self._cpython_restricted
+
+    @property
+    def builtins_whitelist(self):
+        return self._builtins_whitelist.copy()
 
     def enable(self, feature):
         # If you add a new feature, update the README documentation
@@ -73,6 +125,7 @@ class SandboxConfig:
             self.allowModule('sre_parse', 'parse')
         elif feature == 'exit':
             self.allowModule('sys', 'exit')
+            self._builtins_whitelist.add('SystemExit')
         elif feature == 'traceback':
             if self._cpython_restricted:
                 raise ValueError("traceback feature is incompatible with the CPython restricted mode")
@@ -87,8 +140,9 @@ class SandboxConfig:
                     self.allowPath(license_filename)
             self.allowModuleSourceCode('site')
         elif feature == 'help':
-            self.allowModule('pydoc', 'help')
             self.enable('regex')
+            self.allowModule('pydoc', 'help')
+            self._builtins_whitelist.add('help')
         elif feature == 'interpreter':
             # "Meta" feature + some extras
             self.enable('stdin')
@@ -99,6 +153,8 @@ class SandboxConfig:
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')
+            self._builtins_whitelist.add('BaseException')
+            self._builtins_whitelist.add('KeyboardInterrupt')
         elif feature == 'debug_sandbox':
             self.enable('traceback')
             self.allowModule('sys', '_getframe')

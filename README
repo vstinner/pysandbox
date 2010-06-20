@@ -15,6 +15,7 @@ Blocked Python functions (by default):
  * Deny importing Python modules
  * Deny exiting Python
  * Deny access to stdin, stdout or stderr
+ * Deny some builtins symbols like execfile() or KeyboardInterrupt
 
 A timeout of 5 seconds if used by default. You can enable all of these
 features by setting the sandbox configuration.

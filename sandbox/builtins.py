@@ -24,6 +24,12 @@ class CleanupBuiltins:
     def enable(self, sandbox):
         config = sandbox.config
 
+        # Remove all symbols not in the whitelist
+        whitelist = config.builtins_whitelist
+        keys = set(self.builtin_dict.dict.iterkeys())
+        for key in keys - whitelist:
+            del self.builtin_dict[key]
+
         # Get frame builtins
         self.frame = _getframe(2)
         self.builtins_dict = self.get_frame_builtins(self.frame)
@@ -58,7 +64,6 @@ class CleanupBuiltins:
             def safe_exit(code=0):
                 raise SandboxError("exit() function blocked by the sandbox")
             self.builtin_dict['exit'] = safe_exit
-            del self.builtin_dict['SystemExit']
 
         # Replace help function
         help_func = self.builtin_dict.dict.get('help')

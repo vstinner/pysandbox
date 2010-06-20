@@ -4,6 +4,7 @@ from sandbox import (Sandbox, SandboxConfig,
     SandboxError, Timeout,
     USE_CPYTHON_HACKS)
 from sys import version_info
+import contextlib
 
 def createSandboxConfig(*features, **kw):
     if createSandboxConfig.debug:
@@ -349,13 +350,20 @@ if version_info < (3, 0):
         file = get_file_from_subclasses()
         read_first_line(file)
 
-def test_stdout():
+@contextlib.contextmanager
+def capture_stdout():
     import sys
     from StringIO import StringIO
 
-    old_stdout = sys.stdout
+    original = sys.stdout
     sys.stdout = StringIO()
     try:
+        yield sys.stdout
+    finally:
+        sys.stdout = original
+
+def test_stdout():
+    with capture_stdout() as stdout:
         config = SandboxConfig()
         def print_denied():
             try:
@@ -372,9 +380,7 @@ def test_stdout():
 
         print "Hello Sandbox 3"
 
-        output =  sys.stdout.getvalue()
-    finally:
-        sys.stdout = old_stdout
+        output = stdout.getvalue()
 
     assert output == "Hello Sandbox 2\nHello Sandbox 3\n"
 
@@ -561,6 +567,34 @@ def test_func_code():
         assert False
 
     assert replace_func_code() == 42
+
+def execfile_test(filename):
+    execfile(filename)
+
+def test_execfile():
+    from tempfile import NamedTemporaryFile
+    from StringIO import StringIO
+
+    with NamedTemporaryFile() as script:
+        print >>script, "print('Hello World!')"
+        script.flush()
+
+        filename = script.name
+
+        with capture_stdout() as stdout:
+            config = createSandboxConfig('stdout')
+            try:
+                Sandbox(config).call(execfile_test, filename)
+            except NameError, err:
+                assert str(err) == "global name 'execfile' is not defined"
+            else:
+                assert False
+
+        with capture_stdout() as stdout:
+            execfile_test(filename)
+            output = stdout.getvalue()
+            print(repr(output))
+            assert output.startswith('Hello World')
 
 def parseOptions():
     from optparse import OptionParser
