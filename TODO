@@ -1,8 +1,9 @@
 Major tasks
 -----------
 
- * block compile()?
- * .execute(code, locals={}) deny creation of new local variables
+ * deny creation of arbitrary code object: compile(), type(generator.gi_code),
+   frame.f_code, func.func_code/.__code__
+ * Bug: .execute(code, locals={}) denies the creation of new local variables
  * interpreter.py has a quit() builtin function (instance of site.Quitter)
    which is not protected by a proxy
  * safe_import(): from_list default value is mutable
@@ -23,9 +24,6 @@ Major tasks
 Open questions
 --------------
 
- * Deny creation of an arbitray code object? type(lambda: 0), compile(),
-   generator.gi_code, ...
- * Deny builtins: execfile?, reload?, input?, eval?
  * A function keeps its func_globals. Is it a problem?
  * A generator can be controled: .throw(), .send(), etc. Is it a problem if the
    generator was created outside the sandbox?
