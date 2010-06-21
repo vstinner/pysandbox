@@ -43,7 +43,7 @@ To enable a feature, use SandboxConfig('feature1', 'feature2', ...) or
 config.enable('feature'). Available features:
 
  - "debug_sandbox": enable traceback of the sandbox itself
- - "exit": sys.exit(), BaseException, KeyboardInterrupt and SystemExit
+ - "exit": sys.exit(), BaseException, KeyboardInterrupt, SystemExit, quit()
  - "future": from __future__ import ...
  - "help": pydoc.help(), use "import pydoc" outside the sandbox to use it
  - "interpreter": give access to standard streams, enable traceback

@@ -70,12 +70,12 @@ class SandboxConfig:
             'filter', 'format', 'getattr', 'globals', 'hasattr', 'hash', 'hex',
             'id', 'isinstance', 'issubclass', 'iter', 'len', 'locals',
             'map', 'max', 'min', 'next', 'oct', 'open', 'ord', 'pow', 'print',
-            'property', 'quit', 'range', 'reduce', 'repr',
+            'property', 'range', 'reduce', 'repr',
             'reversed', 'round', 'setattr', 'slice', 'sorted', 'staticmethod',
             'sum', 'super', 'type', 'unichr', 'vars', 'xrange', 'zip',
             # blocked: execfile, input and raw_input (enabled by stdin
             #          feature), intern, help (from site module, enabled by
-            #          help feature), reload
+            #          help feature), quit (enabled by exit feature), reload
             # note: reload is useless because we don't have access to real
             #       module objects
             # note: exit is replaced by safe_exit()
@@ -128,6 +128,8 @@ class SandboxConfig:
             self._builtins_whitelist.add('BaseException')
             self._builtins_whitelist.add('KeyboardInterrupt')
             self._builtins_whitelist.add('SystemExit')
+            # quit builtin is created by the site module
+            self._builtins_whitelist.add('quit')
         elif feature == 'traceback':
             if self._cpython_restricted:
                 raise ValueError("traceback feature is incompatible with the CPython restricted mode")
