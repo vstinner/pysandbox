@@ -49,9 +49,8 @@ class SandboxConfig:
             'UnboundLocalError', 'UnicodeDecodeError', 'UnicodeEncodeError',
             'UnicodeError', 'UnicodeTranslateError', 'UnicodeWarning',
             'UserWarning', 'ValueError', 'Warning', 'ZeroDivisionError',
-            # blocked: BaseException (enabled by interpreter feature),
-            #          Ellipsis, KeyboardInterrupt (enabled by interpreter
-            #          feature), SystemExit (enabled by exit feature)
+            # blocked: BaseException - KeyboardInterrupt - SystemExit (enabled
+            #          by exit feature), Ellipsis,
 
             # constants
             'False', 'None', 'True',
@@ -69,12 +68,13 @@ class SandboxConfig:
             'buffer', 'callable', 'chr', 'classmethod', 'cmp', 'compile',
             'coerce', 'delattr', 'dir', 'divmod', 'enumerate', 'eval', 'exit',
             'filter', 'format', 'getattr', 'globals', 'hasattr', 'hash', 'hex',
-            'id', 'input', 'isinstance', 'issubclass', 'iter', 'len', 'locals',
+            'id', 'isinstance', 'issubclass', 'iter', 'len', 'locals',
             'map', 'max', 'min', 'next', 'oct', 'open', 'ord', 'pow', 'print',
-            'property', 'quit', 'range', 'raw_input', 'reduce', 'repr',
+            'property', 'quit', 'range', 'reduce', 'repr',
             'reversed', 'round', 'setattr', 'slice', 'sorted', 'staticmethod',
             'sum', 'super', 'type', 'unichr', 'vars', 'xrange', 'zip',
-            # blocked: execfile, intern, help (from site module, enabled by
+            # blocked: execfile, input and raw_input (enabled by stdin
+            #          feature), intern, help (from site module, enabled by
             #          help feature), reload
             # note: reload is useless because we don't have access to real
             #       module objects
@@ -125,14 +125,20 @@ class SandboxConfig:
             self.allowModule('sre_parse', 'parse')
         elif feature == 'exit':
             self.allowModule('sys', 'exit')
+            self._builtins_whitelist.add('BaseException')
+            self._builtins_whitelist.add('KeyboardInterrupt')
             self._builtins_whitelist.add('SystemExit')
         elif feature == 'traceback':
             if self._cpython_restricted:
                 raise ValueError("traceback feature is incompatible with the CPython restricted mode")
             # change allowModule() behaviour
-        elif feature in ('stdin', 'stdout', 'stderr'):
+        elif feature in ('stdout', 'stderr'):
             self.allowModule('sys', feature)
             # ProtectStdio.enable() use also these features
+        elif feature == 'stdin':
+            self.allowModule('sys', 'stdin')
+            self._builtins_whitelist.add('input')
+            self._builtins_whitelist.add('raw_input')
         elif feature == 'site':
             if 'traceback' in self._features:
                 license_filename = findLicenseFile()
@@ -153,8 +159,6 @@ class SandboxConfig:
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')
-            self._builtins_whitelist.add('BaseException')
-            self._builtins_whitelist.add('KeyboardInterrupt')
         elif feature == 'debug_sandbox':
             self.enable('traceback')
             self.allowModule('sys', '_getframe')
