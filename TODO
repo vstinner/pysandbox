@@ -1,3 +1,9 @@
+Known issues
+------------
+
+ * ReadOnlyObject.__getattr__() doesn't proxify the result of a method,
+   type(sys.stdout.__enter__())
+
 Major tasks
 -----------
 
