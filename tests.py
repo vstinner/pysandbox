@@ -202,24 +202,57 @@ def test_readonly_import():
             assert False
     Sandbox(config).call(readonly_module)
 
-def get_file_from_stdout():
+def get_file_type_from_stdout():
     import sys
     return type(sys.stdout)
 
-def test_import_sys_stdout():
+def test_filetype_from_sys_stdout():
     config = createSandboxConfig()
     config.allowModule('sys', 'stdout')
-    def get_file_object():
-        file = get_file_from_stdout()
+    def get_file_type_object():
+        file_type = get_file_type_from_stdout()
         try:
-            read_first_line(file)
+            read_first_line(file_type)
         except TypeError, err:
-            return str(err) == 'object.__new__() takes no parameters'
-        assert False
-    Sandbox(config).call(get_file_object)
+            assert str(err) == 'object.__new__() takes no parameters'
+        else:
+            assert False
+    Sandbox(config).call(get_file_type_object)
 
-    file = get_file_from_stdout()
-    read_first_line(file)
+    file_type = get_file_type_from_stdout()
+    read_first_line(file_type)
+
+def get_file_type_from_open_file(filename):
+    try:
+        with open(filename) as fp:
+            return type(fp)
+    except SandboxError, err:
+        pass
+
+    try:
+        with open(filename, 'rb') as fp:
+            return type(fp)
+    except SandboxError, err:
+        pass
+    raise TestException("Unable to get file type")
+
+
+def test_filetype_from_open_file():
+    filename = READ_FILENAME
+
+    config = createSandboxConfig()
+    config.allowPath(filename)
+    def get_file_type_object():
+        try:
+            get_file_type_from_open_file(filename)
+        except SandboxError, err:
+            assert str(err) == "Block access to type 'file'"
+        else:
+            assert False
+    Sandbox(config).call(get_file_type_object)
+
+    file_type = get_file_type_from_open_file(filename)
+    read_first_line(file_type)
 
 def test_exit():
     def exit_noarg():
@@ -335,7 +368,7 @@ def test_func_locals():
 
 # Python 3.x has builtin file type
 if version_info < (3, 0):
-    def get_file_from_subclasses():
+    def get_file_type_from_subclasses():
         for subtype in object.__subclasses__():
             if subtype.__name__ == "file":
                 return subtype
@@ -344,15 +377,15 @@ if version_info < (3, 0):
     def test_subclasses():
         def subclasses_denied():
             try:
-                get_file_from_subclasses()
+                get_file_type_from_subclasses()
             except AttributeError, err:
                 assert str(err) == "type object 'object' has no attribute '__subclasses__'"
             else:
                 assert False
         createSandbox().call(subclasses_denied)
 
-        file = get_file_from_subclasses()
-        read_first_line(file)
+        file_type = get_file_type_from_subclasses()
+        read_first_line(file_type)
 
 @contextlib.contextmanager
 def capture_stdout():
