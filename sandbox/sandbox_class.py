@@ -23,24 +23,18 @@ class Sandbox:
             self.config = SandboxConfig()
         self.protections = [protection() for protection in self.PROTECTIONS]
 
-    def _enable(self):
-        for protection in self.protections:
-            protection.enable(self)
-
-    def _disable(self):
-        for protection in reversed(self.protections):
-            protection.disable(self)
-
     def _call(self, func, args, kw):
         timeout = self.config.timeout
-        self._enable()
+        for protection in self.protections:
+            protection.enable(self)
         try:
             if timeout is not None:
                 return limitedTime(timeout, func, *args, **kw)
             else:
                 return func(*args, **kw)
         finally:
-            self._disable()
+            for protection in reversed(self.protections):
+                protection.disable(self)
 
     def call(self, func, *args, **kw):
         """
