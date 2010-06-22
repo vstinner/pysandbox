@@ -3,12 +3,13 @@ Known issues
 
  * ReadOnlyObject.__getattr__() doesn't proxify the result of a method,
    type(sys.stdout.__enter__())
+ * tests.py: get_code_type() should try code_obj.__class__
+ * deny creation of arbitrary code object: compile(), type(generator.gi_code),
+   frame.f_code, func.func_code/.__code__
 
 Major tasks
 -----------
 
- * deny creation of arbitrary code object: compile(), type(generator.gi_code),
-   frame.f_code, func.func_code/.__code__
  * Bug: .execute(code, locals={}) denies the creation of new local variables
  * interpreter.py has a quit() builtin function (instance of site.Quitter)
    which is not protected by a proxy
