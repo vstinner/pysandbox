@@ -6,6 +6,9 @@ from sandbox import (Sandbox, SandboxConfig,
 from sys import version_info
 import contextlib
 
+class TestException(Exception):
+    pass
+
 def createSandboxConfig(*features, **kw):
     if createSandboxConfig.debug:
         features += ("stdout", "stderr")
@@ -236,19 +239,15 @@ def get_file_type_from_open_file(filename):
         pass
     raise TestException("Unable to get file type")
 
-
 def test_filetype_from_open_file():
     filename = READ_FILENAME
 
     config = createSandboxConfig()
     config.allowPath(filename)
     def get_file_type_object():
-        try:
-            get_file_type_from_open_file(filename)
-        except TestException, err:
-            pass
-        else:
-            assert False
+        file_type = get_file_type_from_open_file(filename)
+        read_first_line(file_type)
+
     Sandbox(config).call(get_file_type_object)
 
     file_type = get_file_type_from_open_file(filename)
@@ -632,6 +631,85 @@ def test_execfile():
             output = stdout.getvalue()
             print(repr(output))
             assert output.startswith('Hello World')
+
+def get_code_args():
+    def somme(a, b):
+        return a+b
+    fcode = somme.func_code
+    # code constructor arguments
+    return (
+        fcode.co_argcount,
+        fcode.co_nlocals,
+        fcode.co_stacksize,
+        fcode.co_flags,
+        fcode.co_code,
+        fcode.co_consts,
+        fcode.co_names,
+        fcode.co_varnames,
+        fcode.co_filename,
+        fcode.co_name,
+        fcode.co_firstlineno,
+        fcode.co_lnotab,
+    )
+
+def code_objects():
+    try:
+        yield compile("1", "<string>", "eval")
+    except NameError:
+        pass
+
+    # Function code
+    def func():
+        pass
+    try:
+        yield func.__code__
+    except AttributeError:
+        pass
+
+    # Generator code
+    def generator():
+        yield
+    gen = generator()
+    try:
+        yield gen.gi_code
+    except AttributeError:
+        pass
+
+    import sys
+    frame = sys._getframe(0)
+    try:
+        yield frame.f_code
+    except AttributeError:
+        pass
+
+def get_code_type():
+    for code_obj in code_objects():
+        return type(code_obj)
+        #return code_obj.__class__
+    raise TestException("Unable to get code type")
+
+def exec_bytecode(code_args):
+    def func():
+        pass
+    function_type = type(func)
+    code_type = get_code_type()
+    fcode = code_type(*code_args)
+    new_func = function_type(fcode, {}, "new_func")
+    return new_func(1, 2)
+
+def test_bytecode():
+    code_args = get_code_args()
+
+    config = createSandboxConfig()
+    config.allowModule('sys', '_getframe')
+    try:
+        Sandbox(config).call(exec_bytecode, code_args)
+    except TestException, err:
+        assert str(err) == "Unable to get code type"
+    else:
+        assert False
+
+    assert exec_bytecode(code_args) == 3
 
 def parseOptions():
     from optparse import OptionParser

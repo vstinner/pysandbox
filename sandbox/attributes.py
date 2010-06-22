@@ -1,4 +1,4 @@
-from types import FunctionType, FrameType
+from types import FunctionType, FrameType, GeneratorType
 from sys import version_info
 try:
     from sys import _clear_type_cache
@@ -24,6 +24,7 @@ class HideAttributes:
         self.frame_dict = RestorableDict(dictionary_of(FrameType))
         self.type_dict = RestorableDict(dictionary_of(type))
         self.builtin_func_dict = RestorableDict(dictionary_of(builtin_function))
+        self.generator_dict = RestorableDict(dictionary_of(GeneratorType))
 
     def enable(self, sandbox):
         # Blacklist dict.__setitem__() and dict.__delitem__() to protect
@@ -40,8 +41,10 @@ class HideAttributes:
             del self.function_dict['__globals__']
             del self.function_dict['__code__']
         del self.frame_dict['f_locals']
+        del self.frame_dict['f_code']
         del self.type_dict['__subclasses__']
         del self.builtin_func_dict['__self__']
+        del self.generator_dict['gi_code']
         _clear_type_cache()
 
     def disable(self, sandbox):
@@ -50,6 +53,7 @@ class HideAttributes:
         self.frame_dict.restore()
         self.type_dict.restore()
         self.builtin_func_dict.restore()
+        self.generator_dict.restore()
         # Python 2.6+ uses a method cache: clear it to avoid errors
         _clear_type_cache()
 

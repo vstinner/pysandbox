@@ -15,14 +15,15 @@ Blocked Python functions (by default):
  * Deny importing Python modules
  * Deny exiting Python
  * Deny access to stdin, stdout or stderr
- * Deny some builtins symbols like execfile() or KeyboardInterrupt
+ * Deny some builtins symbols like compile(), execfile() or KeyboardInterrupt
+ * Deny access to code type
 
 A timeout of 5 seconds if used by default. You can enable all of these
 features by setting the sandbox configuration.
 
 Protection on the namespace:
 
- * Deny access to function closure, globals or code
+ * Deny access to function closure, globals and code
  * Deny access to frame locals
  * Deny access to types subclasses
  * __builtins__ is read only

@@ -3,9 +3,6 @@ Known issues
 
  * ReadOnlyObject.__getattr__() doesn't proxify the result of a method,
    type(sys.stdout.__enter__())
- * tests.py: get_code_type() should try code_obj.__class__
- * deny creation of arbitrary code object: compile(), type(generator.gi_code),
-   frame.f_code, func.func_code/.__code__
 
 Major tasks
 -----------
@@ -38,6 +35,7 @@ Open questions
 Minor tasks
 -----------
 
+ * Only instanciate each protection once?
  * Write a test using class.mro()?
  * __builtins__ can be redefined
  * isinstance(createReadOnlyList(...), list) is False
