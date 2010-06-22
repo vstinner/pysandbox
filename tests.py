@@ -245,8 +245,8 @@ def test_filetype_from_open_file():
     def get_file_type_object():
         try:
             get_file_type_from_open_file(filename)
-        except SandboxError, err:
-            assert str(err) == "Block access to type 'file'"
+        except TestException, err:
+            pass
         else:
             assert False
     Sandbox(config).call(get_file_type_object)
