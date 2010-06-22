@@ -3,7 +3,7 @@ Default policy
 
 ``f.func_globals`` is blocked
 
-ne supporte pas les sous-fonctions ?
+Don't support user functions?
 
 ::
 
@@ -21,3 +21,4 @@ Blocked:
 * ``compile()``
 * ``iter()``
 * ``type()``
+
