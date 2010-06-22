@@ -42,6 +42,7 @@ class HideAttributes:
         del self.frame_dict['f_locals']
         del self.type_dict['__subclasses__']
         del self.builtin_func_dict['__self__']
+        _clear_type_cache()
 
     def disable(self, sandbox):
         self.dict_dict.restore()

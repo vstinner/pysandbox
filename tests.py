@@ -145,10 +145,14 @@ def test_closure():
             assert str(err) == "'function' object has no attribute '__closure__'"
         else:
             assert False, "func_closure is present"
+
+    # Begin by a test outside the sandbox to fill the type cache
+    read_closure_secret()
     createSandbox().call(check_closure)
 
-    # closure are readable outside the sandbox
+    # Repeat the test to ensure that the attribute cache is cleared correctly
     read_closure_secret()
+    createSandbox().call(check_closure)
 
 def test_import():
     def import_blocked():
