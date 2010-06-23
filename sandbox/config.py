@@ -117,7 +117,7 @@ class SandboxConfig:
         if feature == 'regex':
             self.allowModule('re',
                 'compile', 'match', 'search', 'findall', 'finditer', 'split',
-                'sub', 'subn', 'escape', 'I', 'IGNORECASE', 'L', 'LOCALE', 'M',
+                'sub', 'subn', '_subx', 'escape', 'I', 'IGNORECASE', 'L', 'LOCALE', 'M',
                 'MULTILINE', 'S', 'DOTALL', 'X', 'VERBOSE',
                 # FIXME: proxy() doesn't support class yet
                 # 'error',
