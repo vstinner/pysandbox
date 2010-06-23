@@ -2,7 +2,7 @@
 Proxies using a whitelist policy.
 """
 
-from types import FunctionType, ClassType, InstanceType, MethodType
+from types import FunctionType, ClassType, InstanceType, MethodType, FrameType
 from sandbox import SandboxError
 from sys import version_info
 
@@ -12,7 +12,7 @@ SAFE_TYPES = (
     type(None), bool,
     int, long, float,
     str, unicode,
-    builtin_function_or_method, FunctionType,
+    FrameType,
 )
 
 def readOnlyError():
@@ -210,9 +210,7 @@ isinstance=isinstance, MethodType=MethodType):
             value = getattr(real_object, name)
             if isinstance(value, MethodType):
                 value = MethodType(value.im_func, self, self.__class__)
-            else:
-                value = proxy(value)
-            return value
+            return proxy(value)
 
         def __setattr__(self, name, value):
             readOnlyError()
@@ -220,12 +218,22 @@ isinstance=isinstance, MethodType=MethodType):
     copyProxyMethods(real_object, ReadOnlyObject)
     return ReadOnlyObject()
 
+def callback_proxy(proxy, callback):
+    def _callback_proxy(*args, **kw):
+        result = callback(*args, **kw)
+        return proxy(result)
+    _callback_proxy.__name__ = callback.__name__
+    _callback_proxy.__doc__ = callback.__doc__
+    return _callback_proxy
+
 def _proxy():
     file_type = file
     def proxy(value):
         if isinstance(value, SAFE_TYPES):
             # Safe type, no need to create a proxy
             return value
+        elif callable(value):
+            return callback_proxy(proxy, value)
         elif isinstance(value, tuple):
             return tuple(
                 proxy(item)

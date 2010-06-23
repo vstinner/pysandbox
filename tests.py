@@ -210,8 +210,7 @@ def get_file_type_from_stdout():
     return type(sys.stdout)
 
 def test_filetype_from_sys_stdout():
-    config = createSandboxConfig()
-    config.allowModule('sys', 'stdout')
+    config = createSandboxConfig('stdout')
     def get_file_type_object():
         file_type = get_file_type_from_stdout()
         try:
@@ -246,7 +245,12 @@ def test_filetype_from_open_file():
     config.allowPath(filename)
     def get_file_type_object():
         file_type = get_file_type_from_open_file(filename)
-        read_first_line(file_type)
+        try:
+            read_first_line(file_type)
+        except TypeError, err:
+            assert str(err) == 'object.__new__() takes no parameters'
+        else:
+            assert False
 
     Sandbox(config).call(get_file_type_object)
 
@@ -365,7 +369,7 @@ def test_func_locals():
     myimport = get_import_from_func_locals(safe_import, sys.exc_info)
     assert myimport is builtin_import
 
-# Python 3.x has builtin file type
+# Python 3 doesn't have the builtin file type
 if version_info < (3, 0):
     def get_file_type_from_subclasses():
         for subtype in object.__subclasses__():
@@ -617,14 +621,13 @@ def test_execfile():
 
         filename = script.name
 
-        with capture_stdout() as stdout:
-            config = createSandboxConfig('stdout')
-            try:
-                Sandbox(config).call(execfile_test, filename)
-            except NameError, err:
-                assert str(err) == "global name 'execfile' is not defined"
-            else:
-                assert False
+        config = createSandboxConfig('stdout')
+        try:
+            Sandbox(config).call(execfile_test, filename)
+        except NameError, err:
+            assert str(err) == "global name 'execfile' is not defined"
+        else:
+            assert False
 
         with capture_stdout() as stdout:
             execfile_test(filename)
@@ -710,6 +713,25 @@ def test_bytecode():
         assert False
 
     assert exec_bytecode(code_args) == 3
+
+def get_file_type_from_stdout_method():
+    import sys
+    return type(sys.stdout.__enter__())
+
+def test_method_proxy():
+    config = createSandboxConfig('stdout')
+    def get_file_type_object():
+        file_type = get_file_type_from_stdout_method()
+        try:
+            read_first_line(file_type)
+        except TypeError, err:
+            assert str(err) == 'object.__new__() takes no parameters'
+        else:
+            assert False
+    Sandbox(config).call(get_file_type_object)
+
+    file_type = get_file_type_from_stdout_method()
+    read_first_line(file_type)
 
 def parseOptions():
     from optparse import OptionParser

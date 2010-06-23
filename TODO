@@ -1,12 +1,8 @@
-Known issues
-------------
-
- * ReadOnlyObject.__getattr__() doesn't proxify the result of a method,
-   type(sys.stdout.__enter__())
-
 Major tasks
 -----------
 
+ * Repair interpreter.py (it requires compile)
+ * Deny frame type?
  * Bug: .execute(code, locals={}) denies the creation of new local variables
  * interpreter.py has a quit() builtin function (instance of site.Quitter)
    which is not protected by a proxy
