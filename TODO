@@ -36,6 +36,8 @@ Open questions
 Minor tasks
 -----------
 
+ * interpreter.py: import code in the sandbox to execute the whole interpreter
+   in the sandbox
  * Only instanciate each protection once?
  * Write a test using class.mro()?
  * __builtins__ can be redefined
