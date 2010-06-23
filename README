@@ -43,6 +43,7 @@ Features
 To enable a feature, use SandboxConfig('feature1', 'feature2', ...) or
 config.enable('feature'). Available features:
 
+ - "compile": compile() builtin
  - "debug_sandbox": enable traceback of the sandbox itself
  - "exit": sys.exit(), BaseException, KeyboardInterrupt, SystemExit, quit()
  - "future": from __future__ import ...

@@ -73,9 +73,10 @@ class SandboxConfig:
             'property', 'range', 'reduce', 'repr',
             'reversed', 'round', 'setattr', 'slice', 'sorted', 'staticmethod',
             'sum', 'super', 'type', 'unichr', 'vars', 'xrange', 'zip',
-            # blocked: compile, execfile, input and raw_input (enabled by stdin
-            #          feature), intern, help (from site module, enabled by
-            #          help feature), quit (enabled by exit feature), reload
+            # blocked: compile (enabled by compile feature), execfile, input
+            #          and raw_input (enabled by stdin feature), intern,
+            #          help (from site module, enabled by help feature), quit
+            #          (enabled by exit feature), reload
             # note: reload is useless because we don't have access to real
             #       module objects
             # note: exit is replaced by safe_exit()
@@ -151,6 +152,8 @@ class SandboxConfig:
             self.enable('regex')
             self.allowModule('pydoc', 'help')
             self._builtins_whitelist.add('help')
+        elif feature == 'compile':
+            self._builtins_whitelist.add('compile')
         elif feature == 'interpreter':
             # "Meta" feature + some extras
             self.enable('stdin')
@@ -158,10 +161,10 @@ class SandboxConfig:
             self.enable('stderr')
             self.enable('exit')
             self.enable('site')
+            self.enable('compile')
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')
-            self._builtins_whitelist.add('compile')
         elif feature == 'debug_sandbox':
             self.enable('traceback')
             self.allowModule('sys', '_getframe')

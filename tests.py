@@ -733,6 +733,28 @@ def test_method_proxy():
     file_type = get_file_type_from_stdout_method()
     read_first_line(file_type)
 
+def test_compile():
+    import sys
+
+    orig_displayhook = sys.displayhook
+    try:
+        results = []
+        def displayhook(value):
+            results.append(value)
+
+        sys.displayhook = displayhook
+
+        def _test_compile():
+            exec compile("1+1", "<string>", "single") in {}
+            assert results == [2]
+        config = createSandboxConfig('compile')
+        Sandbox(config).call(_test_compile)
+
+        del results[:]
+        _test_compile()
+    finally:
+        sys.displayhook = orig_displayhook
+
 def parseOptions():
     from optparse import OptionParser
 
