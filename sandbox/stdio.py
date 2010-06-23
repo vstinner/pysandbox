@@ -1,22 +1,22 @@
 import sys
 from sandbox import SandboxError
 
-def createNoAttribute(name):
-    def _blocked():
-        raise SandboxError("Block access to sys.%s" % name)
+def createNoAttribute(stream_name):
+    def _blocked(name):
+        raise SandboxError("Block access to sys.%s.%s" % (stream_name, name))
 
     # FIXME:
     #class NoAttribute(object):
     #    __slots__ = tuple()
     class NoAttribute:
         def __getattr__(self, name):
-            _blocked()
+            _blocked(name)
 
         def __setattr__(self, name, value):
-            _blocked()
+            _blocked(name)
 
         def __delattr__(self, name):
-            _blocked()
+            _blocked(name)
     return NoAttribute()
 
 class ProtectStdio:
