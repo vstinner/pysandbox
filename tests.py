@@ -755,6 +755,19 @@ def test_compile():
     finally:
         sys.displayhook = orig_displayhook
 
+def check_frame_filename():
+    import sys
+    frame = sys._getframe(1)
+    fcode = frame.f_code
+    assert fcode.co_filename == __file__
+
+def test_traceback():
+    config = createSandboxConfig('traceback')
+    config.allowModule('sys', '_getframe')
+    Sandbox(config).call(check_frame_filename)
+
+    check_frame_filename()
+
 def parseOptions():
     from optparse import OptionParser
 
