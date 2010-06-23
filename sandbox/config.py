@@ -171,6 +171,7 @@ class SandboxConfig:
             self.allowModuleSourceCode('sandbox')
         elif feature == 'future':
             self.allowModule('__future__',
+                'all_feature_names',
                 'absolute_import', 'braces', 'division', 'generators',
                 'nested_scopes', 'print_function', 'unicode_literals',
                 'with_statement')
