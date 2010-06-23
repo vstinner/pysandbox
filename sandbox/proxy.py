@@ -2,15 +2,16 @@
 Proxies using a whitelist policy.
 """
 
-from types import FunctionType, ClassType, InstanceType, MethodType, FrameType
+from types import (NoneType, FunctionType, ClassType, InstanceType,
+    MethodType, FrameType)
 from sandbox import SandboxError
 from sys import version_info
 
 builtin_function_or_method = type(len)
 
 SAFE_TYPES = (
-    type(None), bool,
-    int, long, float,
+    NoneType,
+    bool, int, long, float,
     str, unicode,
     FrameType,
 )

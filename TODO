@@ -1,7 +1,12 @@
+Known issues
+------------
+
+ * interpreter feature should not allow compile() builtin
+ * traceback feature should not allow frame.f_code attribute
+
 Major tasks
 -----------
 
- * Repair interpreter.py (it requires compile)
  * Deny frame type?
  * Bug: .execute(code, locals={}) denies the creation of new local variables
  * interpreter.py has a quit() builtin function (instance of site.Quitter)

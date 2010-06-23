@@ -161,6 +161,7 @@ class SandboxConfig:
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')
+            self._builtins_whitelist.add('compile')
         elif feature == 'debug_sandbox':
             self.enable('traceback')
             self.allowModule('sys', '_getframe')
