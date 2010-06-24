@@ -126,11 +126,12 @@ class SandboxConfig:
             self.allowModule('sre_parse', 'parse')
         elif feature == 'exit':
             self.allowModule('sys', 'exit')
-            self._builtins_whitelist.add('BaseException')
-            self._builtins_whitelist.add('KeyboardInterrupt')
-            self._builtins_whitelist.add('SystemExit')
-            # quit builtin is created by the site module
-            self._builtins_whitelist.add('quit')
+            self._builtins_whitelist |= set((
+                'BaseException',
+                'KeyboardInterrupt',
+                'SystemExit',
+                # quit builtin is added by the site module
+                'quit'))
         elif feature == 'traceback':
             if self._cpython_restricted:
                 raise ValueError("traceback feature is incompatible with the CPython restricted mode")
@@ -156,6 +157,7 @@ class SandboxConfig:
             self._builtins_whitelist.add('compile')
         elif feature == 'interpreter':
             # "Meta" feature + some extras
+            self.enable('traceback')
             self.enable('stdin')
             self.enable('stdout')
             self.enable('stderr')
