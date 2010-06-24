@@ -219,12 +219,23 @@ isinstance=isinstance, MethodType=MethodType):
     copyProxyMethods(real_object, ReadOnlyObject)
     return ReadOnlyObject()
 
+def copy_callable_attributes(original, copy):
+    for name in ('__name__', '__doc__'):
+        try:
+            value = getattr(original, name)
+        except AttributeError:
+            continue
+        try:
+            setattr(copy, name, value)
+        except RuntimeError:
+            # function attributes not accessible in restricted mode
+            pass
+
 def callback_proxy(proxy, callback):
     def _callback_proxy(*args, **kw):
         result = callback(*args, **kw)
         return proxy(result)
-    _callback_proxy.__name__ = callback.__name__
-    _callback_proxy.__doc__ = callback.__doc__
+    copy_callable_attributes(callback, _callback_proxy)
     return _callback_proxy
 
 def _proxy():
