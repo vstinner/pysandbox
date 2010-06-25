@@ -1,5 +1,5 @@
-from ctypes import Structure, cast, POINTER, CFUNCTYPE
-from ctypes import c_void_p, c_size_t, c_int,  c_char_p
+from ctypes import Structure, cast, POINTER, PYFUNCTYPE
+from ctypes import c_void_p, c_size_t, c_int,  c_char_p, c_long
 from ctypes import pythonapi
 import sys
 from sys import version_info
@@ -66,15 +66,62 @@ else:
 
 PyObject_pp = POINTER(PyObject_p)
 
-destructor = CFUNCTYPE(None, c_void_p)
+destructor = PYFUNCTYPE(None, c_void_p)
+newfunc = PYFUNCTYPE(c_void_p, # PyObject*
+    c_void_p, # PyTypeObject*
+    PyObject_p,
+    PyObject_p)
 
 class PyTypeObject(Structure):
     _fields_ = PyObject_VAR_HEAD._fields_ + (
-	("tp_name", c_char_p),
+        ("tp_name", c_char_p),
         ("tp_basicsize", Py_ssize_t),
-	("tp_itemsize", Py_ssize_t),
-	("tp_dealloc", destructor),
-        # ... (we don't need to know more to hack CPython)
+        ("tp_itemsize", Py_ssize_t),
+
+        ("tp_dealloc", destructor),
+        ("tp_print", c_void_p),
+        ("tp_getattr", c_void_p),
+        ("tp_setattr", c_void_p),
+        ("tp_compare", c_void_p),
+        ("tp_repr", c_void_p),
+
+        ("tp_as_number", c_void_p),
+        ("tp_as_sequence", c_void_p),
+        ("tp_as_mapping", c_void_p),
+
+        ("tp_hash", c_void_p),
+        ("tp_call", c_void_p),
+        ("tp_str", c_void_p),
+        ("tp_getattro", c_void_p),
+        ("tp_setattro", c_void_p),
+
+        ("tp_as_buffer", c_void_p),
+        ("tp_flags", c_long),
+        ("tp_doc", c_char_p),
+        ("tp_traverse", c_void_p),
+        ("tp_clear", c_void_p),
+        ("tp_richcompare", c_void_p),
+        ("tp_weaklistoffset", c_long),
+        ("tp_iter", c_void_p),
+        ("tp_iternext", c_void_p),
+        ("tp_methods", c_void_p),
+        ("tp_members", c_void_p),
+        ("tp_getset", c_void_p),
+        ("tp_base", c_void_p),
+        ("tp_dict", c_void_p),
+        ("tp_descr_get", c_void_p),
+        ("tp_descr_set", c_void_p),
+        ("tp_dictoffset", c_long),
+        ("tp_init", c_void_p),
+        ("tp_alloc", c_void_p),
+        ("tp_new", newfunc),
+        ("tp_free", c_void_p),
+        ("tp_is_gc", c_void_p),
+        ("tp_bases", c_void_p),
+        ("tp_mro", c_void_p),
+        ("tp_cache", c_void_p),
+        ("tp_subclasses", c_void_p),
+        ("tp_weaklist", c_void_p),
     )
 
     if version_info >= (3, 0):
@@ -84,6 +131,7 @@ class PyTypeObject(Structure):
         def __repr__(self):
             return "<type %s>" % self.tp_name
 PyTypeObject_p = POINTER(PyTypeObject)
+
 
 class PyTryBlock(Structure):
     _fields_ = (
@@ -221,28 +269,3 @@ def set_interp_builtins(frame, builtins):
     cinterp = ctstate.interp.contents
     cobject_setattr(cinterp, "builtins", builtins)
 
-# class ClearFrameCache:
-#     def __init__(self, frame):
-#         self.frame = frame
-#         self.cframe = pyobject_get_cobject(self.frame, PyFrameObject)
-#
-#         # clear f_locals
-#         self.locals = frame.f_locals.copy()
-#         frame.f_locals.clear()
-#
-#         # clear f_localsplus (LOAD_FAST/STORE_FAST cache)
-#         self.cache_size = 2
-#         self.cache = []
-#         for index in xrange(self.cache_size):
-#             ptr = self.cframe.f_localsplus[index]
-#             pythonapi._PyObject_Dump(ptr)
-#             self.cache.append(ptr)
-#             self.cframe.f_localsplus[index] = pyobject_address(42)
-#
-#     def restore(self):
-#         # restore f_localsplus (LOAD_FAST/STORE_FAST cache)
-#         for index, ptr in enumerate(self.cache):
-#             self.cframe.f_localsplus[index] = ptr
-#         # restore f_locals
-#         self.frame.f_locals.update(self.locals)
-#
