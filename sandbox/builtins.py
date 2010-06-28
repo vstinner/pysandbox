@@ -3,15 +3,15 @@ from types import FrameType
 from sys import _getframe, version_info
 import sys
 
-from sandbox import SandboxError, USE_CPYTHON_HACKS
+from sandbox import SandboxError, USE_CSANDBOX
 from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
 from .proxy import createReadOnlyObject
 from .blacklist_proxy import ReadOnlyBuiltins
-if USE_CPYTHON_HACKS:
-    from .cpython_hack import set_frame_builtins, set_interp_builtins
+if USE_CSANDBOX:
+    from _sandbox import set_frame_builtins, set_interp_builtins
 
 class CleanupBuiltins:
     """
@@ -75,10 +75,10 @@ class CleanupBuiltins:
 
         # Make builtins read only (enable restricted mode)
         safe_builtins = ReadOnlyBuiltins(self.builtin_dict.dict)
-        if USE_CPYTHON_HACKS:
+        if USE_CSANDBOX:
             set_frame_builtins(self.frame, safe_builtins)
             if not config.cpython_restricted:
-                set_interp_builtins(self.frame, safe_builtins)
+                set_interp_builtins(safe_builtins)
         for module_dict in self.modules_dict:
             module_dict['__builtins__'] = safe_builtins
         self.main_module.__dict__['__builtins__'] = safe_builtins
@@ -88,10 +88,10 @@ class CleanupBuiltins:
         self.builtin_dict.restore()
 
         # Restore modifiable builtins
-        if USE_CPYTHON_HACKS:
+        if USE_CSANDBOX:
             set_frame_builtins(self.frame, self.builtins_dict)
             if not sandbox.config.cpython_restricted:
-                set_interp_builtins(self.frame, self.builtins_dict)
+                set_interp_builtins(self.builtins_dict)
         for module_dict in self.modules_dict:
             module_dict['__builtins__'] = self.builtins_dict
         self.main_module.__dict__['__builtins__'] = __builtin__

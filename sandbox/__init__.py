@@ -8,7 +8,8 @@ class Protection:
     def disable(self, sandbox):
         pass
 
-USE_CPYTHON_HACKS = True
+# Use the C module (_sandbox)
+USE_CSANDBOX = True
 
 from .config import SandboxConfig
 from .sandbox_class import Sandbox

@@ -2,7 +2,7 @@
 from __future__ import with_statement
 from sandbox import (Sandbox, SandboxConfig,
     SandboxError, Timeout,
-    USE_CPYTHON_HACKS)
+    USE_CSANDBOX)
 from sys import version_info
 import contextlib
 
@@ -33,7 +33,7 @@ def read_first_line(open):
         line = fp.readline()
     assert line.rstrip() == '#!/usr/bin/env python'
 
-if USE_CPYTHON_HACKS:
+if USE_CSANDBOX:
     def test_open_whitelist():
         from errno import EACCES
 
@@ -64,10 +64,10 @@ if USE_CPYTHON_HACKS:
             assert builtin_type == ReadOnlyBuiltins
         createSandbox().call(check_builtins_type)
 else:
-    print "USE_CPYTHON_HACKS=False: disable test_open_whitelist(), test_exec_builtins()"
+    print "USE_CSANDBOX=False: disable test_open_whitelist(), test_exec_builtins()"
 
 if version_info < (3, 0):
-    if USE_CPYTHON_HACKS:
+    if USE_CSANDBOX:
         def test_frame_restricted():
             from sys import _getframe
 
@@ -102,7 +102,7 @@ if version_info < (3, 0):
                 assert restricted == False
             Sandbox(config).call(check_module_not_restricted)
     else:
-        print "USE_CPYTHON_HACKS=False: disable test_frame_restricted(), test_module_frame_restricted()"
+        print "USE_CSANDBOX=False: disable test_frame_restricted(), test_module_frame_restricted()"
 
 def write_file(filename):
     with open(filename, "w") as fp:

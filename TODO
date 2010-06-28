@@ -1,6 +1,8 @@
 Known issues
 ------------
 
+ * _sandbox/Makefile (make install): don't hardcode python version
+ * rewrite _sandbox/Makefile using a setup.py script
  * compile feature should not give access to the code type
  * traceback feature should not allow frame.f_code attribute
 
