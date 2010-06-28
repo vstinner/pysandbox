@@ -1,9 +1,3 @@
-Known issues
-------------
-
- * compile feature should not give access to the code type
- * traceback feature should not allow frame.f_code attribute
-
 Major tasks
 -----------
 
@@ -32,6 +26,7 @@ Open questions
  * A function keeps its func_globals. Is it a problem?
  * A generator can be controled: .throw(), .send(), etc. Is it a problem if the
    generator was created outside the sandbox?
+ * Move compile() builtin in its own feature (compile)?
 
 Minor tasks
 -----------

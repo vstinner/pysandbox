@@ -713,7 +713,7 @@ if USE_CSANDBOX:
     def test_bytecode():
         code_args = get_code_args()
 
-        config = createSandboxConfig()
+        config = createSandboxConfig('code')
         config.allowModule('sys', '_getframe')
         try:
             Sandbox(config).call(exec_bytecode, code_args)
@@ -759,7 +759,7 @@ def test_compile():
         def _test_compile():
             exec compile("1+1", "<string>", "single") in {}
             assert results == [2]
-        config = createSandboxConfig('compile')
+        config = createSandboxConfig('code')
         Sandbox(config).call(_test_compile)
 
         del results[:]

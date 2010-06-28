@@ -16,7 +16,7 @@ Blocked Python functions (by default):
  * Deny exiting Python
  * Deny access to stdin, stdout or stderr
  * Deny some builtins symbols like compile(), execfile() or KeyboardInterrupt
- * Deny access to code type
+ * Deny execution of arbitrary bytecode (creation of arbitrary code object)
 
 A timeout of 5 seconds if used by default. You can enable all of these
 features by setting the sandbox configuration.
@@ -43,7 +43,7 @@ Features
 To enable a feature, use SandboxConfig('feature1', 'feature2', ...) or
 config.enable('feature'). Available features:
 
- - "compile": compile() builtin
+ - "code": compile() builtin, frame.f_locals and generator.gi_code
  - "debug_sandbox": enable traceback of the sandbox itself
  - "exit": sys.exit(), BaseException, KeyboardInterrupt, SystemExit, quit()
  - "future": from __future__ import ...

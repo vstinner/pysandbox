@@ -41,11 +41,12 @@ class HideAttributes:
             del self.function_dict['__globals__']
             del self.function_dict['__code__']
         del self.frame_dict['f_locals']
-        if 'traceback' not in sandbox.config.features:
+        if 'code' not in sandbox.config.features:
             del self.frame_dict['f_code']
         del self.type_dict['__subclasses__']
         del self.builtin_func_dict['__self__']
-        del self.generator_dict['gi_code']
+        if 'code' not in sandbox.config.features:
+            del self.generator_dict['gi_code']
         _clear_type_cache()
 
     def disable(self, sandbox):

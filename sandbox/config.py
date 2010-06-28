@@ -73,7 +73,7 @@ class SandboxConfig:
             'property', 'range', 'reduce', 'repr',
             'reversed', 'round', 'setattr', 'slice', 'sorted', 'staticmethod',
             'sum', 'super', 'type', 'unichr', 'vars', 'xrange', 'zip',
-            # blocked: compile (enabled by compile feature), execfile, input
+            # blocked: compile (enabled by code feature), execfile, input
             #          and raw_input (enabled by stdin feature), intern,
             #          help (from site module, enabled by help feature), quit
             #          (enabled by exit feature), reload
@@ -135,6 +135,7 @@ class SandboxConfig:
         elif feature == 'traceback':
             if self._cpython_restricted:
                 raise ValueError("traceback feature is incompatible with the CPython restricted mode")
+            self.enable('code')
             # change allowModule() behaviour
         elif feature in ('stdout', 'stderr'):
             self.allowModule('sys', feature)
@@ -153,7 +154,7 @@ class SandboxConfig:
             self.enable('regex')
             self.allowModule('pydoc', 'help')
             self._builtins_whitelist.add('help')
-        elif feature == 'compile':
+        elif feature == 'code':
             self._builtins_whitelist.add('compile')
         elif feature == 'interpreter':
             # "Meta" feature + some extras
@@ -163,7 +164,7 @@ class SandboxConfig:
             self.enable('stderr')
             self.enable('exit')
             self.enable('site')
-            self.enable('compile')
+            self.enable('code')
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')
