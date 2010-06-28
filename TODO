@@ -1,7 +1,6 @@
 Major tasks
 -----------
 
- * Deny frame type?
  * Bug: .execute(code, locals={}) denies the creation of new local variables
  * interpreter.py has a quit() builtin function (instance of site.Quitter)
    which is not protected by a proxy
@@ -55,6 +54,5 @@ Todo later
  * RuntimeError: maximum recursion depth exceeded
    import sys; sys.setrecursionlimit(50)
    http://mail.python.org/pipermail/python-dev/2009-February/086463.html
- * Fix "raise" in interpreter.py. Is it really a problem?
  * Limit memory usage
 
