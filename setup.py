@@ -1,4 +1,18 @@
 #!/usr/bin/env python
+
+# Todo list to prepare a release:
+#  - set version in sandbox/version.py
+#  - set release date in the ChangeLog
+#  - git tag -a pysandbox-n
+#  - git push
+#  - ./setup.py register sdist upload
+#  - update the website
+#
+# After the release:
+#  - set version to n+1
+#  - add a new empty section in the changelog for version n+1
+#  - git commit
+
 from distutils.core import setup, Extension
 import imp
 
