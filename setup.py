@@ -30,10 +30,15 @@ CLASSIFIERS = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
+with open('README') as f:
+    long_description = f.read().strip()
+
 options = {
     'name': version.PACKAGE,
     'version': version.VERSION,
     'license': version.LICENSE,
+    'description': 'Python sandbox',
+    'long_description': long_description,
     'url': version.URL,
     'author': 'Victor Stinner',
     'author_email': 'victor.stinner@haypocalc.com',
