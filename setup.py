@@ -5,13 +5,14 @@ import imp
 version = imp.load_source('version', 'sandbox/version.py')
 
 CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Natural Language :: English',
     'Programming Language :: C',
     'Programming Language :: Python',
+    'Topic :: Security',
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
