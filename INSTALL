@@ -13,3 +13,7 @@ Run the following command as root: ::
 
     python setup.py install
 
+And then test your installation with: ::
+
+    python tests.py
+
