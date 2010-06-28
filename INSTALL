@@ -1,0 +1,15 @@
+Requirements
+============
+
+To compile the C module (_sandbox), you need a compiler (gcc) and Python
+headers. Eg. on Fedora, you have to install python-devel package (sudo yum
+install python-devel).
+
+
+Installation of the sandbox and _sandbox modules
+================================================
+
+Run the following command as root: ::
+
+    python setup.py install
+
