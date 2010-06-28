@@ -238,24 +238,27 @@ def get_file_type_from_open_file(filename):
         pass
     raise TestException("Unable to get file type")
 
-def test_filetype_from_open_file():
-    filename = READ_FILENAME
+if USE_CSANDBOX:
+    def test_filetype_from_open_file():
+        filename = READ_FILENAME
 
-    config = createSandboxConfig()
-    config.allowPath(filename)
-    def get_file_type_object():
+        config = createSandboxConfig()
+        config.allowPath(filename)
+        def get_file_type_object():
+            file_type = get_file_type_from_open_file(filename)
+            try:
+                read_first_line(file_type)
+            except TypeError, err:
+                assert str(err) == 'object.__new__() takes no parameters'
+            else:
+                assert False
+
+        Sandbox(config).call(get_file_type_object)
+
         file_type = get_file_type_from_open_file(filename)
-        try:
-            read_first_line(file_type)
-        except TypeError, err:
-            assert str(err) == 'object.__new__() takes no parameters'
-        else:
-            assert False
-
-    Sandbox(config).call(get_file_type_object)
-
-    file_type = get_file_type_from_open_file(filename)
-    read_first_line(file_type)
+        read_first_line(file_type)
+else:
+    print "USE_CSANDBOX=False: disable test_filetype_from_open_file()"
 
 def test_exit():
     def exit_noarg():
@@ -455,57 +458,60 @@ def test_read_objectproxy():
     sandbox = createSandbox()
     sandbox.call(testPerson, person)
 
-def test_modify_objectproxy():
-    class Person:
-        def __init__(self, name):
-            self.name = name
+if USE_CSANDBOX:
+    def test_modify_objectproxy():
+        class Person:
+            def __init__(self, name):
+                self.name = name
 
-    # Attribute
-    def setAttr(person):
-        person.name = "victor"
+        # Attribute
+        def setAttr(person):
+            person.name = "victor"
 
-    person = Person("haypo")
-    sandbox = createSandbox()
-    try:
-        sandbox.call(setAttr, person)
-    except SandboxError, err:
-        assert str(err) == 'Read only object'
-    else:
-        assert False
+        person = Person("haypo")
+        sandbox = createSandbox()
+        try:
+            sandbox.call(setAttr, person)
+        except SandboxError, err:
+            assert str(err) == 'Read only object'
+        else:
+            assert False
 
-    setAttr(person)
-    assert person.name == "victor"
+        setAttr(person)
+        assert person.name == "victor"
 
-    # Delete attribute
-    def delAttr(person):
-        del person.name
+        # Delete attribute
+        def delAttr(person):
+            del person.name
 
-    person = Person("haypo")
-    sandbox = createSandbox()
-    try:
-        sandbox.call(delAttr, person)
-    except SandboxError, err:
-        assert str(err) == 'Read only object'
-    else:
-        assert False
+        person = Person("haypo")
+        sandbox = createSandbox()
+        try:
+            sandbox.call(delAttr, person)
+        except SandboxError, err:
+            assert str(err) == 'Read only object'
+        else:
+            assert False
 
-    delAttr(person)
-    assert hasattr(person, 'name') == False
+        delAttr(person)
+        assert hasattr(person, 'name') == False
 
-    # Dictionary
-    def setDict(person):
-        person.__dict__['name'] = "victor"
+        # Dictionary
+        def setDict(person):
+            person.__dict__['name'] = "victor"
 
-    person = Person("haypo")
-    try:
-        sandbox.call(setDict, person)
-    except SandboxError, err:
-        assert str(err) == 'Read only object'
-    else:
-        assert False
+        person = Person("haypo")
+        try:
+            sandbox.call(setDict, person)
+        except SandboxError, err:
+            assert str(err) == 'Read only object'
+        else:
+            assert False
 
-    setDict(person)
-    assert person.name == "victor"
+        setDict(person)
+        assert person.name == "victor"
+else:
+    print "USE_CSANDBOX=False: disable test_modify_objectproxy()"
 
 def builtins_superglobal():
     if isinstance(__builtins__, dict):
@@ -678,6 +684,7 @@ def code_objects():
     except AttributeError:
         pass
 
+    # Frame code
     import sys
     frame = sys._getframe(0)
     try:
@@ -685,34 +692,39 @@ def code_objects():
     except AttributeError:
         pass
 
-def get_code_type():
+def create_code_objects(args):
     for code_obj in code_objects():
-        return type(code_obj)
-        #return code_obj.__class__
+        code_type = type(code_obj)
+        try:
+            return code_type(*args)
+        except SandboxError, err:
+            assert str(err) == 'code() blocked by the sandbox'
     raise TestException("Unable to get code type")
 
 def exec_bytecode(code_args):
     def func():
         pass
     function_type = type(func)
-    code_type = get_code_type()
-    fcode = code_type(*code_args)
+    fcode = create_code_objects(code_args)
     new_func = function_type(fcode, {}, "new_func")
     return new_func(1, 2)
 
-def test_bytecode():
-    code_args = get_code_args()
+if USE_CSANDBOX:
+    def test_bytecode():
+        code_args = get_code_args()
 
-    config = createSandboxConfig()
-    config.allowModule('sys', '_getframe')
-    try:
-        Sandbox(config).call(exec_bytecode, code_args)
-    except TestException, err:
-        assert str(err) == "Unable to get code type"
-    else:
-        assert False
+        config = createSandboxConfig()
+        config.allowModule('sys', '_getframe')
+        try:
+            Sandbox(config).call(exec_bytecode, code_args)
+        except TestException, err:
+            assert str(err) == "Unable to get code type"
+        else:
+            assert False
 
-    assert exec_bytecode(code_args) == 3
+        assert exec_bytecode(code_args) == 3
+else:
+    print "USE_CSANDBOX=False: disable test_bytecode()"
 
 def get_file_type_from_stdout_method():
     import sys
