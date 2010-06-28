@@ -30,6 +30,7 @@ Open questions
 Minor tasks
 -----------
 
+ * "from sys import *" doesn't work
  * interpreter.py: import code in the sandbox to execute the whole interpreter
    in the sandbox
  * Only instanciate each protection once?

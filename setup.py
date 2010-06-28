@@ -21,6 +21,8 @@ options = {
     'version': version.VERSION,
     'license': version.LICENSE,
     'url': version.URL,
+    'author': 'Victor Stinner',
+    'author_email': 'victor.stinner@haypocalc.com',
     'ext_modules': [Extension('_sandbox', ['_sandbox/module.c'])],
     'classifiers': CLASSIFIERS,
     'packages': ('sandbox',),

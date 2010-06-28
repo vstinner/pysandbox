@@ -1,0 +1,9 @@
+include doc/*.rst
+include AUTHORS
+include INSTALL
+include MANIFEST.in
+include TODO 
+include execfile.py
+include interpreter.py 
+include tests.py
+include test_restricted.py
