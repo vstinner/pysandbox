@@ -4,7 +4,7 @@ from errno import EACCES
 
 def _safe_open(open_whitelist):
     open_file = open
-    def safe_open(filename, mode='r', buffering=0):
+    def safe_open(filename, mode='r', buffering=-1):
         """A secure file reader."""
         if type(mode) is not str:
             raise TypeError("mode have to be a string, not %s" % type(name).__name__)
