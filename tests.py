@@ -614,32 +614,33 @@ def test_func_code():
 
     assert replace_func_code() == 42
 
-def execfile_test(filename):
-    execfile(filename)
+if version_info < (3, 0):
+    def execfile_test(filename):
+        execfile(filename)
 
-def test_execfile():
-    from tempfile import NamedTemporaryFile
-    from StringIO import StringIO
+    def test_execfile():
+        from tempfile import NamedTemporaryFile
+        from StringIO import StringIO
 
-    with NamedTemporaryFile() as script:
-        print >>script, "print('Hello World!')"
-        script.flush()
+        with NamedTemporaryFile() as script:
+            print >>script, "print('Hello World!')"
+            script.flush()
 
-        filename = script.name
+            filename = script.name
 
-        config = createSandboxConfig('stdout')
-        try:
-            Sandbox(config).call(execfile_test, filename)
-        except NameError, err:
-            assert str(err) == "global name 'execfile' is not defined"
-        else:
-            assert False
+            config = createSandboxConfig('stdout')
+            try:
+                Sandbox(config).call(execfile_test, filename)
+            except NameError, err:
+                assert str(err) == "global name 'execfile' is not defined"
+            else:
+                assert False
 
-        with capture_stdout() as stdout:
-            execfile_test(filename)
-            output = stdout.getvalue()
-            print(repr(output))
-            assert output.startswith('Hello World')
+            with capture_stdout() as stdout:
+                execfile_test(filename)
+                output = stdout.getvalue()
+                print(repr(output))
+                assert output.startswith('Hello World')
 
 def get_code_args():
     def somme(a, b):
