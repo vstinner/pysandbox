@@ -1,5 +1,5 @@
 Version 1.0.1
-    * XXX 
+    * Fix Python 2.5 compatibility
 
 Version 1.0 (2010-06-29)
     * First public release

@@ -45,7 +45,8 @@ class HideAttributes:
             del self.frame_dict['f_code']
         del self.type_dict['__subclasses__']
         del self.builtin_func_dict['__self__']
-        if 'code' not in sandbox.config.features:
+        if version_info >= (2, 6) \
+        and ('code' not in sandbox.config.features):
             del self.generator_dict['gi_code']
         _clear_type_cache()
 

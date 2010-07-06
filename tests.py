@@ -216,7 +216,7 @@ def test_filetype_from_sys_stdout():
         try:
             read_first_line(file_type)
         except TypeError, err:
-            assert str(err) == 'object.__new__() takes no parameters'
+            assert str(err) in ('object.__new__() takes no parameters', 'default __new__ takes no parameters')
         else:
             assert False
     Sandbox(config).call(get_file_type_object)
@@ -249,7 +249,7 @@ if USE_CSANDBOX:
             try:
                 read_first_line(file_type)
             except TypeError, err:
-                assert str(err) == 'object.__new__() takes no parameters'
+                assert str(err) in ('object.__new__() takes no parameters', 'default __new__ takes no parameters')
             else:
                 assert False
 
@@ -737,7 +737,7 @@ def test_method_proxy():
         try:
             read_first_line(file_type)
         except TypeError, err:
-            assert str(err) == 'object.__new__() takes no parameters'
+            assert str(err) in ('object.__new__() takes no parameters', 'default __new__ takes no parameters')
         else:
             assert False
     Sandbox(config).call(get_file_type_object)
@@ -815,11 +815,15 @@ def main():
 
     # Run tests
     nerror = 0
+    if version_info < (2, 6):
+        base_exception = Exception
+    else:
+        base_exception = BaseException
     for func in all_tests:
         name = func.__name__
         try:
             func()
-        except BaseException, err:
+        except base_exception, err:
             nerror += 1
             print "Test %s: FAILED! %r" % (name, err)
             if options.raise_exception:

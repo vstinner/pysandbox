@@ -13,6 +13,7 @@
 #  - add a new empty section in the changelog for version n+1
 #  - git commit
 
+from __future__ import with_statement
 from distutils.core import setup, Extension
 import imp
 
