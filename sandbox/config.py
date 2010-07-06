@@ -1,6 +1,7 @@
 from os import sep as path_sep
 from os.path import realpath
 import sys
+from sys import version_info
 
 DEFAULT_TIMEOUT = 5.0
 
@@ -82,6 +83,11 @@ class SandboxConfig:
             # note: exit is replaced by safe_exit()
             # note: open is replaced by safe_open()
         ))
+        if version_info >= (3, 0):
+            self._builtins_whitelist |= set((
+                # functions
+                '__build_class__', 'exec',
+            ))
 
         # Timeout in seconds: use None to disable the timeout
         self.timeout = kw.get('timeout', DEFAULT_TIMEOUT)
