@@ -1,4 +1,4 @@
-import __builtin__
+import __builtin__ as BUILTINS_MODULE
 from types import FrameType
 from sys import _getframe, version_info
 import sys
@@ -19,7 +19,7 @@ class CleanupBuiltins:
     """
     def __init__(self):
         self.get_frame_builtins = dictionary_of(FrameType)['f_builtins'].__get__
-        self.builtin_dict = RestorableDict(__builtin__.__dict__)
+        self.builtin_dict = RestorableDict(BUILTINS_MODULE.__dict__)
 
     def enable(self, sandbox):
         config = sandbox.config
@@ -94,5 +94,5 @@ class CleanupBuiltins:
                 set_interp_builtins(self.builtins_dict)
         for module_dict in self.modules_dict:
             module_dict['__builtins__'] = self.builtins_dict
-        self.main_module.__dict__['__builtins__'] = __builtin__
+        self.main_module.__dict__['__builtins__'] = BUILTINS_MODULE
 
