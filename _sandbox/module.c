@@ -3,6 +3,10 @@
 
 #define VERSION 1
 
+#if PY_MAJOR_VERSION >= 3
+# define PYTHON3
+#endif
+
 static newfunc code_new = NULL;
 static PyObject *sandbox_error = NULL;
 
@@ -94,18 +98,49 @@ static PyMethodDef sandbox_methods[] = {
 PyDoc_STRVAR(module_doc,
 "_sandbox module.");
 
+#ifdef PYTHON3
+static struct PyModuleDef sandbox_module = {
+    PyModuleDef_HEAD_INIT,
+    "_sandbox",
+    module_doc,
+    -1,
+    sandbox_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+#endif
+
 PyMODINIT_FUNC
+#ifdef PYTHON3
+PyInit__sandbox(void)
+#else
 init_sandbox(void)
+#endif
 {
     PyObject *m, *version;
 
+#ifdef PYTHON3
+    m = PyModule_Create(&sandbox_module);
+    if (m == NULL)
+        return NULL;
+#else
     m = Py_InitModule3("_sandbox", sandbox_methods, module_doc);
     if (m == NULL)
         return;
+#endif
 
     code_new = PyCode_Type.tp_new;
 
+#ifdef PYTHON3
+    version = PyLong_FromLong(VERSION);
+#else
     version = PyInt_FromLong(VERSION);
+#endif
     PyModule_AddObject(m, "version", version);
+#ifdef PYTHON3
+    return m;
+#endif
 }
 
