@@ -1,0 +1,66 @@
+diff --git a/sandbox/proxy.py b/sandbox/proxy.py
+index 3365bcd..5b0526e 100644
+--- a/sandbox/proxy.py
++++ b/sandbox/proxy.py
+@@ -19,7 +19,7 @@ builtin_function_or_method = type(len)
+ SAFE_TYPES = (
+     NoneType,
+     bool, int, int, float,
+-    str, str,
++    bytes, str,
+     FrameType,
+ )
+ 
+@@ -250,7 +250,7 @@ def _proxy():
+         if isinstance(value, SAFE_TYPES):
+             # Safe type, no need to create a proxy
+             return value
+-        elif isinstance(value, collections.Callable):
++        elif hasattr(value, '__call__'):
+             return callback_proxy(proxy, value)
+         elif isinstance(value, tuple):
+             return tuple(
+@@ -260,10 +260,8 @@ def _proxy():
+             return createReadOnlyList(value)
+         elif isinstance(value, dict):
+             return createReadOnlyDict(value)
+-        elif isinstance(value, OBJECT_TYPES):
+-            return createReadOnlyObject(value)
+         else:
+-            raise TypeError("Unable to proxy a value of type %s" % type(value))
++            return createReadOnlyObject(value)
+     return proxy
+ proxy = _proxy()
+ del _proxy
+diff --git a/tests.py b/tests.py
+index e83e148..bd47368 100644
+--- a/tests.py
++++ b/tests.py
+@@ -29,9 +29,12 @@ READ_FILENAME = realpath(__file__)
+ del realpath
+ 
+ def read_first_line(open):
+-    with open(READ_FILENAME) as fp:
++    fp = open(READ_FILENAME, 'rb')
++    try:
+         line = fp.readline()
+-    assert line.rstrip() == '#!/usr/bin/env python'
++    finally:
++        fp.close()
++    assert line.rstrip() == b'#!/usr/bin/env python'
+ 
+ if USE_CSANDBOX:
+     def test_open_whitelist():
+@@ -226,8 +229,11 @@ def test_filetype_from_sys_stdout():
+ 
+ def get_file_type_from_open_file(filename):
+     try:
+-        with open(filename) as fp:
++        fp = open(filename)
++        try:
+             return _get_file_type(fp)
++        finally:
++            fp.close()
+     except SandboxError as err:
+         pass
+ 
