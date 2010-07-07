@@ -207,7 +207,7 @@ def test_readonly_import():
 
 def get_file_type_from_stdout():
     import sys
-    return type(sys.stdout)
+    return _get_file_type(sys.stdout)
 
 def test_filetype_from_sys_stdout():
     config = createSandboxConfig('stdout')
@@ -227,7 +227,7 @@ def test_filetype_from_sys_stdout():
 def get_file_type_from_open_file(filename):
     try:
         with open(filename) as fp:
-            return type(fp)
+            return _get_file_type(fp)
     except SandboxError, err:
         pass
 
@@ -587,10 +587,10 @@ def test_timeout():
     Sandbox(config).call(denial_of_service)
 
 def test_execute():
-    code = "assert globals().keys() == locals().keys() == ['__builtins__']"
+    code = "assert list(globals().keys()) == list(locals().keys()) == ['__builtins__']"
     createSandbox().execute(code)
 
-    code = "assert globals().keys() == locals().keys() == ['a']"
+    code = "assert list(globals().keys()) == list(locals().keys()) == ['a']"
     createSandbox().execute(code, globals={'a': 0})
 
 def replace_func_code():
@@ -647,20 +647,37 @@ def get_code_args():
         return a+b
     fcode = somme.func_code
     # code constructor arguments
-    return (
-        fcode.co_argcount,
-        fcode.co_nlocals,
-        fcode.co_stacksize,
-        fcode.co_flags,
-        fcode.co_code,
-        fcode.co_consts,
-        fcode.co_names,
-        fcode.co_varnames,
-        fcode.co_filename,
-        fcode.co_name,
-        fcode.co_firstlineno,
-        fcode.co_lnotab,
-    )
+    if version_info >= (3, 0):
+        return (
+            fcode.co_argcount,
+            fcode.co_kwonlyargcount,
+            fcode.co_nlocals,
+            fcode.co_stacksize,
+            fcode.co_flags,
+            fcode.co_code,
+            fcode.co_consts,
+            fcode.co_names,
+            fcode.co_varnames,
+            fcode.co_filename,
+            fcode.co_name,
+            fcode.co_firstlineno,
+            fcode.co_lnotab,
+        )
+    else:
+        return (
+            fcode.co_argcount,
+            fcode.co_nlocals,
+            fcode.co_stacksize,
+            fcode.co_flags,
+            fcode.co_code,
+            fcode.co_consts,
+            fcode.co_names,
+            fcode.co_varnames,
+            fcode.co_filename,
+            fcode.co_name,
+            fcode.co_firstlineno,
+            fcode.co_lnotab,
+        )
 
 def code_objects():
     try:
@@ -727,9 +744,19 @@ if USE_CSANDBOX:
 else:
     print "USE_CSANDBOX=False: disable test_bytecode()"
 
+def _get_file_type(obj):
+    if version_info >= (3, 0):
+        if hasattr(obj, "buffer"):
+            # TextIOWrapper => BufferedXXX
+            obj = obj.buffer
+        if hasattr(obj, "raw"):
+            # BufferedXXX => _FileIO
+            obj = obj.raw
+    return type(obj)
+
 def get_file_type_from_stdout_method():
     import sys
-    return type(sys.stdout.__enter__())
+    return _get_file_type(sys.stdout.__enter__())
 
 def test_method_proxy():
     config = createSandboxConfig('stdout')
