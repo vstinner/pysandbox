@@ -2,10 +2,16 @@
 Proxies using a whitelist policy.
 """
 
-from types import (NoneType, FunctionType, ClassType, InstanceType,
-    MethodType, FrameType)
+from types import FunctionType, MethodType, FrameType
 from sandbox import SandboxError
 from sys import version_info
+if version_info < (3, 0):
+    from types import NoneType, ClassType, InstanceType
+    OBJECT_TYPES = (file, ClassType, InstanceType)
+else:
+    # Python 3 has no NoneType
+    NoneType = type(None)
+    OBJECT_TYPES = tuple()
 
 builtin_function_or_method = type(len)
 
@@ -239,7 +245,6 @@ def callback_proxy(proxy, callback):
     return _callback_proxy
 
 def _proxy():
-    file_type = file
     def proxy(value):
         if isinstance(value, SAFE_TYPES):
             # Safe type, no need to create a proxy
@@ -254,7 +259,7 @@ def _proxy():
             return createReadOnlyList(value)
         elif isinstance(value, dict):
             return createReadOnlyDict(value)
-        elif isinstance(value, (file_type, ClassType, InstanceType)):
+        elif isinstance(value, OBJECT_TYPES):
             return createReadOnlyObject(value)
         else:
             raise TypeError("Unable to proxy a value of type %s" % type(value))
