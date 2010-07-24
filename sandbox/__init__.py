@@ -12,9 +12,11 @@ class Protection:
 USE_CSANDBOX = True
 
 if USE_CSANDBOX:
-    from _sandbox import set_error_class
+    from _sandbox import set_error_class, version as _sandbox_version
     set_error_class(SandboxError)
     del set_error_class
+    if _sandbox_version != 1:
+        raise SandboxError("Unknown _sandbox version (%s)" % _sandbox_version)
 
 from .config import SandboxConfig
 from .sandbox_class import Sandbox
