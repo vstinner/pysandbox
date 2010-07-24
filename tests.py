@@ -593,25 +593,44 @@ def test_execute():
 
     test(
         "assert globals() is locals(), 'test_execute #1a'",
-        "assert list(globals().keys()) == list(locals().keys()) == ['__builtins__'], 'test_execute #1b'")
+        "assert list(globals().keys()) == list(locals().keys()) == ['__builtins__'], 'test_execute #1b'",
+        "x=42")
 
+    namespace = {'a': 1}
     test(
         "assert globals() is locals(), 'test_execute #2a'",
         "assert list(globals().keys()) == list(locals().keys()) == ['a', '__builtins__'], 'test_execute #2b'",
-        globals={'a': 1})
+        "a=10",
+        "x=42",
+        globals=namespace)
+    assert set(namespace.keys()) == set(('a', 'x', '__builtins__'))
+    assert namespace['a'] == 10
+    assert namespace['x'] == 42 
 
+    namespace = {'b': 2}
     test(
         "assert globals() is not locals(), 'test_execute #3a'",
         "assert list(globals().keys()) == ['__builtins__'], 'test_execute #3b'",
         "assert list(locals().keys()) == ['b'], 'test_execute #3c'",
-        locals={'b': 2})
+        "b=20",
+        "x=42",
+        locals=namespace)
+    assert namespace == {'b': 20, 'x': 42}
 
+    my_globals = {'a': 1}
+    namespace = {'b': 2}
     test(
         "assert globals() is not locals(), 'test_execute #4a'",
         "assert list(globals().keys()) == ['a', '__builtins__'], 'test_execute #4b'",
         "assert list(locals().keys()) == ['b'], 'test_execute #4c'",
-        globals={'a': 1}, 
-        locals={'b': 2})
+        "x=42",
+        "a=10",
+        "b=20",
+        globals=my_globals, 
+        locals=namespace)
+    assert set(my_globals.keys()) == set(('a', '__builtins__'))
+    assert my_globals['a'] == 1
+    assert namespace == {'a': 10, 'b': 20, 'x': 42}
     
     namespace = {}
     test('a=1', locals=namespace)
