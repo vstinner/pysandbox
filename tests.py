@@ -587,11 +587,35 @@ def test_timeout():
     Sandbox(config).call(denial_of_service)
 
 def test_execute():
-    code = "assert list(globals().keys()) == list(locals().keys()) == ['__builtins__']"
-    createSandbox().execute(code)
+    def test(*lines, **kw):
+        code = "; ".join(lines)
+        createSandbox().execute(code, **kw)
 
-    code = "assert list(globals().keys()) == list(locals().keys()) == ['a']"
-    createSandbox().execute(code, globals={'a': 0})
+    test(
+        "assert globals() is locals(), 'test_execute #1a'",
+        "assert list(globals().keys()) == list(locals().keys()) == ['__builtins__'], 'test_execute #1b'")
+
+    test(
+        "assert globals() is locals(), 'test_execute #2a'",
+        "assert list(globals().keys()) == list(locals().keys()) == ['a', '__builtins__'], 'test_execute #2b'",
+        globals={'a': 1})
+
+    test(
+        "assert globals() is not locals(), 'test_execute #3a'",
+        "assert list(globals().keys()) == ['__builtins__'], 'test_execute #3b'",
+        "assert list(locals().keys()) == ['b'], 'test_execute #3c'",
+        locals={'b': 2})
+
+    test(
+        "assert globals() is not locals(), 'test_execute #4a'",
+        "assert list(globals().keys()) == ['a', '__builtins__'], 'test_execute #4b'",
+        "assert list(locals().keys()) == ['b'], 'test_execute #4c'",
+        globals={'a': 1}, 
+        locals={'b': 2})
+    
+    namespace = {}
+    test('a=1', locals=namespace)
+    assert namespace == {'a': 1}, namespace
 
 def replace_func_code():
     def add(x, y):

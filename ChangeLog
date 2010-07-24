@@ -1,5 +1,7 @@
 Version 1.0.1
     * Fix Python 2.5 compatibility
+    * Fix Sandbox.execute(): don't create a new object for globals and locals
+      when the user pass its own dict, only proxify the keys and values
 
 Version 1.0 (2010-06-29)
     * First public release

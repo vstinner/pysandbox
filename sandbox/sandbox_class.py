@@ -1,7 +1,6 @@
 from __future__ import with_statement
 from .config import SandboxConfig
 from .proxy import proxy
-from .blacklist_proxy import createDictProxy
 from .timeout import limitedTime
 
 def keywordsProxy(keywords):
@@ -44,6 +43,12 @@ class Sandbox:
         kw = keywordsProxy(kw)
         return self._call(func, args, kw)
 
+    def _dictProxy(self, data):
+        items = data.items()
+        data.clear()
+        for key, value in items:
+            data[proxy(key)] = proxy(value)
+
     def execute(self, code, globals=None, locals=None):
         """
         execute the code in the sandbox:
@@ -53,11 +58,11 @@ class Sandbox:
         Use globals={} by default to get an empty namespace.
         """
         if globals is not None:
-            globals = createDictProxy(globals)
+            self._dictProxy(globals)
         else:
             globals = {}
         if locals is not None:
-            locals = createDictProxy(locals)
+            self._dictProxy(locals)
 
         self._call(_call_exec, (code, globals, locals), {})
 
