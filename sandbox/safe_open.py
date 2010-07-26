@@ -7,7 +7,7 @@ def _safe_open(open_whitelist):
     def safe_open(filename, mode='r', buffering=-1):
         """A secure file reader."""
         if type(mode) is not str:
-            raise TypeError("mode have to be a string, not %s" % type(name).__name__)
+            raise TypeError("mode have to be a string, not %s" % type(mode).__name__)
         if mode not in ['r', 'rb', 'rU']:
             raise ValueError("Only read modes are allowed.")
 
