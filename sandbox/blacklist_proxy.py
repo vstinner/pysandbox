@@ -6,7 +6,7 @@ inherit from dict: Python/ceval.c uses PyDict_SetItem() and an inlined version
 of PyDict_GetItem().
 """
 
-from .proxy import proxy, readOnlyError
+from .proxy import readOnlyError
 
 class ReadOnlyBuiltins(dict):
     """

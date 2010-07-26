@@ -2,7 +2,7 @@
 Proxies using a whitelist policy.
 """
 
-from types import FunctionType, MethodType, FrameType
+from types import MethodType, FrameType
 from sandbox import SandboxError
 from sys import version_info
 if version_info < (3, 0):

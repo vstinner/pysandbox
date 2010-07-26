@@ -228,13 +228,13 @@ def get_file_type_from_open_file(filename):
     try:
         with open(filename) as fp:
             return _get_file_type(fp)
-    except SandboxError, err:
+    except SandboxError:
         pass
 
     try:
         with open(filename, 'rb') as fp:
             return type(fp)
-    except SandboxError, err:
+    except SandboxError:
         pass
     raise TestException("Unable to get file type")
 
@@ -605,7 +605,7 @@ def test_execute():
         globals=namespace)
     assert set(namespace.keys()) == set(('a', 'x', '__builtins__'))
     assert namespace['a'] == 10
-    assert namespace['x'] == 42 
+    assert namespace['x'] == 42
 
     namespace = {'b': 2}
     test(
@@ -626,12 +626,12 @@ def test_execute():
         "x=42",
         "a=10",
         "b=20",
-        globals=my_globals, 
+        globals=my_globals,
         locals=namespace)
     assert set(my_globals.keys()) == set(('a', '__builtins__'))
     assert my_globals['a'] == 1
     assert namespace == {'a': 10, 'b': 20, 'x': 42}
-    
+
     namespace = {}
     test('a=1', locals=namespace)
     assert namespace == {'a': 1}, namespace
@@ -663,7 +663,6 @@ if version_info < (3, 0):
 
     def test_execfile():
         from tempfile import NamedTemporaryFile
-        from StringIO import StringIO
 
         with NamedTemporaryFile() as script:
             print >>script, "print('Hello World!')"
