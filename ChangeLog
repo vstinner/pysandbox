@@ -1,8 +1,14 @@
+Version 1.0.2
+
+    * SandboxConfig doesn't import modules to get their path
+
 Version 1.0.1 (2010-07-26)
+
     * Fix Python 2.5 compatibility
     * Fix Sandbox.execute(): don't create a new object for globals and locals
       when the user pass its own dict, only proxify the keys and values
 
 Version 1.0 (2010-06-29)
+
     * First public release
 

@@ -4,8 +4,6 @@ Major tasks
  * interpreter.py has a quit() builtin function (instance of site.Quitter)
    which is not protected by a proxy
  * safe_import(): from_list default value is mutable
- * SandboxConfig.allowModuleSourceCode(): don't import the module just to get
-   the filename
  * safe_open() should not use createReadOnlyObject(), but just hide the real
    type
  * Python3:

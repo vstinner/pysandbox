@@ -1,20 +1,46 @@
-from os import sep as path_sep
-from os.path import realpath
-import sys
+from os.path import realpath, sep as path_sep, dirname, join as path_join, exists, isdir
 from sys import version_info
+import imp
+import sys
 
 DEFAULT_TIMEOUT = 5.0
 
 def findLicenseFile():
     # Adapted from setcopyright() from site.py
     import os
-    here = os.path.dirname(os.__file__)
-    for filename in ["LICENSE.txt", "LICENSE"]:
-        for directory in (os.path.join(here, os.pardir), here, os.curdir):
-            fullname = os.path.join(directory, filename)
-            if os.path.exists(fullname):
+    here = dirname(os.__file__)
+    for filename in ("LICENSE.txt", "LICENSE"):
+        for directory in (path_join(here, os.pardir), here, os.curdir):
+            fullname = path_join(directory, filename)
+            if exists(fullname):
                 return fullname
     return None
+
+def getModulePath(name):
+    parts = name.split('.')
+
+    search_path = None
+    for index, part in enumerate(parts[:-1]):
+        fileobj, pathname, description = imp.find_module(part, search_path)
+        module = imp.load_module(part, fileobj, pathname, description)
+        del sys.modules[part]
+        try:
+            search_path = module.__path__
+        except AttributeError:
+            raise ImportError("%s is not a package" % '.'.join(parts[:index+1]))
+        module = None
+
+    part = parts[-1]
+    fileobj, pathname, description = imp.find_module(part, search_path)
+    if fileobj is not None:
+        fileobj.close()
+    if part == pathname:
+        # builtin module
+        return None
+    if not pathname:
+        # special module?
+        return None
+    return pathname
 
 class SandboxConfig:
     def __init__(self, *features, **kw):
@@ -225,22 +251,16 @@ class SandboxConfig:
         """
         if 'traceback' not in self._features:
             return
-        old_sys_modules = sys.modules.copy()
-        try:
-            module = __import__(name)
-            for part in name.split(".")[1:]:
-                module = getattr(module, part)
-            try:
-                filename = module.__file__
-            except AttributeError:
-                return
-        finally:
-            sys.modules.clear()
-            sys.modules.update(old_sys_modules)
-        if filename.endswith('.pyc'):
+
+        filename = getModulePath(name)
+        if not filename:
+            return
+        if filename.endswith('.pyc') or filename.endswith('.pyo'):
+            # file.pyc / file.pyo => file.py
             filename = filename[:-1]
-        if filename.endswith('__init__.py'):
-            filename = filename[:-11]
+        if isdir(filename) and not filename.endswith(path_sep):
+            # .../encodings => .../encodings/
+            filename += path_sep
         self.allowPath(filename)
 
     @staticmethod
