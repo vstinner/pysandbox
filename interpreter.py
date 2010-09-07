@@ -3,6 +3,7 @@ from code import InteractiveConsole
 from sandbox import Sandbox, SandboxConfig
 import readline
 from optparse import OptionParser
+from sandbox.version import VERSION
 
 class SandboxedInterpeter:
     def __init__(self):
@@ -54,6 +55,7 @@ class SandboxedInterpeter:
         console.interact("Try to break the sandbox!")
 
     def main(self):
+        print("pysandbox %s" % VERSION)
         self.dumpConfig()
         if 'help' in self.config.features:
             # Import pydoc here because it uses a lot of modules
