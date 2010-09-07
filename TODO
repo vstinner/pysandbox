@@ -3,6 +3,7 @@ Major tasks
 
  * re.match('a', 'a') raises a
    TypeError("Unable to proxy a value of type <type '_sre.SRE_Match'>")
+ * Finish the port to Python3
  * interpreter.py has a quit() builtin function (instance of site.Quitter)
    which is not protected by a proxy
  * safe_import(): from_list default value is mutable
