@@ -2,23 +2,33 @@
 Proxies using a whitelist policy.
 """
 
-from types import MethodType, FrameType
-from sandbox import SandboxError
 from sys import version_info
 if version_info < (3, 0):
     from types import NoneType, ClassType, InstanceType
     OBJECT_TYPES = (file, ClassType, InstanceType)
+    BYTES_TYPE = str
+    UNICODE_TYPE = unicode
+    def is_callable(obj):
+        return callable(obj)
 else:
     # Python 3 has no NoneType
     NoneType = type(None)
     OBJECT_TYPES = tuple()
+    # 2to3 script converts str to str instead of bytes
+    BYTES_TYPE = bytes
+    UNICODE_TYPE = str
+    def is_callable(obj):
+        return any("__call__" in cls.__dict__ for cls in type(obj).__mro__)
+
+from types import MethodType, FrameType
+from sandbox import SandboxError
 
 builtin_function_or_method = type(len)
 
 SAFE_TYPES = (
     NoneType,
     bool, int, long, float,
-    str, unicode,
+    BYTES_TYPE, UNICODE_TYPE,
     FrameType,
 )
 
@@ -249,7 +259,7 @@ def _proxy():
         if isinstance(value, SAFE_TYPES):
             # Safe type, no need to create a proxy
             return value
-        elif callable(value):
+        elif is_callable(value):
             return callback_proxy(proxy, value)
         elif isinstance(value, tuple):
             return tuple(

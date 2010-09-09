@@ -6,6 +6,14 @@ from sandbox import (Sandbox, SandboxConfig,
 from sys import version_info
 import contextlib
 
+if version_info >= (3, 0):
+    # function for python2/python3 compatibility: bytes literal string
+    def bytes_literal(text):
+        return text.encode('ascii')
+else:
+    def bytes_literal(text):
+        return text
+
 class TestException(Exception):
     pass
 
@@ -29,9 +37,9 @@ READ_FILENAME = realpath(__file__)
 del realpath
 
 def read_first_line(open):
-    with open(READ_FILENAME) as fp:
+    with open(READ_FILENAME, 'rb') as fp:
         line = fp.readline()
-    assert line.rstrip() == '#!/usr/bin/env python'
+    assert line.rstrip() == bytes_literal('#!/usr/bin/env python')
 
 if USE_CSANDBOX:
     def test_open_whitelist():

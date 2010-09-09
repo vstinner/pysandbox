@@ -1,7 +1,7 @@
 Major tasks
 -----------
 
- * Python3: fix builtins.py, Python3 has no __builtin__ module
+ * Python3: "with open(filename): pass" raise an AttributeError('__exit__')
  * Write a test for traceback
  * re.match('a', 'a') raises a
    TypeError("Unable to proxy a value of type <type '_sre.SRE_Match'>")
