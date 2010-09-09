@@ -43,10 +43,13 @@ Features
 To enable a feature, use SandboxConfig('feature1', 'feature2', ...) or
 config.enable('feature'). Available features:
 
+ - "codecs": codecs module
  - "code": compile() builtin, frame.f_locals, frame.f_code and
    generator.gi_code
  - "debug_sandbox": enable traceback of the sandbox itself
  - "datetime": datetime module
+ - "encodings": encodings module with ascii, latin_1, utf_8 and utf_32_be
+   codecs (submodules)
  - "exit": sys.exit(), BaseException, KeyboardInterrupt, SystemExit, quit()
  - "future": from __future__ import ...
  - "help": pydoc.help(), use "import pydoc" outside the sandbox to use it

@@ -269,6 +269,23 @@ class SandboxConfig:
                 'choice', 'gauss', 'getrandbits', 'randint', 'random',
                 'randrange', 'sample', 'shuffle', 'triangular', 'uniform')
                 # blocked: getstate, jumpahead, seed, setstate
+        elif feature == 'codecs':
+            self.allowModule('codecs',
+                'lookup', 'CodecInfo',
+                'ascii_encode', 'ascii_decode',
+                'latin_1_encode', 'latin_1_decode',
+                'utf_32_be_encode', 'utf_32_be_decode')
+            self.allowSafeModule('codecs',
+                'Codec', 'BufferedIncrementalDecoder',
+                'IncrementalEncoder', 'IncrementalDecoder',
+                'StreamWriter', 'StreamReader')
+        elif feature == 'encodings':
+            self.enable('codecs')
+            self.allowModule('encodings', 'aliases')
+            self.allowModule('encodings.ascii', 'getregentry')
+            self.allowModule('encodings.latin_1', 'getregentry')
+            self.allowModule('encodings.utf_8', 'getregentry')
+            self.allowModule('encodings.utf_32_be', 'getregentry')
         else:
             self._features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)

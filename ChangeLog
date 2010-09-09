@@ -7,7 +7,10 @@ Version 1.0.2
       objects
     * Add SandoxConfig.allowSafeModule(): similar to allowModule() but don't
       proxify the attribute
-    * Add "datetime", "itertools", "math", "random" and "time" features
+    * Add "codecs", "datetime", "encodings", "itertools", "math", "random"
+      and "time" features
+    * interpreter feature enables encodings feature to support non-ascii
+      unicode literals
 
 Version 1.0.1 (2010-07-26)
 
