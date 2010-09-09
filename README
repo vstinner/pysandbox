@@ -54,6 +54,7 @@ config.enable('feature'). Available features:
  - "site": allow to read the license file
  - "stdin": sys.stdin, input() and raw_input()
  - "stdout", "stderr": sys.stdout and sys.stderr
+ - "time": time module (except sleep, strptime and tzset functions)
  - "traceback": compile() builtin, frame.f_code, next calls to allowModule()
    will add the module filename to the open() whitelist, so Python can display
    a traceback with the source code

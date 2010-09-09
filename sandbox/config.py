@@ -224,6 +224,14 @@ class SandboxConfig:
                 'decomposition', 'digit', 'east_asian_width', 'lookup',
                 'mirrored', 'name', 'normalize', 'numeric',
                 'unidata_version')
+        elif feature == 'time':
+            self.allowModule('time',
+                'accept2dyear', 'altzone', 'asctime', 'clock', 'ctime',
+                'daylight', 'mktime', 'strftime', 'time',
+                'timezone', 'tzname')
+            self.allowSafeModule('time',
+               'gmtime', 'localtime', 'struct_time')
+            # blocked: sleep(), strptime(), tzset()
         else:
             self._features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)
