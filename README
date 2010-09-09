@@ -53,6 +53,7 @@ config.enable('feature'). Available features:
  - "interpreter": give access to standard streams, enable traceback
  - "itertools": itertools module
  - "math": math module
+ - "random": random module
  - "regex": compile regex, match regex, search regex, etc. (re module)
  - "site": allow to read the license file
  - "stdin": sys.stdin, input() and raw_input()

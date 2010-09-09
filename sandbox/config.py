@@ -252,6 +252,23 @@ class SandboxConfig:
                 'izip_longest', 'permutations', 'product', 'repeat', 'starmap',
                 'takewhile', 'tee')
             # TODO, python 2.7/3.2: combinations_with_replacement, compress
+        elif feature == 'random':
+            self.enable('math')
+            self.allowModule('__future__', 'division')
+            self.allowModule('warnings', 'warn')
+            self.allowModule('types', 'MethodType', 'BuiltinMethodType')
+            self.allowModule('os', 'urandom')
+            self.allowModule('binascii', 'hexlify')
+            self.allowSafeModule('_random', 'Random')
+            self.allowModule('random',
+                # variate
+                'betavariate', 'expovariate', 'gammavariate', 'lognormvariate',
+                'normalvariate', 'paretovariate', 'vonmisesvariate',
+                'weibullvariate',
+                # others
+                'choice', 'gauss', 'getrandbits', 'randint', 'random',
+                'randrange', 'sample', 'shuffle', 'triangular', 'uniform')
+                # blocked: getstate, jumpahead, seed, setstate
         else:
             self._features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)
