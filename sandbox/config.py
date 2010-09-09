@@ -203,7 +203,7 @@ class SandboxConfig:
             self._builtins_whitelist.add('compile')
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
-                'api_version', 'version', 'hexversion')
+                'api_version', 'version', 'hexversion', 'version_info')
         elif feature == 'debug_sandbox':
             self.enable('traceback')
             self.allowModule('sys', '_getframe')
@@ -237,6 +237,21 @@ class SandboxConfig:
                 'MAXYEAR', 'MINYEAR')
             self.allowSafeModule('datetime',
                 'date', 'datetime', 'time', 'timedelta', 'tzinfo')
+        elif feature == 'math':
+            self.allowModule('math',
+                'acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
+                'ceil', 'copysign', 'cos', 'cosh', 'degrees', 'e', 'exp',
+                'fabs', 'factorial', 'floor', 'fmod', 'frexp', 'fsum', 'hypot',
+                'isinf', 'isnan', 'ldexp', 'log', 'log10', 'log1p', 'modf',
+                'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan', 'tanh',
+                'trunc')
+        elif feature == 'itertools':
+            self.allowSafeModule('itertools',
+                'chain', 'combinations', 'count', 'cycle', 'dropwhile',
+                'groupby', 'ifilter', 'ifilterfalse', 'imap', 'islice', 'izip',
+                'izip_longest', 'permutations', 'product', 'repeat', 'starmap',
+                'takewhile', 'tee')
+            # TODO, python 2.7/3.2: combinations_with_replacement, compress
         else:
             self._features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)
