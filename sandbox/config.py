@@ -17,6 +17,9 @@ def findLicenseFile():
     return None
 
 def getModulePath(name):
+    """
+    Get the path of a module, as "import module; module.__file__".
+    """
     parts = name.split('.')
 
     search_path = None
