@@ -228,6 +228,9 @@ isinstance=isinstance, MethodType=MethodType):
         def __delattr__(self, name):
             readOnlyError()
 
+        def __dir__(self):
+            return dir(real_object)
+
         def __getattr__(self, name):
             value = getattr(real_object, name)
             if isinstance(value, MethodType):
