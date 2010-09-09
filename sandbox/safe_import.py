@@ -1,7 +1,8 @@
 from .proxy import proxy, readOnlyError
 
-def createSafeModule(real_module, attributes):
+def createSafeModule(real_module, attributes, safe_attributes):
     attributes = set(attributes)
+    attributes |= set(safe_attributes)
 
     name_repr = repr(real_module.__name__)
     try:
@@ -13,6 +14,7 @@ def createSafeModule(real_module, attributes):
         attributes.add('__file__')
 
     attributes = frozenset(attributes)
+    safe_attributes = frozenset(safe_attributes)
 
     class SafeModule(object):
         __doc__ = real_module.__doc__
@@ -31,7 +33,9 @@ def createSafeModule(real_module, attributes):
             if name not in attributes:
                 raise AttributeError("SafeModule %r has no attribute %r" % (self.__name__, name))
             value = getattr(real_module, name)
-            return proxy(value)
+            if name not in safe_attributes:
+                value = proxy(value)
+            return value
 
         def __setattr__(self, name, value):
             readOnlyError()
@@ -47,10 +51,10 @@ def _safe_import(__import__, module_whitelist):
     """
     def safe_import(name, globals={}, locals={}, fromlist=[], level=-1):
         try:
-            attributes = module_whitelist[name]
+            attributes, safe_attributes = module_whitelist[name]
         except KeyError:
             raise ImportError('Import "%s" blocked by the sandbox' % name)
         module = __import__(name, globals, locals, fromlist, level)
-        return createSafeModule(module, attributes)
+        return createSafeModule(module, attributes, safe_attributes)
     return safe_import
 

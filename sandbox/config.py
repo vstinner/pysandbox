@@ -56,7 +56,8 @@ class SandboxConfig:
         # open() whitelist: see safe_open()
         self._open_whitelist = set()
 
-        # import whitelist: see safe_import()
+        # import whitelist dict: name (str) => [attributes, safe_attributes]
+        # where attributes and safe_attributes are set of names (str)
         self._import_whitelist = {}
 
         # list of enabled features
@@ -130,7 +131,8 @@ class SandboxConfig:
 
     @property
     def import_whitelist(self):
-        return self._import_whitelist.copy()
+        return dict((name, (tuple(value[0]), tuple(value[1])))
+            for name, value in self._import_whitelist.iteritems())
 
     @property
     def open_whitelist(self):
@@ -228,9 +230,16 @@ class SandboxConfig:
 
     def allowModule(self, name, *attributes):
         if name in self._import_whitelist:
-            self._import_whitelist[name] |= set(attributes)
+            self._import_whitelist[name][0] |= set(attributes)
         else:
-            self._import_whitelist[name] = set(attributes)
+            self._import_whitelist[name] = [set(attributes), set()]
+        self.allowModuleSourceCode(name)
+
+    def allowSafeModule(self, name, *safe_attributes):
+        if name in self._import_whitelist:
+            self._import_whitelist[name][1] |= set(safe_attributes)
+        else:
+            self._import_whitelist[name] = [set(), set(safe_attributes)]
         self.allowModuleSourceCode(name)
 
     def allowPath(self, path):
