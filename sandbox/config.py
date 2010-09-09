@@ -209,6 +209,7 @@ class SandboxConfig:
             self.enable('stderr')
             self.enable('exit')
             self.enable('site')
+            self.enable('encodings')
             self._builtins_whitelist.add('compile')
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
@@ -281,10 +282,10 @@ class SandboxConfig:
         elif feature == 'codecs':
             self.allowModule('codecs',
                 'lookup', 'CodecInfo',
-                'ascii_encode', 'ascii_decode',
-                'latin_1_encode', 'latin_1_decode',
                 'utf_32_be_encode', 'utf_32_be_decode')
             self.allowSafeModule('codecs',
+                'ascii_encode', 'ascii_decode',
+                'latin_1_encode', 'latin_1_decode',
                 'Codec', 'BufferedIncrementalDecoder',
                 'IncrementalEncoder', 'IncrementalDecoder',
                 'StreamWriter', 'StreamReader')
