@@ -7,7 +7,7 @@ Version 1.0.2
       objects
     * Add SandoxConfig.allowSafeModule(): similar to allowModule() but don't
       proxify the attribute
-    * Add "time" feature
+    * Add "datetime" and "time" feature
 
 Version 1.0.1 (2010-07-26)
 

@@ -232,6 +232,11 @@ class SandboxConfig:
             self.allowSafeModule('time',
                'gmtime', 'localtime', 'struct_time')
             # blocked: sleep(), strptime(), tzset()
+        elif feature == 'datetime':
+            self.allowModule('datetime',
+                'MAXYEAR', 'MINYEAR')
+            self.allowSafeModule('datetime',
+                'date', 'datetime', 'time', 'timedelta', 'tzinfo')
         else:
             self._features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)

@@ -46,6 +46,7 @@ config.enable('feature'). Available features:
  - "code": compile() builtin, frame.f_locals, frame.f_code and
    generator.gi_code
  - "debug_sandbox": enable traceback of the sandbox itself
+ - "datetime": datetime module
  - "exit": sys.exit(), BaseException, KeyboardInterrupt, SystemExit, quit()
  - "future": from __future__ import ...
  - "help": pydoc.help(), use "import pydoc" outside the sandbox to use it
