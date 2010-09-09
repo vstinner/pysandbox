@@ -1,19 +1,15 @@
 Major tasks
 -----------
 
+ * Python3: fix builtins.py, Python3 has no __builtin__ module
+ * Write a test for traceback
  * re.match('a', 'a') raises a
    TypeError("Unable to proxy a value of type <type '_sre.SRE_Match'>")
- * Finish the port to Python3
  * interpreter.py has a quit() builtin function (instance of site.Quitter)
    which is not protected by a proxy
  * safe_import(): from_list default value is mutable
  * safe_open() should not use createReadOnlyObject(), but just hide the real
    type
- * Python3:
-   - fix proxy.py: Python3 has no builtin file type
-   - fix proxy.py: Python3 has no types.ClassType nor types.InstanceType
-   - fix safe_open.py: open() doesn't accept buffering=None
-   - fix builtins.py: Python3 has no __builtin__ module
  * Write a blacklist for ObjectProxy (eg. "__class__" attribute)
  * Write a whitelist of modifiable attributes in ObjectProxy?
    Problem of callback: have to be executed in the sandbox
