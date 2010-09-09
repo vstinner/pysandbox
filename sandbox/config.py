@@ -282,13 +282,15 @@ class SandboxConfig:
         elif feature == 'codecs':
             self.allowModule('codecs',
                 'lookup', 'CodecInfo',
-                'utf_32_be_encode', 'utf_32_be_decode')
+                'utf_32_be_encode', 'utf_32_be_decode',
+                'charmap_encode', 'charmap_decode')
             self.allowSafeModule('codecs',
                 'ascii_encode', 'ascii_decode',
                 'latin_1_encode', 'latin_1_decode',
                 'Codec', 'BufferedIncrementalDecoder',
                 'IncrementalEncoder', 'IncrementalDecoder',
-                'StreamWriter', 'StreamReader')
+                'StreamWriter', 'StreamReader',
+                'make_identity_dict', 'make_encoding_map')
         elif feature == 'encodings':
             self.enable('codecs')
             self.allowModule('encodings', 'aliases')
@@ -296,6 +298,7 @@ class SandboxConfig:
             self.allowModule('encodings.latin_1', 'getregentry')
             self.allowModule('encodings.utf_8', 'getregentry')
             self.allowModule('encodings.utf_32_be', 'getregentry')
+            self.allowModule('encodings.rot_13', 'getregentry')
         else:
             self._features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)
