@@ -1,6 +1,8 @@
 Major tasks
 -----------
 
+ * Choose getModulePath() implementation (problem with "from encodings import
+   aliases")
  * Python3: set/fix OBJECT_TYPES of proxy()
  * Python3: allow __subclasses__ attribute?
  * Write a test for traceback

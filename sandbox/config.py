@@ -1,6 +1,6 @@
 from os.path import realpath, sep as path_sep, dirname, join as path_join, exists, isdir
 from sys import version_info
-import imp
+#import imp
 import sys
 
 DEFAULT_TIMEOUT = 5.0
@@ -16,34 +16,43 @@ def findLicenseFile():
                 return fullname
     return None
 
+#def getModulePath(name):
+#    """
+#    Get the path of a module, as "import module; module.__file__".
+#    """
+#    parts = name.split('.')
+#
+#    search_path = None
+#    for index, part in enumerate(parts[:-1]):
+#        fileobj, pathname, description = imp.find_module(part, search_path)
+#        module = imp.load_module(part, fileobj, pathname, description)
+#        del sys.modules[part]
+#        try:
+#            search_path = module.__path__
+#        except AttributeError:
+#            raise ImportError("%s is not a package" % '.'.join(parts[:index+1]))
+#        module = None
+#
+#    part = parts[-1]
+#    fileobj, pathname, description = imp.find_module(part, search_path)
+#    if fileobj is not None:
+#        fileobj.close()
+#    if part == pathname:
+#        # builtin module
+#        return None
+#    if not pathname:
+#        # special module?
+#        return None
+#    return pathname
+#
 def getModulePath(name):
-    """
-    Get the path of a module, as "import module; module.__file__".
-    """
-    parts = name.split('.')
-
-    search_path = None
-    for index, part in enumerate(parts[:-1]):
-        fileobj, pathname, description = imp.find_module(part, search_path)
-        module = imp.load_module(part, fileobj, pathname, description)
-        del sys.modules[part]
-        try:
-            search_path = module.__path__
-        except AttributeError:
-            raise ImportError("%s is not a package" % '.'.join(parts[:index+1]))
-        module = None
-
-    part = parts[-1]
-    fileobj, pathname, description = imp.find_module(part, search_path)
-    if fileobj is not None:
-        fileobj.close()
-    if part == pathname:
-        # builtin module
-        return None
-    if not pathname:
-        # special module?
-        return None
-    return pathname
+    old_modules = sys.modules.copy()
+    try:
+        module = __import__(name)
+        return getattr(module, '__file__', None)
+    finally:
+        sys.modules.clear()
+        sys.modules.update(old_modules)
 
 class SandboxConfig:
     def __init__(self, *features, **kw):
