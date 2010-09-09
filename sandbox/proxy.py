@@ -49,9 +49,14 @@ def createMethodProxy(method_wrapper):
     return func
 
 def copyProxyMethods(real_object, proxy_class):
+    for name in (
     # Copy methods from the real object because the object type has default
     # implementations
-    for name in ('__repr__', '__str__', '__hash__', '__call__'):
+    '__repr__', '__str__', '__hash__', '__call__',
+    # Copy __enter__ and __exit__ because the WITH_STATEMENT bytecode uses
+    # special_lookup() which reads type(obj).attr instead of obj.attr
+    '__enter__', '__exit__',
+    ):
         if not hasattr(real_object, name):
             continue
         func = getattr(real_object, name)
