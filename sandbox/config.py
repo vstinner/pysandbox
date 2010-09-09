@@ -170,7 +170,6 @@ class SandboxConfig:
         elif feature == 'traceback':
             if self._cpython_restricted:
                 raise ValueError("traceback feature is incompatible with the CPython restricted mode")
-            self.enable('code')
             # change allowModule() behaviour
         elif feature in ('stdout', 'stderr'):
             self.allowModule('sys', feature)
@@ -199,7 +198,7 @@ class SandboxConfig:
             self.enable('stderr')
             self.enable('exit')
             self.enable('site')
-            self.enable('code')
+            self._builtins_whitelist.add('compile')
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')

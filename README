@@ -43,7 +43,8 @@ Features
 To enable a feature, use SandboxConfig('feature1', 'feature2', ...) or
 config.enable('feature'). Available features:
 
- - "code": compile() builtin, frame.f_locals and generator.gi_code
+ - "code": compile() builtin, frame.f_locals, frame.f_code and
+   generator.gi_code
  - "debug_sandbox": enable traceback of the sandbox itself
  - "exit": sys.exit(), BaseException, KeyboardInterrupt, SystemExit, quit()
  - "future": from __future__ import ...
@@ -53,8 +54,9 @@ config.enable('feature'). Available features:
  - "site": allow to read the license file
  - "stdin": sys.stdin, input() and raw_input()
  - "stdout", "stderr": sys.stdout and sys.stderr
- - "traceback": next calls to allowModule() will add the module filename to the
-   open() whitelist, so Python can display a traceback with the source code
+ - "traceback": compile() builtin, frame.f_code, next calls to allowModule()
+   will add the module filename to the open() whitelist, so Python can display
+   a traceback with the source code
  - "unicodedata": unicodedata module, required for u'\N{ATOM SYMBOL}' syntax
 
 CPython restricted mode

@@ -1,6 +1,8 @@
 Version 1.0.2
 
     * SandboxConfig doesn't import modules to get their path
+    * interpreter config feature is more strict: don't give access to
+      frame.f_locals nor generator.gi_code (don't enable code feature)
 
 Version 1.0.1 (2010-07-26)
 

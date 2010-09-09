@@ -41,7 +41,8 @@ class HideAttributes:
             del self.function_dict['__globals__']
             del self.function_dict['__code__']
         del self.frame_dict['f_locals']
-        if 'code' not in sandbox.config.features:
+        if ('code' not in sandbox.config.features) \
+        and ('traceback' not in sandbox.config.features):
             del self.frame_dict['f_code']
         del self.type_dict['__subclasses__']
         del self.builtin_func_dict['__self__']
