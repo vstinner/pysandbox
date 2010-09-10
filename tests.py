@@ -875,6 +875,10 @@ def get_interpreter_stdout(*code, **kw):
     code = '\n'.join(code)
     code = code.encode(encoding)
     stdout, stderr = process.communicate(code)
+    if process.returncode != 0:
+        raise AssertionError(
+            "Process error: exit code=%s, stdout=%r"
+            % (process.returncode, stdout))
     assert process.returncode == 0
     stdout = stdout.splitlines()
     assert stdout[0] == '', stdout[0]
