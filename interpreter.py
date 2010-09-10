@@ -4,6 +4,7 @@ from sandbox import Sandbox, SandboxConfig
 import readline
 from optparse import OptionParser
 from sandbox.version import VERSION
+import sys
 
 class SandboxedInterpeter:
     def __init__(self):
@@ -14,6 +15,7 @@ class SandboxedInterpeter:
         if 'traceback' in self.config.features:
             self.config.allowPath(__file__)
 
+        self.stdout = sys.stdout
 
     def parseOptions(self):
         parser = OptionParser(usage="%prog [options]")
@@ -22,10 +24,16 @@ class SandboxedInterpeter:
         parser.add_option("--verbose", "-v",
             help="Verbose mode",
             action="store_true", default=False)
+        parser.add_option("--quiet", "-q",
+            help="Quiet mode",
+            action="store_true", default=False)
         options, argv = parser.parse_args()
         if argv:
             parser.print_help()
             exit(1)
+
+        if options.quiet:
+            options.verbose = False
 
         config = SandboxConfig.fromOptparseOptions(options)
         return config, options
@@ -48,16 +56,25 @@ class SandboxedInterpeter:
         if result is None:
             return
         self.sandbox_locals['_'] = result
-        print(repr(result))
+        text = repr(result)
+        if not self.options.quiet:
+            print(text)
+        else:
+            self.stdout.write(text)
 
     def interact(self):
         console = InteractiveConsole()
         self.sandbox_locals = console.locals
-        console.interact("Try to break the sandbox!")
+        if not self.options.quiet:
+            banner = "Try to break the sandbox!"
+        else:
+            banner = ''
+        console.interact(banner)
 
     def main(self):
-        print("pysandbox %s" % VERSION)
-        self.dumpConfig()
+        if not self.options.quiet:
+            print("pysandbox %s" % VERSION)
+            self.dumpConfig()
         if 'help' in self.config.features:
             # Import pydoc here because it uses a lot of modules
             # blocked by the sandbox
