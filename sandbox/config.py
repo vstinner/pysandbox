@@ -283,6 +283,7 @@ class SandboxConfig:
             self.allowModule('codecs',
                 'lookup', 'CodecInfo',
                 'utf_8_encode', 'utf_8_decode',
+                'utf_16_be_encode', 'utf_16_be_decode',
                 'utf_32_be_encode', 'utf_32_be_decode',
                 'charmap_encode', 'charmap_decode')
             self.allowSafeModule('codecs',
@@ -298,6 +299,7 @@ class SandboxConfig:
             self.allowModule('encodings.ascii', 'getregentry')
             self.allowModule('encodings.latin_1', 'getregentry')
             self.allowModule('encodings.utf_8', 'getregentry')
+            self.allowModule('encodings.utf_16_be', 'getregentry')
             self.allowModule('encodings.utf_32_be', 'getregentry')
             self.allowModule('encodings.rot_13', 'getregentry')
         else:
