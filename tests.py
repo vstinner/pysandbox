@@ -858,6 +858,38 @@ def test_traceback():
 
     check_frame_filename()
 
+def get_interpreter_stdout(*code, **kw):
+    import os
+    import sys
+    from subprocess import Popen, PIPE, STDOUT
+
+    encoding = kw.get('encoding', 'utf-8')
+
+    env = os.environ.copy()
+    env['PYTHONIOENCODING'] = encoding
+    process = Popen(
+        [sys.executable, 'interpreter.py', '-q'],
+        stdin=PIPE, stdout=PIPE, stderr=STDOUT,
+        env=env)
+    code += (u'exit()',)
+    code = '\n'.join(code)
+    code = code.encode(encoding)
+    stdout, stderr = process.communicate(code)
+    assert process.returncode == 0
+    stdout = stdout.splitlines()
+    assert stdout[0] == '', stdout[0]
+    assert stdout[1] == '', stdout[1]
+    stdout = stdout[2:]
+    return stdout
+
+def test_interpreter():
+    stdout = get_interpreter_stdout('1+1')
+    assert stdout == [r"sandbox>>> 2", 'sandbox>>> ']
+
+    for encoding in ('latin_1', 'utf_8'):
+        stdout = get_interpreter_stdout(u'u"\xe9"', encoding=encoding)
+        assert stdout == [r"sandbox>>> u'\xe9'", 'sandbox>>> ']
+
 def parseOptions():
     from optparse import OptionParser
 
