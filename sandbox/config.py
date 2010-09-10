@@ -282,6 +282,7 @@ class SandboxConfig:
         elif feature == 'codecs':
             self.allowModule('codecs',
                 'lookup', 'CodecInfo',
+                'utf_8_encode', 'utf_8_decode',
                 'utf_32_be_encode', 'utf_32_be_decode',
                 'charmap_encode', 'charmap_decode')
             self.allowSafeModule('codecs',
