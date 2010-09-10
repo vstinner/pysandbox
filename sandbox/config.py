@@ -119,7 +119,7 @@ class SandboxConfig:
             #          (enabled by exit feature), reload
             # note: reload is useless because we don't have access to real
             #       module objects
-            # note: exit is replaced by safe_exit()
+            # note: exit is replaced by safe_exit() if exit feature is disabled
             # note: open is replaced by safe_open()
         ))
         if version_info >= (3, 0):
@@ -301,7 +301,8 @@ class SandboxConfig:
             self.allowModule('encodings.utf_8', 'getregentry')
             self.allowModule('encodings.utf_16_be', 'getregentry')
             self.allowModule('encodings.utf_32_be', 'getregentry')
-            self.allowModule('encodings.rot_13', 'getregentry')
+            if version_info < (3, 0):
+                self.allowModule('encodings.rot_13', 'getregentry')
         else:
             self._features.remove(feature)
             raise ValueError("Unknown feature: %s" % feature)
