@@ -13,12 +13,14 @@ def createSafeModule(real_module, attributes, safe_attributes):
         name_repr += " from %r" % module_file
         attributes.add('__file__')
 
+    all_attributes = tuple(attributes)
     attributes = frozenset(attributes)
     safe_attributes = frozenset(safe_attributes)
 
     class SafeModule(object):
         __doc__ = real_module.__doc__
         __name__ = real_module.__name__
+        __all__ = all_attributes
         __slots__ = tuple()
 
         def __delattr__(self, name):
