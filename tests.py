@@ -63,13 +63,11 @@ if USE_CSANDBOX:
         read_first_line(open)
 
     def test_exec_builtins():
-        from sandbox.builtins import ReadOnlyBuiltins
-
         def check_builtins_type():
             result = []
             exec "result.append(type(__builtins__))" in {'result': result}
             builtin_type = result[0]
-            assert builtin_type == ReadOnlyBuiltins
+            assert builtin_type != dict
         createSandbox().call(check_builtins_type)
 else:
     print "USE_CSANDBOX=False: disable test_open_whitelist(), test_exec_builtins()"

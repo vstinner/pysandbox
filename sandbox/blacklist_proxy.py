@@ -8,34 +8,41 @@ of PyDict_GetItem().
 
 from .proxy import readOnlyError
 
-# If you update this class, update also HideAttributes.enable()
-class ReadOnlyBuiltins(dict):
-    """
-    Type used for a read only version of the __builtins__ dictionary.
+def createReadOnlyBuiltins(builtins):
+    # If you update this class, update also HideAttributes.enable()
+    class ReadOnlyBuiltins(dict):
+        """
+        Type used for a read only version of the __builtins__ dictionary.
 
-    Don't proxy __getattr__ because we suppose that __builtins__ only contains
-    safe functions (not mutable objects).
-    """
-    __slots__ = tuple()
+        Don't proxy __getattr__ because we suppose that __builtins__ only
+        contains safe functions (not mutable objects).
+        """
+        __slots__ = tuple()
 
-    def clear(self):
+        def clear(self):
+            readOnlyError()
+
+        def __delitem__(self, key):
+            readOnlyError()
+
+        def pop(self, key, default=None):
+            readOnlyError()
+
+        def popitem(self):
+            readOnlyError()
+
+        def setdefault(self, key, value):
+            readOnlyError()
+
+        def __setitem__(self, key, value):
+            readOnlyError()
+
+        def update(self, dict, **kw):
+            readOnlyError()
+
+    safe = ReadOnlyBuiltins(builtins)
+    def __init__(*args, **kw):
         readOnlyError()
-
-    def __delitem__(self, key):
-        readOnlyError()
-
-    def pop(self, key, default=None):
-        readOnlyError()
-
-    def popitem(self):
-        readOnlyError()
-
-    def setdefault(self, key, value):
-        readOnlyError()
-
-    def __setitem__(self, key, value):
-        readOnlyError()
-
-    def update(self, dict, **kw):
-        readOnlyError()
+    ReadOnlyBuiltins.__init__ = __init__
+    return safe
 

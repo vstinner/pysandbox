@@ -1,7 +1,6 @@
 Version 1.1
 
-    * SECURITY FIX: Deny access to all dict methods able to modify a dict, not only
-      dict.__delitem__ and dict.__setitem__.
+    * SECURITY FIX: Deny access to dict.__init__() to protect __builtins__.
     * SandboxConfig doesn't import modules to get their path
     * interpreter config feature is more strict: don't give access to
       frame.f_locals nor generator.gi_code (don't enable code feature)
@@ -13,6 +12,12 @@ Version 1.1
       and "time" features
     * interpreter feature enables encodings feature to support non-ascii
       unicode literals
+
+Version 1.0.2 (2010-09-15)
+
+    * SECURITY FIX: Deny access to all dict methods able to modify a dict to
+      protect __builtins__: block clear, pop, popitem, setdefault and update
+      methods (__delitem__ and __setitem__ were already blocked).
 
 Version 1.0.1 (2010-07-26)
 
