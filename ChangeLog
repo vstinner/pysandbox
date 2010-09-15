@@ -1,5 +1,7 @@
 Version 1.1
 
+    * SECURITY FIX: Deny access to all dict methods able to modify a dict, not only
+      dict.__delitem__ and dict.__setitem__.
     * SandboxConfig doesn't import modules to get their path
     * interpreter config feature is more strict: don't give access to
       frame.f_locals nor generator.gi_code (don't enable code feature)

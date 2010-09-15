@@ -3,6 +3,7 @@ class RestorableDict:
         self.dict = dict
         self.original = {}
         self.delete = set()
+        self.dict_update = dict.update
 
     def __setitem__(self, key, value):
         if (key not in self.original) and (key not in self.delete):
@@ -21,6 +22,6 @@ class RestorableDict:
     def restore(self):
         for key in self.delete:
             del self.dict[key]
-        self.dict.update(self.original)
+        self.dict_update(self.original)
         self.original.clear()
 

@@ -8,6 +8,7 @@ of PyDict_GetItem().
 
 from .proxy import readOnlyError
 
+# If you update this class, update also HideAttributes.enable()
 class ReadOnlyBuiltins(dict):
     """
     Type used for a read only version of the __builtins__ dictionary.
