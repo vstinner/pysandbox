@@ -2,6 +2,7 @@ Major tasks
 -----------
 
  * Deny modification of open.func_defaults
+ * FIXME: ReadOnlyList(list('abc')) == list('abc') is False
  * Choose getModulePath() implementation (problem with "from encodings import
    aliases")
  * Python3: set/fix OBJECT_TYPES of proxy()

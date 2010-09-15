@@ -23,8 +23,8 @@ def createSandboxConfig(*features, **kw):
     return SandboxConfig(*features, **kw)
 createSandboxConfig.debug = False
 
-def createSandbox():
-    config = createSandboxConfig()
+def createSandbox(*features):
+    config = createSandboxConfig(*features)
     return Sandbox(config)
 
 def test_valid_code():
@@ -909,6 +909,23 @@ def parseOptions():
         parser.print_help()
         exit(1)
     return options
+
+def test_regex():
+    def check_regex():
+        import re
+        assert re.escape('+') == '\\+'
+        assert re.match('a+', 'aaaa').group(0) == 'aaaa'
+        # FIXME: Remove this workaround: list(...)
+        assert list(re.findall('.', 'abc')) == ['a', 'b', 'c']
+        assert re.search('a+', 'aaaa').group(0) == 'aaaa'
+        # FIXME: Remove this workaround: list(...)
+        assert list(re.split(' +', 'a b    c')) == ['a', 'b', 'c']
+        assert re.sub('a+', '#', 'a b aa c') == '# b # c'
+
+    sandbox = createSandbox('regex')
+    sandbox.call(check_regex)
+
+    check_regex()
 
 def main():
     global createSandboxConfig
