@@ -1,6 +1,7 @@
 Major tasks
 -----------
 
+ * Deny modification of open.func_defaults
  * Choose getModulePath() implementation (problem with "from encodings import
    aliases")
  * Python3: set/fix OBJECT_TYPES of proxy()

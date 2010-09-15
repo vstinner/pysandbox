@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 # Todo list to prepare a release:
+#  - run python tests.py
+#  - check TODO if there is no more critical known bug
+#  - do an audit of new features (see the ChangeLog)
 #  - set version in sandbox/version.py
 #  - set release date in the ChangeLog
 #  - git commit -a
