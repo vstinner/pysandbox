@@ -27,11 +27,12 @@ class HideAttributes:
         self.generator_dict = RestorableDict(dictionary_of(GeneratorType))
 
     def enable(self, sandbox):
-        # Blacklist dict.__setitem__() and dict.__delitem__() to protect
+        # Blacklist all dict methods able to modify a dict, to protect
         # ReadOnlyBuiltins
-        # FIXME: Use a cleaner fix?
-        del self.dict_dict['__setitem__']
-        del self.dict_dict['__delitem__']
+        for name in (
+        'clear', '__delitem__', 'pop', 'popitem',
+        'setdefault', '__setitem__', 'update'):
+            del self.dict_dict[name]
         if version_info < (3, 0):
             del self.function_dict['func_closure']
             del self.function_dict['func_globals']

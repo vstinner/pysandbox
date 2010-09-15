@@ -29,6 +29,7 @@ Open questions
 Minor tasks
 -----------
 
+ * Don't hide dict methods able to modify a dict (eg. dict.clear)
  * "from sys import *" doesn't work
  * interpreter.py: import code in the sandbox to execute the whole interpreter
    in the sandbox

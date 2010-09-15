@@ -27,8 +27,8 @@ Protection on the namespace:
  * Deny access to frame locals
  * Deny access to types subclasses
  * __builtins__ is read only
- * Deny access to dict.__setitem__ and dict.__delitem__:
-   use d[key]=value and del d[key] instead
+ * Deny access to dict methods able to modify a dict, eg. dict.__setitem__.
+   But you can use "d[key] = value" and "del d[key]" instead
 
 
 Configuration

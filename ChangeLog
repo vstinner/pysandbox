@@ -1,3 +1,8 @@
+Version 1.0.2
+
+    * SECURITY FIX: Deny access to all dict methods able to modify a dict, not only
+      dict.__delitem__ and dict.__setitem__.
+
 Version 1.0.1 (2010-07-26)
     * Fix Python 2.5 compatibility
     * Fix Sandbox.execute(): don't create a new object for globals and locals
