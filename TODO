@@ -8,8 +8,6 @@ Major tasks
  * Python3: set/fix OBJECT_TYPES of proxy()
  * Python3: allow __subclasses__ attribute?
  * Write a test for traceback
- * re.match('a', 'a') raises a
-   TypeError("Unable to proxy a value of type <type '_sre.SRE_Match'>")
  * interpreter.py has a quit() builtin function (instance of site.Quitter)
    which is not protected by a proxy
  * safe_import(): from_list default value is mutable
@@ -18,7 +16,6 @@ Major tasks
  * Write a blacklist for ObjectProxy (eg. "__class__" attribute)
  * Write a whitelist of modifiable attributes in ObjectProxy?
    Problem of callback: have to be executed in the sandbox
- * Write a cache for safe_import. Reuse sys.modules???
 
 Open questions
 --------------
@@ -32,9 +29,9 @@ Minor tasks
 -----------
 
  * Don't hide dict methods able to modify a dict (eg. dict.clear)
- * "from sys import *" doesn't work
- * interpreter.py: import code in the sandbox to execute the whole interpreter
-   in the sandbox
+ * Write a cache for safe_import. Reuse sys.modules???
+ * interpreter.py: import code module (InteractiveConsole) in the sandbox to
+   execute the whole interpreter in the sandbox
  * Only instanciate each protection once?
  * Write a test using class.mro()?
  * __builtins__ can be redefined
