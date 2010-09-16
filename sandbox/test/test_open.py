@@ -50,6 +50,8 @@ def test_write_file():
                 write_file(tempfile.name)
             except ValueError, err:
                 assert str(err) == "Only read modes are allowed."
+            except IOError, err:
+                assert str(err) == "file() constructor not accessible in restricted mode"
             else:
                 assert False, "writing to a file is not blocked"
         createSandbox().call(write_denied)
