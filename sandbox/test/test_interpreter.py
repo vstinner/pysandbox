@@ -1,4 +1,4 @@
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE
 from sandbox.test.tools import bytes_literal
 import os
 import sys
@@ -12,7 +12,7 @@ def check_interpreter_stdout(code, expected, **kw):
     env['PYTHONIOENCODING'] = encoding
     process = Popen(
         [sys.executable, 'interpreter.py', '-q'],
-        stdin=PIPE, stdout=PIPE, stderr=STDOUT,
+        stdin=PIPE, stdout=PIPE, stderr=PIPE,
         env=env)
     code += u'\nexit()'
     code = code.encode(encoding)
@@ -24,8 +24,7 @@ def check_interpreter_stdout(code, expected, **kw):
     assert process.returncode == 0
     stdout = stdout.splitlines()
     assert stdout[0] == bytes_literal(''), stdout[0]
-    assert stdout[1] == bytes_literal(''), stdout[1]
-    stdout = stdout[2:]
+    stdout = stdout[1:]
     assert stdout == expected, "%s != %s" % (stdout, expected)
 
 def test_interpreter():
