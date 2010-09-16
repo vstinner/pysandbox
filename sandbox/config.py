@@ -185,7 +185,7 @@ class SandboxConfig:
             )
             self.allowSafeModule('re',
                 'compile', 'finditer', 'match', 'search')
-            self.allowModule('sre_parse', 'parse')
+            self.allowSafeModule('sre_parse', 'parse')
         elif feature == 'exit':
             self.allowModule('sys', 'exit')
             self._builtins_whitelist |= set((
