@@ -11,6 +11,7 @@ class Protection:
 # CPython restricted mode is only available in Python 2.x
 from sys import version_info
 HAVE_CPYTHON_RESTRICTED = (version_info < (3, 0))
+del version_info
 
 # Use the C module (_sandbox)
 try:
