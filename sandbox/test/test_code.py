@@ -1,5 +1,5 @@
 from sys import version_info
-from sandbox import Sandbox, SandboxError, USE_CSANDBOX
+from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX
 from sandbox.test import (createSandbox, createSandboxConfig,
     SkipTest, TestException)
 
@@ -90,7 +90,7 @@ def exec_bytecode(code_args):
 
 
 def test_func_code():
-    if not USE_CSANDBOX:
+    if not HAVE_CSANDBOX:
         raise SkipTest("require _sandbox")
 
     def replace_func_code():

@@ -1,5 +1,5 @@
 from __future__ import with_statement
-from sandbox import Sandbox, SandboxError, USE_CSANDBOX
+from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX
 from sandbox.test import (createSandbox, createSandboxConfig,
     SkipTest, TestException)
 from sandbox.test.tools import read_first_line, READ_FILENAME
@@ -16,7 +16,7 @@ def _get_file_type(obj):
     return type(obj)
 
 def test_open_whitelist():
-    if not USE_CSANDBOX:
+    if not HAVE_CSANDBOX:
         raise SkipTest("require _sandbox")
 
     from errno import EACCES
@@ -77,7 +77,7 @@ def test_filetype_from_sys_stdout():
     read_first_line(file_type)
 
 def test_filetype_from_open_file():
-    if not USE_CSANDBOX:
+    if not HAVE_CSANDBOX:
         raise SkipTest("require _sandbox")
 
     def get_file_type_from_open_file(filename):

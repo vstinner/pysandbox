@@ -3,14 +3,14 @@ from types import FrameType
 from sys import _getframe, version_info
 import sys
 
-from sandbox import SandboxError, USE_CSANDBOX
+from sandbox import SandboxError, HAVE_CSANDBOX
 from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
 from .proxy import createReadOnlyObject
 from .blacklist_proxy import createReadOnlyBuiltins
-if USE_CSANDBOX:
+if HAVE_CSANDBOX:
     from _sandbox import set_frame_builtins, set_interp_builtins
 
 class CleanupBuiltins:
@@ -76,7 +76,7 @@ class CleanupBuiltins:
 
         # Make builtins read only (enable restricted mode)
         safe_builtins = createReadOnlyBuiltins(self.builtin_dict.dict)
-        if USE_CSANDBOX:
+        if HAVE_CSANDBOX:
             set_frame_builtins(self.frame, safe_builtins)
             if not config.cpython_restricted:
                 set_interp_builtins(safe_builtins)
@@ -89,7 +89,7 @@ class CleanupBuiltins:
         self.builtin_dict.restore()
 
         # Restore modifiable builtins
-        if USE_CSANDBOX:
+        if HAVE_CSANDBOX:
             set_frame_builtins(self.frame, self.builtins_dict)
             if not sandbox.config.cpython_restricted:
                 set_interp_builtins(self.builtins_dict)

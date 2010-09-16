@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from sandbox import USE_CSANDBOX
+from sandbox import HAVE_CSANDBOX
 from sys import version_info
 from sandbox.test import SkipTest, createSandboxConfig
 from sandbox.test.tools import getTests
@@ -30,7 +30,7 @@ def main():
     options = parseOptions()
     createSandboxConfig.debug = options.debug
 
-    if not USE_CSANDBOX:
+    if not HAVE_CSANDBOX:
         print("WARNING: _sandbox module is missing")
         print
 

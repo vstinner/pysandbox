@@ -1,9 +1,9 @@
-from sandbox import Sandbox, SandboxError, USE_CSANDBOX
+from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX
 from sandbox.test import SkipTest, createSandbox, createSandboxConfig
 from sys import version_info
 
 def test_exec_builtins():
-    if not USE_CSANDBOX:
+    if not HAVE_CSANDBOX:
         raise SkipTest("require _sandbox")
 
     def check_builtins_type():

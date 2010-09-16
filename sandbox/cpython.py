@@ -1,5 +1,5 @@
-from sandbox import USE_CSANDBOX
-if USE_CSANDBOX:
+from sandbox import HAVE_CSANDBOX
+if HAVE_CSANDBOX:
     from _sandbox import dictionary_of
 else:
     from ctypes import pythonapi, POINTER, py_object

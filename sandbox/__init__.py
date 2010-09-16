@@ -19,9 +19,9 @@ try:
 except ImportError:
     if not HAVE_CPYTHON_RESTRICTED:
         raise SandboxError("_sandbox is required on Python 3.x")
-    USE_CSANDBOX = False
+    HAVE_CSANDBOX = False
 else:
-    USE_CSANDBOX = True
+    HAVE_CSANDBOX = True
     set_error_class(SandboxError)
     del set_error_class
     if _sandbox_version != 2:
@@ -40,7 +40,7 @@ Sandbox.PROTECTIONS.append(HideAttributes)
 from .stdio import ProtectStdio
 Sandbox.PROTECTIONS.append(ProtectStdio)
 
-if USE_CSANDBOX:
+if HAVE_CSANDBOX:
     from .code import DisableCode
     Sandbox.PROTECTIONS.append(DisableCode)
 

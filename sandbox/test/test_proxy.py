@@ -1,4 +1,4 @@
-from sandbox import USE_CSANDBOX, SandboxError
+from sandbox import HAVE_CSANDBOX, SandboxError
 from sandbox.test import createSandbox, SkipTest
 
 def test_read_objectproxy():
@@ -33,7 +33,7 @@ def test_read_objectproxy():
     sandbox.call(testPerson, person)
 
 def test_modify_objectproxy():
-    if not USE_CSANDBOX:
+    if not HAVE_CSANDBOX:
         raise SkipTest("require _sandbox")
 
     class Person:

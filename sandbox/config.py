@@ -2,7 +2,7 @@ from os.path import realpath, sep as path_sep, dirname, join as path_join, exist
 from sys import version_info
 #import imp
 import sys
-from sandbox import USE_CSANDBOX, HAVE_CPYTHON_RESTRICTED
+from sandbox import HAVE_CSANDBOX, HAVE_CPYTHON_RESTRICTED
 
 DEFAULT_TIMEOUT = 5.0
 
@@ -76,7 +76,7 @@ class SandboxConfig:
         try:
             self._cpython_restricted = kw['cpython_restricted']
         except KeyError:
-            if USE_CSANDBOX:
+            if HAVE_CSANDBOX:
                 # use _sandbox
                 self._cpython_restricted = False
             else:
