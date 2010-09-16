@@ -511,17 +511,17 @@ if USE_CSANDBOX:
 else:
     print "USE_CSANDBOX=False: disable test_modify_objectproxy()"
 
-def builtins_superglobal():
-    if isinstance(__builtins__, dict):
-        __builtins__['SUPERGLOBAL'] = 42
-        assert SUPERGLOBAL == 42
-        del __builtins__['SUPERGLOBAL']
-    else:
-        __builtins__.SUPERGLOBAL = 42
-        assert SUPERGLOBAL == 42
-        del __builtins__.SUPERGLOBAL
+def test_builtins_setitem():
+    def builtins_superglobal():
+        if isinstance(__builtins__, dict):
+            __builtins__['SUPERGLOBAL'] = 42
+            assert SUPERGLOBAL == 42
+            del __builtins__['SUPERGLOBAL']
+        else:
+            __builtins__.SUPERGLOBAL = 42
+            assert SUPERGLOBAL == 42
+            del __builtins__.SUPERGLOBAL
 
-def test_modify_builtins():
     def readonly_builtins():
         try:
             builtins_superglobal()
@@ -532,6 +532,26 @@ def test_modify_builtins():
     createSandbox().call(readonly_builtins)
 
     builtins_superglobal()
+
+def test_builtins_init():
+    def check_init():
+        try:
+            __builtins__.__init__({})
+        except SandboxError, err:
+            assert str(err) == "Read only object"
+        else:
+            assert False
+    createSandbox().call(check_init)
+
+    def check_dict_init():
+        try:
+            dict.__init__(__builtins__, {})
+        except ImportError, err:
+            assert str(err) == 'Import "_warnings" blocked by the sandbox'
+        else:
+            assert False
+    config = createSandboxConfig()
+    Sandbox(config).call(check_dict_init)
 
 def builtins_dict_superglobal():
     dict.__setitem__(__builtins__, 'SUPERGLOBAL', 42)
