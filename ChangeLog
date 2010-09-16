@@ -1,6 +1,5 @@
 Version 1.1
 
-    * SECURITY FIX: Deny access to dict.__init__() to protect __builtins__.
     * SandboxConfig doesn't import modules to get their path
     * interpreter config feature is more strict: don't give access to
       frame.f_locals nor generator.gi_code (don't enable code feature)
@@ -12,6 +11,10 @@ Version 1.1
       and "time" features
     * interpreter feature enables encodings feature to support non-ascii
       unicode literals
+
+Version 1.0.3 (2010-09-16)
+
+    * SECURITY FIX: Deny access to dict.__init__() to protect __builtins__.
 
 Version 1.0.2 (2010-09-15)
 
