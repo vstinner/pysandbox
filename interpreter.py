@@ -7,6 +7,16 @@ from sandbox.version import VERSION
 import sys
 from sys import version_info
 
+class SandboxConsole(InteractiveConsole):
+    # Backport Python 2.6 fix for input encoding
+    def raw_input(self, prompt):
+        line = InteractiveConsole.raw_input(self, prompt)
+        # Can be None if sys.stdin was redefined
+        encoding = getattr(sys.stdin, "encoding", None)
+        if encoding and not isinstance(line, unicode):
+            line = line.decode(encoding)
+        return line
+
 class SandboxedInterpeter:
     def __init__(self):
         self.sandbox_locals = None
@@ -65,7 +75,7 @@ class SandboxedInterpeter:
             self.stdout.write(text)
 
     def interact(self):
-        console = InteractiveConsole()
+        console = SandboxConsole()
         self.sandbox_locals = console.locals
         if not self.options.quiet:
             banner = "Try to break the sandbox!"
