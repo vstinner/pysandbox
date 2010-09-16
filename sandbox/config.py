@@ -138,7 +138,7 @@ class SandboxConfig:
         if version_info >= (3, 0):
             self._builtins_whitelist |= set((
                 # functions
-                '__build_class__', 'exec',
+                '__build_class__', 'ascii', 'exec',
             ))
 
         # Timeout in seconds: use None to disable the timeout
