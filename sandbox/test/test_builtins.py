@@ -1,0 +1,95 @@
+from sandbox import Sandbox, SandboxError, USE_CSANDBOX
+from sandbox.test import SkipTest, createSandbox, createSandboxConfig
+
+def test_exec_builtins():
+    if not USE_CSANDBOX:
+        raise SkipTest("require _sandbox")
+
+    def check_builtins_type():
+        result = []
+        exec "result.append(type(__builtins__))" in {'result': result}
+        builtin_type = result[0]
+        assert builtin_type != dict
+    createSandbox().call(check_builtins_type)
+
+def test_builtins_setitem():
+    def builtins_superglobal():
+        if isinstance(__builtins__, dict):
+            __builtins__['SUPERGLOBAL'] = 42
+            assert SUPERGLOBAL == 42
+            del __builtins__['SUPERGLOBAL']
+        else:
+            __builtins__.SUPERGLOBAL = 42
+            assert SUPERGLOBAL == 42
+            del __builtins__.SUPERGLOBAL
+
+    def readonly_builtins():
+        try:
+            builtins_superglobal()
+        except SandboxError, err:
+            assert str(err) == "Read only object"
+        else:
+            assert False
+    createSandbox().call(readonly_builtins)
+
+    builtins_superglobal()
+
+def test_builtins_init():
+    def check_init():
+        try:
+            __builtins__.__init__({})
+        except SandboxError, err:
+            assert str(err) == "Read only object"
+        else:
+            assert False
+    createSandbox().call(check_init)
+
+    def check_dict_init():
+        try:
+            dict.__init__(__builtins__, {})
+        except ImportError, err:
+            assert str(err) == 'Import "_warnings" blocked by the sandbox'
+        else:
+            assert False
+    config = createSandboxConfig()
+    Sandbox(config).call(check_dict_init)
+
+def test_modify_builtins_dict():
+    def builtins_dict_superglobal():
+        dict.__setitem__(__builtins__, 'SUPERGLOBAL', 42)
+        assert SUPERGLOBAL == 42
+        del __builtins__['SUPERGLOBAL']
+
+    def readonly_builtins_dict():
+        try:
+            builtins_dict_superglobal()
+        except AttributeError, err:
+            assert str(err) == "type object 'dict' has no attribute '__setitem__'"
+        else:
+            assert False
+    createSandbox().call(readonly_builtins_dict)
+
+def test_del_builtin():
+    def del_builtin_import():
+        import_func = __builtins__['__import__']
+        dict.__delitem__(__builtins__, '__import__')
+        try:
+            try:
+                import sys
+            except NameError, err:
+                assert str(err) == "type object 'dict' has no attribute '__setitem__'"
+        finally:
+            __builtins__['__import__'] = import_func
+
+    def del_builtin_denied():
+        try:
+            del_builtin_import()
+        except AttributeError, err:
+            assert str(err) == "type object 'dict' has no attribute '__delitem__'"
+        else:
+            assert False
+
+    config = createSandboxConfig()
+    config.allowModule('sys')
+    Sandbox(config).call(del_builtin_denied)
+
