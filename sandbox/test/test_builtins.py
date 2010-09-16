@@ -33,6 +33,8 @@ def test_builtins_setitem():
     builtins_superglobal()
 
 def test_builtins_init():
+    import warnings
+
     def check_init():
         try:
             __builtins__.__init__({})
@@ -40,18 +42,29 @@ def test_builtins_init():
             assert str(err) == "Read only object"
         else:
             assert False
+
+    def check_dict_init():
+        try:
+            dict.__init__(__builtins__, {})
+        except ImportError, err:
+            assert str(err) == 'Import "_warnings" blocked by the sandbox'
+        except DeprecationWarning as err:
+            assert str(err) == 'object.__init__() takes no parameters'
+        else:
+            assert False
+
     createSandbox().call(check_init)
 
     if version_info >= (2, 6):
-        def check_dict_init():
-            try:
-                dict.__init__(__builtins__, {})
-            except ImportError, err:
-                assert str(err) == 'Import "_warnings" blocked by the sandbox'
-            else:
-                assert False
-        config = createSandboxConfig()
-        Sandbox(config).call(check_dict_init)
+        original_filters = warnings.filters[:]
+        try:
+            warnings.filterwarnings('error', '', DeprecationWarning)
+
+            config = createSandboxConfig()
+            Sandbox(config).call(check_dict_init)
+        finally:
+            del warnings.filters[:]
+            warnings.filters.extend(original_filters)
 
 def test_modify_builtins_dict():
     def builtins_dict_superglobal():
