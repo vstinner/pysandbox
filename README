@@ -73,6 +73,9 @@ config.enable('feature'). Available features:
 CPython restricted mode
 -----------------------
 
+WARNING: CPython restricted mode is unsafe because it is possible to execute
+arbitrary bytecode.
+
 Use SandboxConfig(cpython_restricted=True) to enable CPython restricted mode.
 In this mode, reading a file and modify a class are blocked. Some attributes
 are hidden (eg. method.__self__), other are read only (eg. func.__doc__).
