@@ -15,6 +15,9 @@ def parseOptions():
     parser.add_option("--debug",
         help="Enable debug mode (enable stdout and stderr features)",
         action="store_true")
+    parser.add_option("-k", "--keyword",
+        help="Only execute tests with name containing KEYWORD",
+        type='str')
     options, argv = parser.parse_args()
     if argv:
         parser.print_help()
@@ -32,7 +35,7 @@ def main():
         print
 
     # Get all tests
-    all_tests = getTests(globals())
+    all_tests = getTests(globals(), options.keyword)
 
     # Run tests
     nerror = 0

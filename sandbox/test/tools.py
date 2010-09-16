@@ -15,23 +15,25 @@ else:
     def bytes_literal(text):
         return text
 
-def _getTests(module_dict, all_tests):
+def _getTests(module_dict, all_tests, keyword):
     _locals = module_dict.items()
     for name, value in _locals:
         if not name.startswith("test"):
             continue
+        if keyword and (keyword not in name[4:]):
+            continue
         all_tests.append(value)
 
-def getTests(main_dict):
+def getTests(main_dict, keyword=None):
     all_tests = []
-    _getTests(main_dict, all_tests)
+    _getTests(main_dict, all_tests, keyword)
     for filename in glob(path_join("sandbox", "test", "test_*.py")):
         # sandbox/test/test_bla.py => sandbox.test.bla
         module_name = basename(filename)[:-3]
         full_module_name = "sandbox.test.%s" % module_name
         parent_module = __import__(full_module_name)
         module = getattr(parent_module.test, module_name)
-        _getTests(module.__dict__, all_tests)
+        _getTests(module.__dict__, all_tests, keyword)
     all_tests.sort(key=lambda func: func.__name__)
     return all_tests
 
