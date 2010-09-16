@@ -4,7 +4,6 @@ from sandbox import Sandbox, SandboxConfig
 import readline
 from optparse import OptionParser
 from sandbox.version import VERSION
-from sandbox import USE_CSANDBOX
 import sys
 from sys import version_info
 
