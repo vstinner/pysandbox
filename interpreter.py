@@ -6,6 +6,7 @@ from optparse import OptionParser
 from sandbox.version import VERSION
 from sandbox import USE_CSANDBOX
 import sys
+from sys import version_info
 
 class SandboxedInterpeter:
     def __init__(self):
@@ -86,7 +87,8 @@ class SandboxedInterpeter:
             import encodings
             import encodings.utf_8
             import encodings.utf_16_be
-            import encodings.utf_32_be
+            if version_info >= (2, 6):
+                import encodings.utf_32_be
             if sys.stdout.encoding:
                 import codecs
                 codecs.lookup(sys.stdout.encoding)
