@@ -7,14 +7,30 @@ from sandbox.version import VERSION
 import sys
 from sys import version_info
 
+def getEncoding():
+    encoding = sys.stdin.encoding
+    if encoding:
+        return encoding
+    # sys.stdin.encoding is None if stdin is not a tty
+
+    # Emulate PYTHONIOENCODING on Python < 2.6
+    import os
+    env = os.getenv('PYTHONIOENCODING')
+    if env:
+        return env.split(':',1)[0]
+
+    # Fallback to locales
+    import locale
+    return locale.getpreferredencoding()
+
+ENCODING = getEncoding()
+
 class SandboxConsole(InteractiveConsole):
     # Backport Python 2.6 fix for input encoding
     def raw_input(self, prompt):
         line = InteractiveConsole.raw_input(self, prompt)
-        # Can be None if sys.stdin was redefined
-        encoding = getattr(sys.stdin, "encoding", None)
-        if encoding and not isinstance(line, unicode):
-            line = line.decode(encoding)
+        if not isinstance(line, unicode):
+            line = line.decode(ENCODING)
         return line
 
 class SandboxedInterpeter:
