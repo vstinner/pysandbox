@@ -30,7 +30,7 @@ class HideAttributes:
         # Blacklist all dict methods able to modify a dict, to protect
         # ReadOnlyBuiltins
         for name in (
-        'clear', '__delitem__', 'pop', 'popitem',
+        '__init__', 'clear', '__delitem__', 'pop', 'popitem',
         'setdefault', '__setitem__', 'update'):
             del self.dict_dict[name]
         if version_info < (3, 0):

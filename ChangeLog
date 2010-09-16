@@ -1,3 +1,7 @@
+Version 1.0.3 (2010-09-16)
+
+    * SECURITY FIX: Deny access to dict.__init__() to protect __builtins__.
+
 Version 1.0.2 (2010-09-15)
 
     * SECURITY FIX: Deny access to all dict methods able to modify a dict, not

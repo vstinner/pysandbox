@@ -55,13 +55,11 @@ if USE_CSANDBOX:
         read_first_line(open)
 
     def test_exec_builtins():
-        from sandbox.builtins import ReadOnlyBuiltins
-
         def check_builtins_type():
             result = []
             exec "result.append(type(__builtins__))" in {'result': result}
             builtin_type = result[0]
-            assert builtin_type == ReadOnlyBuiltins
+            assert builtin_type != dict
         createSandbox().call(check_builtins_type)
 else:
     print "USE_CSANDBOX=False: disable test_open_whitelist(), test_exec_builtins()"
@@ -605,7 +603,7 @@ def test_execute():
         globals=namespace)
     assert set(namespace.keys()) == set(('a', 'x', '__builtins__'))
     assert namespace['a'] == 10
-    assert namespace['x'] == 42 
+    assert namespace['x'] == 42
 
     namespace = {'b': 2}
     test(
@@ -626,12 +624,12 @@ def test_execute():
         "x=42",
         "a=10",
         "b=20",
-        globals=my_globals, 
+        globals=my_globals,
         locals=namespace)
     assert set(my_globals.keys()) == set(('a', '__builtins__'))
     assert my_globals['a'] == 1
     assert namespace == {'a': 10, 'b': 20, 'x': 42}
-    
+
     namespace = {}
     test('a=1', locals=namespace)
     assert namespace == {'a': 1}, namespace

@@ -9,7 +9,7 @@ from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
 from .proxy import createReadOnlyObject
-from .blacklist_proxy import ReadOnlyBuiltins
+from .blacklist_proxy import createReadOnlyBuiltins
 if USE_CSANDBOX:
     from _sandbox import set_frame_builtins, set_interp_builtins
 
@@ -74,7 +74,7 @@ class CleanupBuiltins:
                 del self.builtin_dict['help']
 
         # Make builtins read only (enable restricted mode)
-        safe_builtins = ReadOnlyBuiltins(self.builtin_dict.dict)
+        safe_builtins = createReadOnlyBuiltins(self.builtin_dict.dict)
         if USE_CSANDBOX:
             set_frame_builtins(self.frame, safe_builtins)
             if not config.cpython_restricted:
