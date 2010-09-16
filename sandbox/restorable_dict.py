@@ -4,6 +4,7 @@ class RestorableDict:
         self.original = {}
         self.delete = set()
         self.dict_update = dict.update
+        self.dict_pop = dict.pop
 
     def __setitem__(self, key, value):
         if (key not in self.original) and (key not in self.delete):
@@ -14,7 +15,7 @@ class RestorableDict:
         self.dict[key] = value
 
     def __delitem__(self, key):
-        self.original[key] = self.dict.pop(key)
+        self.original[key] = self.dict_pop(key)
 
     def copy(self):
         return self.dict.copy()
