@@ -1,12 +1,20 @@
 Version 1.1
+-----------
 
+This version is much more functional: itertools, math, random, time, ...
+modules are supported. This is possible thanks to a more laxist configuration:
+it's possible to allow "unsafe" module functions using allowSafeModule()
+method of the SandoxConfig, the result of the function is not proxified. This
+version improves also the support of CPython restricted mode and is mostly
+compatible with Python 3.
+
+    * Add SandoxConfig.allowSafeModule(): similar to allowModule() but don't
+      proxify the attribute
     * SandboxConfig doesn't import modules to get their path
     * interpreter config feature is more strict: don't give access to
       frame.f_locals nor generator.gi_code (don't enable code feature)
     * Add __dir__() special method to read object proxy and fake module
       objects
-    * Add SandoxConfig.allowSafeModule(): similar to allowModule() but don't
-      proxify the attribute
     * Add "codecs", "datetime", "encodings", "itertools", "math", "random"
       and "time" features
     * interpreter feature enables encodings feature to support non-ascii
@@ -15,22 +23,26 @@ Version 1.1
       missing (_sandbox becomes optional on Python 2.x).
 
 Version 1.0.3 (2010-09-16)
+--------------------------
 
     * SECURITY FIX: Deny access to dict.__init__() to protect __builtins__.
 
 Version 1.0.2 (2010-09-15)
+--------------------------
 
     * SECURITY FIX: Deny access to all dict methods able to modify a dict to
       protect __builtins__: block clear, pop, popitem, setdefault and update
       methods (__delitem__ and __setitem__ were already blocked).
 
 Version 1.0.1 (2010-07-26)
+--------------------------
 
     * Fix Python 2.5 compatibility
     * Fix Sandbox.execute(): don't create a new object for globals and locals
       when the user pass its own dict, only proxify the keys and values
 
 Version 1.0 (2010-06-29)
+------------------------
 
     * First public release
 
