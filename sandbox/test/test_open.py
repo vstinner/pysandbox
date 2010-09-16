@@ -90,7 +90,7 @@ def test_filetype_from_open_file():
 
     def get_file_type_from_open_file(filename):
         try:
-            with open(filename) as fp:
+            with open(filename, 'rb') as fp:
                 return _get_file_type(fp)
         except SandboxError:
             pass
