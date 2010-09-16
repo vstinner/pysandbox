@@ -1,7 +1,12 @@
 #include "Python.h"
 #include "frameobject.h"
 
-#define VERSION 1
+/**
+ * Version history:
+ *  - Version 2: add dictionary_of() function
+ *  - Version 1: initial version
+ */
+#define VERSION 2
 
 #if PY_MAJOR_VERSION >= 3
 # define PYTHON3
@@ -59,10 +64,6 @@ set_interp_builtins(PyObject *self, PyObject *args)
 static PyObject *
 code_new_raise(PyTypeObject *type, PyObject *args, PyObject *kw)
 {
-    if (sandbox_error == NULL) {
-        PyErr_SetString(PyExc_ValueError, "Sandbox error is not set");
-        return NULL;
-    }
     PyErr_SetString(sandbox_error, "code() blocked by the sandbox");
     return NULL;
 }
@@ -81,6 +82,24 @@ restore_code_new(PyObject *self)
     Py_RETURN_NONE;
 }
 
+static PyObject *
+dictionary_of(PyObject *self, PyObject *args)
+{
+    PyObject *obj, **dict_ptr, *dict;
+
+    if (!PyArg_ParseTuple(args, "O:dictionary_of", &obj))
+        return NULL;
+
+    dict_ptr = _PyObject_GetDictPtr(obj);
+    if (dict_ptr == NULL) {
+        PyErr_SetString(sandbox_error, "Object has no dict");
+        return NULL;
+    }
+    dict = *dict_ptr;
+    Py_INCREF(dict);
+    return dict;
+}
+
 static PyMethodDef sandbox_methods[] = {
     {"set_error_class", set_error_class, METH_VARARGS,
      PyDoc_STR("set_error_class(error_class) -> None")},
@@ -92,6 +111,8 @@ static PyMethodDef sandbox_methods[] = {
      PyDoc_STR("disable_code_new() -> None")},
     {"restore_code_new", (PyCFunction)restore_code_new, METH_NOARGS,
      PyDoc_STR("restore_code_new() -> None")},
+    {"dictionary_of", dictionary_of, METH_VARARGS,
+     PyDoc_STR("dictionary_of(obj) -> dict")},
     {NULL,              NULL}           /* sentinel */
 };
 
@@ -120,6 +141,9 @@ init_sandbox(void)
 #endif
 {
     PyObject *m, *version;
+
+    Py_INCREF(PyExc_ValueError);
+    sandbox_error = PyExc_ValueError;
 
 #ifdef PYTHON3
     m = PyModule_Create(&sandbox_module);

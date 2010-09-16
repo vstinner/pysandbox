@@ -24,8 +24,9 @@ else:
     USE_CSANDBOX = True
     set_error_class(SandboxError)
     del set_error_class
-    if _sandbox_version != 1:
-        raise SandboxError("Unknown _sandbox version (%s)" % _sandbox_version)
+    if _sandbox_version != 2:
+        raise SandboxError(
+            "_sandbox version %s is not supported" % _sandbox_version)
 
 from .config import SandboxConfig
 from .sandbox_class import Sandbox
