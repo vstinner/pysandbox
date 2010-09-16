@@ -8,11 +8,19 @@ class Protection:
     def disable(self, sandbox):
         pass
 
-# Use the C module (_sandbox)
-USE_CSANDBOX = True
+# CPython restricted mode is only available in Python 2.x
+from sys import version_info
+HAVE_CPYTHON_RESTRICTED = (version_info < (3, 0))
 
-if USE_CSANDBOX:
+# Use the C module (_sandbox)
+try:
     from _sandbox import set_error_class, version as _sandbox_version
+except ImportError:
+    if not HAVE_CPYTHON_RESTRICTED:
+        raise SandboxError("_sandbox is required on Python 3.x")
+    USE_CSANDBOX = False
+else:
+    USE_CSANDBOX = True
     set_error_class(SandboxError)
     del set_error_class
     if _sandbox_version != 1:

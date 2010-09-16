@@ -4,6 +4,7 @@ from sandbox import Sandbox, SandboxConfig
 import readline
 from optparse import OptionParser
 from sandbox.version import VERSION
+from sandbox import USE_CSANDBOX
 import sys
 
 class SandboxedInterpeter:
@@ -12,7 +13,8 @@ class SandboxedInterpeter:
         self.config, self.options = self.parseOptions()
 
         self.config.enable('interpreter')
-        if 'traceback' in self.config.features:
+        if ('traceback' in self.config.features) \
+        and (not self.config.cpython_restricted):
             self.config.allowPath(__file__)
 
         self.stdout = sys.stdout
@@ -79,7 +81,15 @@ class SandboxedInterpeter:
             # Import pydoc here because it uses a lot of modules
             # blocked by the sandbox
             import pydoc
-        import sys
+        if self.config.cpython_restricted:
+            # Import is blocked in restricted mode, so preload modules
+            import encodings
+            import encodings.utf_8
+            import encodings.utf_16_be
+            import encodings.utf_32_be
+            if sys.stdout.encoding:
+                import codecs
+                codecs.lookup(sys.stdout.encoding)
         sys.ps1 = '\nsandbox>>> '
         sys.ps2 = '.......... '
         sys.displayhook = self.displayhook

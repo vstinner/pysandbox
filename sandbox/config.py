@@ -2,6 +2,7 @@ from os.path import realpath, sep as path_sep, dirname, join as path_join, exist
 from sys import version_info
 #import imp
 import sys
+from sandbox import USE_CSANDBOX, HAVE_CPYTHON_RESTRICTED
 
 DEFAULT_TIMEOUT = 5.0
 
@@ -72,7 +73,19 @@ class SandboxConfig:
         # list of enabled features
         self._features = set()
 
-        self._cpython_restricted = kw.get('cpython_restricted', False)
+        try:
+            self._cpython_restricted = kw['cpython_restricted']
+        except KeyError:
+            if USE_CSANDBOX:
+                # use _sandbox
+                self._cpython_restricted = False
+            else:
+                # _sandbox is missing: use restricted mode
+                self._cpython_restricted = True
+
+        if self._cpython_restricted and not HAVE_CPYTHON_RESTRICTED:
+            raise ValueError(
+                "Your Python version doesn't support the restricted mode")
 
         self._builtins_whitelist = set((
             # exceptions
@@ -182,9 +195,8 @@ class SandboxConfig:
                 # quit builtin is added by the site module
                 'quit'))
         elif feature == 'traceback':
-            if self._cpython_restricted:
-                raise ValueError("traceback feature is incompatible with the CPython restricted mode")
             # change allowModule() behaviour
+            pass
         elif feature in ('stdout', 'stderr'):
             self.allowModule('sys', feature)
             # ProtectStdio.enable() use also these features
@@ -193,7 +205,8 @@ class SandboxConfig:
             self._builtins_whitelist.add('input')
             self._builtins_whitelist.add('raw_input')
         elif feature == 'site':
-            if 'traceback' in self._features:
+            if 'traceback' in self._features \
+            and (not self._cpython_restricted):
                 license_filename = findLicenseFile()
                 if license_filename:
                     self.allowPath(license_filename)
@@ -205,7 +218,6 @@ class SandboxConfig:
         elif feature == 'code':
             self._builtins_whitelist.add('compile')
         elif feature == 'interpreter':
-            # "Meta" feature + some extras
             self.enable('traceback')
             self.enable('stdin')
             self.enable('stdout')
@@ -342,7 +354,8 @@ class SandboxConfig:
         Allow reading the module source.
         Do nothing if traceback is disabled.
         """
-        if 'traceback' not in self._features:
+        if ('traceback' not in self._features) or self._cpython_restricted:
+            # restricted mode doesn't allow to open any file
             return
 
         filename = getModulePath(name)
@@ -361,9 +374,10 @@ class SandboxConfig:
         parser.add_option("--features",
             help="List of enabled features separated by a comma",
             type="str")
-        parser.add_option("--restricted",
-            help="Enable CPython restricted mode",
-            action="store_true")
+        if HAVE_CPYTHON_RESTRICTED:
+            parser.add_option("--restricted",
+                help="Enable CPython restricted mode",
+                action="store_true")
         parser.add_option("--allow-path",
             help="Allow reading files from PATH",
             action="append", type="str")
@@ -379,7 +393,7 @@ class SandboxConfig:
     @staticmethod
     def fromOptparseOptions(options):
         kw = {}
-        if options.restricted:
+        if HAVE_CPYTHON_RESTRICTED and options.restricted:
             kw['cpython_restricted'] = True
         if options.timeout:
             kw['timeout'] = options.timeout

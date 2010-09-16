@@ -49,11 +49,12 @@ class CleanupBuiltins:
         self.main_module = sys.modules['__main__']
 
         # Replace open and file functions
-        open_whitelist = config.open_whitelist
-        safe_open = _safe_open(open_whitelist)
-        self.builtin_dict['open'] = safe_open
-        if version_info < (3, 0):
-            self.builtin_dict['file'] = safe_open
+        if not config.cpython_restricted:
+            open_whitelist = config.open_whitelist
+            safe_open = _safe_open(open_whitelist)
+            self.builtin_dict['open'] = safe_open
+            if version_info < (3, 0):
+                self.builtin_dict['file'] = safe_open
 
         # Replace __import__ function
         import_whitelist = config.import_whitelist
