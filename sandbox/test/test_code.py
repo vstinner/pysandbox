@@ -40,7 +40,7 @@ def get_code_args():
             fcode.co_lnotab,
         )
 
-def code_objects():
+def get_code_objects():
     try:
         yield compile("1", "<string>", "eval")
     except NameError:
@@ -72,7 +72,7 @@ def code_objects():
         pass
 
 def create_code_objects(args):
-    for code_obj in code_objects():
+    for code_obj in get_code_objects():
         code_type = type(code_obj)
         try:
             return code_type(*args)
@@ -88,32 +88,6 @@ def exec_bytecode(code_args):
     new_func = function_type(fcode, {}, "new_func")
     return new_func(1, 2)
 
-
-def test_func_code():
-    if not HAVE_CSANDBOX:
-        raise SkipTest("require _sandbox")
-
-    def replace_func_code():
-        def add(x, y):
-            return x + y
-        def substract(x, y):
-            return x - y
-        try:
-            add.func_code = substract.func_code
-        except AttributeError:
-            add.__code__ = substract.__code__
-        return add(52, 10)
-
-    sandbox = createSandbox()
-    try:
-        sandbox.call(replace_func_code)
-    except AttributeError, err:
-        assert str(err) == "'function' object has no attribute '__code__'"
-    else:
-        assert False
-
-    assert replace_func_code() == 42
-
 def test_bytecode():
     code_args = get_code_args()
 
@@ -128,4 +102,28 @@ def test_bytecode():
 
     assert exec_bytecode(code_args) == 3
 
+def replace_func_code():
+    def add(x, y):
+        return x + y
+    def substract(x, y):
+        return x - y
+    try:
+        add.func_code = substract.func_code
+    except AttributeError:
+        add.__code__ = substract.__code__
+    return add(52, 10)
+
+def test_func_code():
+    if not HAVE_CSANDBOX:
+        raise SkipTest("require _sandbox")
+
+    sandbox = createSandbox()
+    try:
+        sandbox.call(replace_func_code)
+    except AttributeError, err:
+        assert str(err) == "'function' object has no attribute '__code__'"
+    else:
+        assert False
+
+    assert replace_func_code() == 42
 
