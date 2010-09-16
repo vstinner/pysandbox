@@ -89,6 +89,10 @@ def exec_bytecode(code_args):
     return new_func(1, 2)
 
 def test_bytecode():
+    if not HAVE_CSANDBOX:
+        # restricted mode doesn't block creation of arbitrary code object
+        raise SkipTest("require _sandbox")
+
     code_args = get_code_args()
 
     config = createSandboxConfig('code')
@@ -114,9 +118,6 @@ def replace_func_code():
     return add(52, 10)
 
 def test_func_code():
-    if not HAVE_CSANDBOX:
-        raise SkipTest("require _sandbox")
-
     sandbox = createSandbox()
     try:
         sandbox.call(replace_func_code)

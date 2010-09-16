@@ -3,9 +3,6 @@ from sandbox.test import SkipTest, createSandbox, createSandboxConfig
 from sys import version_info
 
 def test_exec_builtins():
-    if not HAVE_CSANDBOX:
-        raise SkipTest("require _sandbox")
-
     def check_builtins_type():
         result = []
         exec "result.append(type(__builtins__))" in {'result': result}

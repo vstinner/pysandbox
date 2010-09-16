@@ -15,28 +15,33 @@ def _get_file_type(obj):
             obj = obj.raw
     return type(obj)
 
-def test_open_whitelist():
-    if not HAVE_CSANDBOX:
-        raise SkipTest("require _sandbox")
-
+def test_open_denied():
     from errno import EACCES
 
     def access_denied():
         try:
             read_first_line(open)
         except IOError, err:
-            # Expect a safe_open() error
-            assert err.errno == EACCES
-            assert err.args[1].startswith('Sandbox deny access to the file ')
+            if err.errno == EACCES:
+                # safe_open() error
+                assert err.args[1].startswith('Sandbox deny access to the file ')
+            else:
+                # restricted python error
+                assert str(err) == 'file() constructor not accessible in restricted mode'
         else:
             assert False
     createSandbox().call(access_denied)
 
+    read_first_line(open)
+
+def test_open_whitelist():
+    if not HAVE_CSANDBOX:
+        # restricted python denies access to all files
+        raise SkipTest("require _sandbox")
+
     config = createSandboxConfig()
     config.allowPath(READ_FILENAME)
     Sandbox(config).call(read_first_line, open)
-
-    read_first_line(open)
 
 def test_write_file():
     def write_file(filename):
@@ -80,6 +85,7 @@ def test_filetype_from_sys_stdout():
 
 def test_filetype_from_open_file():
     if not HAVE_CSANDBOX:
+        # restricted mode deny to open any file
         raise SkipTest("require _sandbox")
 
     def get_file_type_from_open_file(filename):

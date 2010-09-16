@@ -1,7 +1,7 @@
 from sandbox import HAVE_CSANDBOX, SandboxError
 from sandbox.test import createSandbox, SkipTest
 
-def test_read_objectproxy():
+def test_object_proxy_read():
     class Person:
         __doc__ = 'Person doc'
 
@@ -32,14 +32,11 @@ def test_read_objectproxy():
     sandbox = createSandbox()
     sandbox.call(testPerson, person)
 
-def test_modify_objectproxy():
-    if not HAVE_CSANDBOX:
-        raise SkipTest("require _sandbox")
+class Person:
+    def __init__(self, name):
+        self.name = name
 
-    class Person:
-        def __init__(self, name):
-            self.name = name
-
+def test_object_proxy_setattr():
     # Attribute
     def setAttr(person):
         person.name = "victor"
@@ -56,6 +53,7 @@ def test_modify_objectproxy():
     setAttr(person)
     assert person.name == "victor"
 
+def test_object_proxy_delattr():
     # Delete attribute
     def delAttr(person):
         del person.name
@@ -72,11 +70,17 @@ def test_modify_objectproxy():
     delAttr(person)
     assert hasattr(person, 'name') == False
 
+def test_object_proxy_dict():
+    if not HAVE_CSANDBOX:
+        # restricted python blocks access to instance.__dict__
+        raise SkipTest("require _sandbox")
+
     # Dictionary
     def setDict(person):
         person.__dict__['name'] = "victor"
 
     person = Person("haypo")
+    sandbox = createSandbox()
     try:
         sandbox.call(setDict, person)
     except SandboxError, err:
