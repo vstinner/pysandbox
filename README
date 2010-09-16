@@ -21,7 +21,7 @@ Blocked Python functions (by default):
 A timeout of 5 seconds if used by default. You can enable all of these
 features by setting the sandbox configuration.
 
-Protection on the namespace:
+Protection of the namespace:
 
  * Deny access to function closure, globals and code
  * Deny access to frame locals
@@ -46,25 +46,28 @@ config.enable('feature'). Available features:
  - "codecs": codecs module
  - "code": compile() builtin, frame.f_locals, frame.f_code and
    generator.gi_code
- - "debug_sandbox": enable traceback of the sandbox itself
+ - "debug_sandbox": allow to display a traceback of the sandbox. Enable
+   traceback feature.
  - "datetime": datetime module
  - "encodings": encodings module with ascii, latin_1, utf_8, utf_16_be,
-   utf_32_be and rot_13 codecs (submodules)
+   utf_32_be and rot_13 codecs (submodules). Enable codecs feature.
  - "exit": sys.exit(), BaseException, KeyboardInterrupt, SystemExit, quit()
  - "future": from __future__ import ...
- - "help": pydoc.help(), use "import pydoc" outside the sandbox to use it
- - "interpreter": give access to standard streams, enable traceback
+ - "help": pydoc.help(), use "import pydoc" outside the sandbox to use it. Enable regex feature.
+ - "interpreter": give access to standard streams, enable traceback. Enable
+   encodings, exit, site, stdin, stdout, stderr and traceback features.
  - "itertools": itertools module
  - "math": math module
- - "random": random module
+ - "random": random module. Enable math feature.
  - "regex": compile regex, match regex, search regex, etc. (re module)
  - "site": allow to read the license file
  - "stdin": sys.stdin, input() and raw_input()
  - "stdout", "stderr": sys.stdout and sys.stderr
  - "time": time module (except sleep, strptime and tzset functions)
- - "traceback": compile() builtin, frame.f_code, next calls to allowModule()
+ - "traceback": compile() builtin, frame.f_code. Next calls to allowModule()
    will add the module filename to the open() whitelist, so Python can display
-   a traceback with the source code
+   a traceback with the source code. This feature have to be enabled before all
+   other features.
  - "unicodedata": unicodedata module, required for u'\N{ATOM SYMBOL}' syntax
 
 CPython restricted mode
