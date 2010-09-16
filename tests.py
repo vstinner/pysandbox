@@ -44,18 +44,18 @@ def main():
     else:
         base_exception = BaseException
     for func in all_tests:
-        name = func.__name__
+        name = '%s.%s()' % (func.__module__.split('.')[-1], func.__name__)
         try:
             func()
         except SkipTest, skip:
-            print("Test %s: skipped (%s)" % (name, skip))
+            print("%s: skipped (%s)" % (name, skip))
         except base_exception, err:
             nerror += 1
-            print("Test %s: FAILED! %r" % (name, err))
+            print("%s: FAILED! %r" % (name, err))
             if options.raise_exception:
                 raise
         else:
-            print "Test %s: ok" % name
+            print "%s: ok" % name
 
     # Exit
     from sys import exit
