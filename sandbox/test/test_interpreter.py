@@ -11,7 +11,7 @@ def check_interpreter_stdout(code, expected, **kw):
     env = os.environ.copy()
     env['PYTHONIOENCODING'] = encoding
     process = Popen(
-        [sys.executable, 'interpreter.py', '--features=stdin,stdout', '-q'],
+        [sys.executable, 'interpreter.py', '-q'],
         stdin=PIPE, stdout=PIPE, stderr=STDOUT,
         env=env)
     code += u'\nexit()'
@@ -33,9 +33,16 @@ def test_interpreter():
         [bytes_literal(r"sandbox>>> 2"),
          bytes_literal('sandbox>>> ')])
 
+    if version_info >= (3, 0):
+        code = u'print(ascii("\xe9"))'
+        expected = u"'\\xe9'"
+    else:
+        code = u'print(repr(u"\xe9"))'
+        expected = u"u'\\xe9'"
     for encoding in ('latin_1', 'utf_8'):
-        check_interpreter_stdout(u'u"\xe9"',
-            [bytes_literal(r"sandbox>>> u'\xe9'"),
+        check_interpreter_stdout(code,
+            [bytes_literal(r"sandbox>>> " + expected),
+             bytes_literal(''),
              bytes_literal('sandbox>>> ')],
             encoding=encoding)
 
