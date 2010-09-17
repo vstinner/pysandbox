@@ -105,7 +105,12 @@ def test_func_defaults():
             try:
                 open.__defaults__
             except AttributeError, err:
-                assert str(err) == "'function' object has no attribute '__defaults__'"
+                assert str(err) in (
+                    # open is safe_open()
+                    "'function' object has no attribute '__defaults__'",
+                    # builtin open() in restricted mode
+                    "'builtin_function_or_method' object has no attribute '__defaults__'",
+                )
             else:
                 assert False
     createSandbox().call(func_defaults_denied)
