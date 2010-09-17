@@ -109,14 +109,15 @@ class SandboxedInterpeter:
             import pydoc
         if self.config.cpython_restricted:
             # Import is blocked in restricted mode, so preload modules
+            import codecs
             import encodings
             import encodings.utf_8
             import encodings.utf_16_be
             if version_info >= (2, 6):
                 import encodings.utf_32_be
             if sys.stdout.encoding:
-                import codecs
                 codecs.lookup(sys.stdout.encoding)
+            codecs.lookup(ENCODING)
         sys.ps1 = '\nsandbox>>> '
         sys.ps2 = '.......... '
         sys.displayhook = self.displayhook
