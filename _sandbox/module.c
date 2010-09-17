@@ -86,18 +86,31 @@ static PyObject *
 dictionary_of(PyObject *self, PyObject *args)
 {
     PyObject *obj, **dict_ptr, *dict;
+    PyTypeObject *type;
 
     if (!PyArg_ParseTuple(args, "O:dictionary_of", &obj))
         return NULL;
 
-    dict_ptr = _PyObject_GetDictPtr(obj);
-    if (dict_ptr == NULL) {
-        PyErr_SetString(sandbox_error, "Object has no dict");
-        return NULL;
+    if (PyType_Check(obj)) {
+        type = (PyTypeObject*)obj;
+        if (type->tp_dict == NULL) {
+            if(PyType_Ready(type) < 0)
+                return NULL;
+        }
     }
+
+    dict_ptr = _PyObject_GetDictPtr(obj);
+    if (dict_ptr == NULL)
+        goto error;
     dict = *dict_ptr;
+    if (dict == NULL)
+        goto error;
     Py_INCREF(dict);
     return dict;
+
+error:
+    PyErr_SetString(sandbox_error, "Object has no dict");
+    return NULL;
 }
 
 static PyMethodDef sandbox_methods[] = {
