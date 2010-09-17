@@ -86,3 +86,27 @@ def test_func_locals():
     myimport = get_import_from_func_locals(safe_import, sys.exc_info)
     assert myimport is builtin_import
 
+def test_func_defaults():
+    from sys import version_info
+
+    def func_defaults_denied():
+        try:
+            open.func_defaults
+        except AttributeError, err:
+            assert str(err) in (
+                # open is safe_open()
+                "'function' object has no attribute 'func_defaults'",
+                # builtin open() in restricted mode
+                "'builtin_function_or_method' object has no attribute 'func_defaults'",
+            )
+        else:
+            assert False
+        if version_info >= (2, 6):
+            try:
+                open.__defaults__
+            except AttributeError, err:
+                assert str(err) == "'function' object has no attribute '__defaults__'"
+            else:
+                assert False
+    createSandbox().call(func_defaults_denied)
+

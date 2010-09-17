@@ -23,7 +23,7 @@ features by setting the sandbox configuration.
 
 Protection of the namespace:
 
- * Deny access to function closure, globals and code
+ * Deny access to function closure, globals, defaults and code
  * Deny access to frame locals
  * Deny access to types subclasses
  * __builtins__ is read only

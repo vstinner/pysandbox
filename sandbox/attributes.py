@@ -37,10 +37,12 @@ class HideAttributes:
             del self.function_dict['func_closure']
             del self.function_dict['func_globals']
             del self.function_dict['func_code']
+            del self.function_dict['func_defaults']
         if version_info >= (2, 6):
             del self.function_dict['__closure__']
             del self.function_dict['__globals__']
             del self.function_dict['__code__']
+            del self.function_dict['__defaults__']
         del self.frame_dict['f_locals']
         if ('code' not in sandbox.config.features) \
         and ('traceback' not in sandbox.config.features):

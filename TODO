@@ -1,7 +1,6 @@
 Major tasks
 -----------
 
- * Deny modification of open.func_defaults
  * FIXME: ReadOnlyList(list('abc')) == list('abc') is False
  * Choose getModulePath() implementation (problem with "from encodings import
    aliases")
@@ -28,6 +27,7 @@ Open questions
 Minor tasks
 -----------
 
+ * Allow function.func_code again?
  * Don't hide dict methods able to modify a dict (eg. dict.clear)
  * Write a cache for safe_import. Reuse sys.modules???
  * interpreter.py: import code module (InteractiveConsole) in the sandbox to
