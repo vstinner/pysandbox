@@ -48,7 +48,7 @@ def test_builtins_init():
             dict.__init__(__builtins__, {})
         except ImportError, err:
             assert str(err) == 'Import "_warnings" blocked by the sandbox'
-        except DeprecationWarning as err:
+        except DeprecationWarning, err:
             assert str(err) == 'object.__init__() takes no parameters'
         else:
             assert False
