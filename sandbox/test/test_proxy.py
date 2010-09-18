@@ -1,5 +1,5 @@
-from sandbox import HAVE_CSANDBOX, SandboxError
-from sandbox.test import createSandbox, SkipTest
+from sandbox import HAVE_CSANDBOX, Sandbox, SandboxError
+from sandbox.test import createSandbox, createSandboxConfig, SkipTest
 
 def test_object_proxy_read():
     class Person:
@@ -90,4 +90,19 @@ def test_object_proxy_dict():
 
     setDict(person)
     assert person.name == "victor"
+
+def test_proxy_module():
+    def check_proxy_module():
+        from sys import modules
+        try:
+            modules['sys']
+        except SandboxError, err:
+            assert str(err) == "Unable to proxy a value of type <type 'module'>"
+        else:
+            assert False
+
+    config = createSandboxConfig()
+    config.allowModule('sys', 'modules')
+    sandbox = Sandbox(config)
+    sandbox.call(check_proxy_module)
 
