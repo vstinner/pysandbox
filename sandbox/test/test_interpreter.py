@@ -9,6 +9,9 @@ def check_interpreter_stdout(code, expected, **kw):
     encoding = kw.get('encoding', 'utf-8')
 
     env = os.environ.copy()
+    # Use dummy terminal type to avoid 8 bits mode
+    # escape sequence ('\x1b[?1034h')
+    env['TERM'] = 'dumb'
     env['PYTHONIOENCODING'] = encoding
     process = Popen(
         [sys.executable, 'interpreter.py', '-q'],
