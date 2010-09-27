@@ -280,7 +280,7 @@ def _proxy():
         elif isinstance(value, OBJECT_TYPES):
             return createReadOnlyObject(value)
         else:
-            raise TypeError("Unable to proxy a value of type %s" % type(value))
+            raise SandboxError("Unable to proxy a value of type %s" % type(value))
     return proxy
 proxy = _proxy()
 del _proxy
