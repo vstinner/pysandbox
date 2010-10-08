@@ -1,0 +1,279 @@
+Patch LOAD_BUILD_CLASS, LOAD_GLOBAL, LOAD_NAME, IMPORT_NAME bytecodes to
+support frame->f_builtins of other type than dict.
+
+Patch PyFrame_New(): don't check globals()['__builtins__'] or back->f_builtins
+type.
+
+The overhead is approximativelly 0,1%. pybench output (py3k compiled in pydebug
+mode):
+
+-------------------------------------------------------------------------------
+
+    Rounds: 3
+    Warp:   10
+    Timer:  time.time
+
+    Machine Details:
+       Platform ID:    Linux-2.6.30.10-105.2.23.fc11.i586-i686-with-fedora-11-Leonidas
+       Processor:      i686
+    
+    Python:
+       Implementation: CPython
+       Executable:     /home/haypo/prog/GIT/py3k/python
+       Version:        3.2a2+.0
+       Compiler:       GCC 4.4.1 20090725 (Red Hat 4.4.1-2)
+       Bits:           32bit
+       Build:          Sep 21 2010 18:49:12 (#unknown)
+       Unicode:        UCS2
+
+
+Test                             minimum run-time        average  run-time
+                                 this    other   diff    this    other   diff
+-------------------------------------------------------------------------------
+          BuiltinFunctionCalls:  1258ms  1246ms   +1.0%  1318ms  1268ms   +3.9%
+           BuiltinMethodLookup:   730ms   737ms   -1.0%   746ms   763ms   -2.3%
+                 CompareFloats:   779ms   803ms   -3.1%   821ms   822ms   -0.1%
+         CompareFloatsIntegers:  1483ms  1470ms   +0.9%  1490ms  1486ms   +0.3%
+               CompareIntegers:  1223ms  1249ms   -2.1%  1265ms  1255ms   +0.9%
+        CompareInternedStrings:   864ms   884ms   -2.3%   868ms   891ms   -2.5%
+                  CompareLongs:   701ms   720ms   -2.5%   708ms   724ms   -2.1%
+                CompareStrings:   779ms   802ms   -2.9%   784ms   806ms   -2.7%
+    ComplexPythonFunctionCalls:  1764ms  1738ms   +1.5%  1798ms  1748ms   +2.8%
+                 ConcatStrings:  1471ms  1453ms   +1.3%  1478ms  1475ms   +0.2%
+               CreateInstances:  1824ms  1835ms   -0.6%  1849ms  1859ms   -0.5%
+            CreateNewInstances:  1366ms  1376ms   -0.7%  1375ms  1382ms   -0.5%
+       CreateStringsWithConcat:  1613ms  1589ms   +1.6%  1617ms  1602ms   +0.9%
+                  DictCreation:   517ms   525ms   -1.4%   523ms   538ms   -2.9%
+             DictWithFloatKeys:   836ms   829ms   +0.8%   849ms   868ms   -2.2%
+           DictWithIntegerKeys:   701ms   686ms   +2.2%   708ms   697ms   +1.6%
+            DictWithStringKeys:   643ms   635ms   +1.2%   654ms   661ms   -1.0%
+                      ForLoops:   883ms   884ms   -0.1%   886ms   888ms   -0.2%
+                    IfThenElse:   954ms   947ms   +0.8%   971ms   953ms   +1.9%
+                   ListSlicing:  1110ms  1105ms   +0.5%  1122ms  1152ms   -2.6%
+                NestedForLoops:  1297ms  1308ms   -0.9%  1315ms  1315ms   +0.0%
+      NestedListComprehensions:  1381ms  1352ms   +2.2%  1385ms  1387ms   -0.1%
+          NormalClassAttribute:  1380ms  1411ms   -2.2%  1395ms  1430ms   -2.5%
+       NormalInstanceAttribute:   904ms   935ms   -3.2%   917ms   965ms   -5.1%
+           PythonFunctionCalls:  2126ms  2123ms   +0.1%  2128ms  2143ms   -0.7%
+             PythonMethodCalls:  2046ms  2051ms   -0.3%  2191ms  2114ms   +3.6%
+                     Recursion:  3570ms  3651ms   -2.2%  3669ms  3776ms   -2.8%
+                  SecondImport:  1113ms  1083ms   +2.8%  1116ms  1089ms   +2.4%
+           SecondPackageImport:  1124ms  1094ms   +2.8%  1128ms  1109ms   +1.7%
+         SecondSubmoduleImport:  1438ms  1455ms   -1.2%  1440ms  1478ms   -2.6%
+       SimpleComplexArithmetic:  1269ms  1269ms   +0.0%  1274ms  1289ms   -1.2%
+        SimpleDictManipulation:  2593ms  2594ms   -0.1%  2641ms  2650ms   -0.3%
+         SimpleFloatArithmetic:   736ms   753ms   -2.2%   739ms   766ms   -3.5%
+      SimpleIntFloatArithmetic:   816ms   804ms   +1.5%   820ms   820ms   -0.0%
+       SimpleIntegerArithmetic:   817ms   802ms   +1.8%   819ms   834ms   -1.7%
+      SimpleListComprehensions:  1070ms  1058ms   +1.1%  1084ms  1088ms   -0.4%
+        SimpleListManipulation:   811ms   793ms   +2.3%   813ms   803ms   +1.3%
+          SimpleLongArithmetic:   932ms   935ms   -0.3%   962ms   950ms   +1.3%
+                    SmallLists:  1267ms  1247ms   +1.6%  1414ms  1302ms   +8.5%
+                   SmallTuples:  1411ms  1425ms   -0.9%  1426ms  1434ms   -0.6%
+         SpecialClassAttribute:  2245ms  2221ms   +1.1%  2276ms  2249ms   +1.2%
+      SpecialInstanceAttribute:   896ms   906ms   -1.1%  1008ms   961ms   +4.9%
+                StringMappings:  2383ms  2383ms   +0.0%  2408ms  2428ms   -0.8%
+              StringPredicates:  1077ms  1096ms   -1.7%  1110ms  1100ms   +0.9%
+                 StringSlicing:  2054ms  2035ms   +0.9%  2070ms  2085ms   -0.7%
+                     TryExcept:   598ms   599ms   -0.1%   601ms   616ms   -2.4%
+                    TryFinally:  2059ms  2032ms   +1.3%  2066ms  2103ms   -1.8%
+                TryRaiseExcept:   603ms   625ms   -3.6%   604ms   631ms   -4.2%
+                  TupleSlicing:  1541ms  1516ms   +1.6%  1548ms  1532ms   +1.1%
+                   WithFinally:  2566ms  2572ms   -0.3%  2594ms  2675ms   -3.1%
+               WithRaiseExcept:  2464ms  2496ms   -1.3%  2474ms  2526ms   -2.1%
+-------------------------------------------------------------------------------
+Totals:                         68086ms 68135ms   -0.1% 69266ms 69487ms   -0.3%
+
+diff --git a/Objects/frameobject.c b/Objects/frameobject.c
+index 10fb8b3..9527359 100644
+--- a/Objects/frameobject.c
++++ b/Objects/frameobject.c
+@@ -614,8 +614,6 @@ PyFrame_New(PyThreadState *tstate, PyCodeObject *code, PyObject *globals,
+                 builtins = PyModule_GetDict(builtins);
+                 assert(!builtins || PyDict_Check(builtins));
+             }
+-            else if (!PyDict_Check(builtins))
+-                builtins = NULL;
+         }
+         if (builtins == NULL) {
+             /* No builtins!              Make up a minimal one
+@@ -634,7 +632,6 @@ PyFrame_New(PyThreadState *tstate, PyCodeObject *code, PyObject *globals,
+         /* If we share the globals, we share the builtins.
+            Save a lookup and a call. */
+         builtins = back->f_builtins;
+-        assert(builtins != NULL && PyDict_Check(builtins));
+         Py_INCREF(builtins);
+     }
+     if (code->co_zombieframe != NULL) {
+diff --git a/Python/ceval.c b/Python/ceval.c
+index 48b5678..f1b50a1 100644
+--- a/Python/ceval.c
++++ b/Python/ceval.c
+@@ -119,6 +119,8 @@ static PyObject * load_args(PyObject ***, int);
+ #define CALL_FLAG_VAR 1
+ #define CALL_FLAG_KW 2
+ 
++static PyObject *import_str = NULL;
++static PyObject *build_class_str = NULL;
+ #ifdef LLTRACE
+ static int lltrace;
+ static int prtrace(PyObject *, char *);
+@@ -1933,8 +1935,16 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
+             break;
+ 
+         TARGET(LOAD_BUILD_CLASS)
+-            x = PyDict_GetItemString(f->f_builtins,
+-                                     "__build_class__");
++            if (PyDict_CheckExact(f->f_builtins))
++                x = PyDict_GetItemString(f->f_builtins, "__build_class__");
++            else {
++                if (build_class_str == NULL) {
++                    build_class_str = PyUnicode_FromString("__build_class__");
++                    if (build_class_str == NULL)
++                        break;
++                }
++                x = PyObject_GetItem(f->f_builtins, build_class_str);
++            }
+             if (x == NULL) {
+                 PyErr_SetString(PyExc_ImportError,
+                                 "__build_class__ not found");
+@@ -2079,7 +2089,10 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
+             if (x == NULL) {
+                 x = PyDict_GetItem(f->f_globals, w);
+                 if (x == NULL) {
+-                    x = PyDict_GetItem(f->f_builtins, w);
++                    if (PyDict_CheckExact(f->f_builtins))
++                        x = PyDict_GetItem(f->f_builtins, w);
++                    else
++                        x = PyObject_GetItem(f->f_builtins, w);
+                     if (x == NULL) {
+                         format_exc_check_arg(
+                                     PyExc_NameError,
+@@ -2094,57 +2107,68 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
+ 
+         TARGET(LOAD_GLOBAL)
+             w = GETITEM(names, oparg);
+-            if (PyUnicode_CheckExact(w)) {
+-                /* Inline the PyDict_GetItem() calls.
+-                   WARNING: this is an extreme speed hack.
+-                   Do not try this at home. */
+-                long hash = ((PyUnicodeObject *)w)->hash;
+-                if (hash != -1) {
+-                    PyDictObject *d;
+-                    PyDictEntry *e;
+-                    d = (PyDictObject *)(f->f_globals);
+-                    e = d->ma_lookup(d, w, hash);
+-                    if (e == NULL) {
+-                        x = NULL;
+-                        break;
+-                    }
+-                    x = e->me_value;
+-                    if (x != NULL) {
+-                        Py_INCREF(x);
+-                        PUSH(x);
+-                        DISPATCH();
++            if (PyDict_CheckExact(f->f_builtins)) {
++                if (PyUnicode_CheckExact(w)) {
++                    /* Inline the PyDict_GetItem() calls.
++                       WARNING: this is an extreme speed hack.
++                       Do not try this at home. */
++                    long hash = ((PyUnicodeObject *)w)->hash;
++                    if (hash != -1) {
++                        PyDictObject *d;
++                        PyDictEntry *e;
++                        d = (PyDictObject *)(f->f_globals);
++                        e = d->ma_lookup(d, w, hash);
++                        if (e == NULL) {
++                            x = NULL;
++                            break;
++                        }
++                        x = e->me_value;
++                        if (x != NULL) {
++                            Py_INCREF(x);
++                            PUSH(x);
++                            DISPATCH();
++                        }
++                        d = (PyDictObject *)(f->f_builtins);
++                        e = d->ma_lookup(d, w, hash);
++                        if (e == NULL) {
++                            x = NULL;
++                            break;
++                        }
++                        x = e->me_value;
++                        if (x != NULL) {
++                            Py_INCREF(x);
++                            PUSH(x);
++                            DISPATCH();
++                        }
++                        goto load_global_error;
+                     }
+-                    d = (PyDictObject *)(f->f_builtins);
+-                    e = d->ma_lookup(d, w, hash);
+-                    if (e == NULL) {
+-                        x = NULL;
+-                        break;
+-                    }
+-                    x = e->me_value;
+-                    if (x != NULL) {
+-                        Py_INCREF(x);
+-                        PUSH(x);
+-                        DISPATCH();
+-                    }
+-                    goto load_global_error;
++                }
++                /* This is the un-inlined version of the code above */
++                x = PyDict_GetItem(f->f_globals, w);
++                if (x == NULL) {
++                    x = PyDict_GetItem(f->f_builtins, w);
++                    if (x == NULL)
++                        goto load_global_error;
+                 }
+             }
+-            /* This is the un-inlined version of the code above */
+-            x = PyDict_GetItem(f->f_globals, w);
+-            if (x == NULL) {
+-                x = PyDict_GetItem(f->f_builtins, w);
++            else {
++                x = PyDict_GetItem(f->f_globals, w);
+                 if (x == NULL) {
+-                  load_global_error:
+-                    format_exc_check_arg(
+-                                PyExc_NameError,
+-                                GLOBAL_NAME_ERROR_MSG, w);
+-                    break;
++                    x = PyObject_GetItem(f->f_builtins, w);
++                    if (x == NULL)
++                        goto load_global_error;
+                 }
+             }
+             Py_INCREF(x);
+             PUSH(x);
+             DISPATCH();
+ 
++load_global_error:
++            format_exc_check_arg(
++                PyExc_NameError,
++                GLOBAL_NAME_ERROR_MSG, w);
++            break;
++
+         TARGET(DELETE_FAST)
+             x = GETLOCAL(oparg);
+             if (x != NULL) {
+@@ -2291,7 +2315,16 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
+ 
+         TARGET(IMPORT_NAME)
+             w = GETITEM(names, oparg);
+-            x = PyDict_GetItemString(f->f_builtins, "__import__");
++            if (PyDict_CheckExact(f->f_builtins))
++                x = PyDict_GetItemString(f->f_builtins, "__import__");
++            else {
++                if (import_str == NULL) {
++                    import_str = PyUnicode_FromString("__import__");
++                    if (import_str == NULL)
++                        break;
++                }
++                x = PyObject_GetItem(f->f_builtins, import_str);
++            }
+             if (x == NULL) {
+                 PyErr_SetString(PyExc_ImportError,
+                                 "__import__ not found");

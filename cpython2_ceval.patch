@@ -1,0 +1,173 @@
+Index: Python/ceval.c
+===================================================================
+--- Python/ceval.c	(révision 84785)
++++ Python/ceval.c	(copie de travail)
+@@ -119,6 +119,7 @@
+ #define CALL_FLAG_VAR 1
+ #define CALL_FLAG_KW 2
+ 
++static PyObject *import_str = NULL;
+ #ifdef LLTRACE
+ static int lltrace;
+ static int prtrace(PyObject *, char *);
+@@ -2054,7 +2055,10 @@
+             if (x == NULL) {
+                 x = PyDict_GetItem(f->f_globals, w);
+                 if (x == NULL) {
+-                    x = PyDict_GetItem(f->f_builtins, w);
++                    if (PyDict_CheckExact(f->f_builtins))
++                        x = PyDict_GetItem(f->f_builtins, w);
++                    else
++                        x = PyObject_GetItem(f->f_builtins, w);
+                     if (x == NULL) {
+                         format_exc_check_arg(
+                                     PyExc_NameError,
+@@ -2069,57 +2073,67 @@
+ 
+         case LOAD_GLOBAL:
+             w = GETITEM(names, oparg);
+-            if (PyString_CheckExact(w)) {
+-                /* Inline the PyDict_GetItem() calls.
+-                   WARNING: this is an extreme speed hack.
+-                   Do not try this at home. */
+-                long hash = ((PyStringObject *)w)->ob_shash;
+-                if (hash != -1) {
+-                    PyDictObject *d;
+-                    PyDictEntry *e;
+-                    d = (PyDictObject *)(f->f_globals);
+-                    e = d->ma_lookup(d, w, hash);
+-                    if (e == NULL) {
+-                        x = NULL;
+-                        break;
++            if (PyDict_CheckExact(f->f_builtins)) {
++                if (PyString_CheckExact(w)) {
++                    /* Inline the PyDict_GetItem() calls.
++                       WARNING: this is an extreme speed hack.
++                       Do not try this at home. */
++                    long hash = ((PyStringObject *)w)->ob_shash;
++                    if (hash != -1) {
++                        PyDictObject *d;
++                        PyDictEntry *e;
++                        d = (PyDictObject *)(f->f_globals);
++                        e = d->ma_lookup(d, w, hash);
++                        if (e == NULL) {
++                            x = NULL;
++                            break;
++                        }
++                        x = e->me_value;
++                        if (x != NULL) {
++                            Py_INCREF(x);
++                            PUSH(x);
++                            continue;
++                        }
++                        d = (PyDictObject *)(f->f_builtins);
++                        e = d->ma_lookup(d, w, hash);
++                        if (e == NULL) {
++                            x = NULL;
++                            break;
++                        }
++                        x = e->me_value;
++                        if (x != NULL) {
++                            Py_INCREF(x);
++                            PUSH(x);
++                            continue;
++                        }
++                        goto load_global_error;
+                     }
+-                    x = e->me_value;
+-                    if (x != NULL) {
+-                        Py_INCREF(x);
+-                        PUSH(x);
+-                        continue;
+-                    }
+-                    d = (PyDictObject *)(f->f_builtins);
+-                    e = d->ma_lookup(d, w, hash);
+-                    if (e == NULL) {
+-                        x = NULL;
+-                        break;
+-                    }
+-                    x = e->me_value;
+-                    if (x != NULL) {
+-                        Py_INCREF(x);
+-                        PUSH(x);
+-                        continue;
+-                    }
+-                    goto load_global_error;
+                 }
+-            }
+-            /* This is the un-inlined version of the code above */
+-            x = PyDict_GetItem(f->f_globals, w);
+-            if (x == NULL) {
+-                x = PyDict_GetItem(f->f_builtins, w);
++                /* This is the un-inlined version of the code above */
++                x = PyDict_GetItem(f->f_globals, w);
+                 if (x == NULL) {
+-                  load_global_error:
+-                    format_exc_check_arg(
+-                                PyExc_NameError,
+-                                GLOBAL_NAME_ERROR_MSG, w);
+-                    break;
++                    x = PyDict_GetItem(f->f_builtins, w);
++                    if (x == NULL)
++                        goto load_global_error;
+                 }
++            } else {
++                x = PyDict_GetItem(f->f_globals, w);
++                if (x == NULL) {
++                    x = PyObject_GetItem(f->f_builtins, w);
++                    if (x == NULL)
++                        goto load_global_error;
++                }
+             }
+             Py_INCREF(x);
+             PUSH(x);
+             continue;
+ 
++load_global_error:
++            format_exc_check_arg(
++                PyExc_NameError,
++                GLOBAL_NAME_ERROR_MSG, w);
++            break;
++
+         case DELETE_FAST:
+             x = GETLOCAL(oparg);
+             if (x != NULL) {
+@@ -2295,7 +2309,16 @@
+ 
+         case IMPORT_NAME:
+             w = GETITEM(names, oparg);
+-            x = PyDict_GetItemString(f->f_builtins, "__import__");
++            if (PyDict_CheckExact(f->f_builtins))
++                x = PyDict_GetItemString(f->f_builtins, "__import__");
++            else {
++                if (import_str == NULL) {
++                    import_str = PyString_FromString("__import__");
++                    if (import_str == NULL)
++                        break;
++                }
++                x = PyObject_GetItem(f->f_builtins, import_str);
++            }
+             if (x == NULL) {
+                 PyErr_SetString(PyExc_ImportError,
+                                 "__import__ not found");
+Index: Objects/frameobject.c
+===================================================================
+--- Objects/frameobject.c	(révision 84785)
++++ Objects/frameobject.c	(copie de travail)
+@@ -641,8 +641,6 @@
+                 builtins = PyModule_GetDict(builtins);
+                 assert(!builtins || PyDict_Check(builtins));
+             }
+-            else if (!PyDict_Check(builtins))
+-                builtins = NULL;
+         }
+         if (builtins == NULL) {
+             /* No builtins!              Make up a minimal one
+@@ -661,7 +659,6 @@
+         /* If we share the globals, we share the builtins.
+            Save a lookup and a call. */
+         builtins = back->f_builtins;
+-        assert(builtins != NULL && PyDict_Check(builtins));
+         Py_INCREF(builtins);
+     }
+     if (code->co_zombieframe != NULL) {
