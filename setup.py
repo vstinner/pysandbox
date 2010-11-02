@@ -9,7 +9,7 @@
 #  - set release date in the ChangeLog
 #  - git commit -a
 #  - git tag -a pysandbox-n
-#  - git push
+#  - git push --tags
 #  - ./setup.py register sdist upload
 #  - update the website
 #
