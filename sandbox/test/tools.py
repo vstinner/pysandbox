@@ -3,6 +3,7 @@ from os.path import join as path_join, basename, realpath
 from glob import glob
 from sys import version_info
 import contextlib
+from sandbox.test import SkipTest
 
 READ_FILENAME = realpath(__file__)
 FIRST_LINE = open(READ_FILENAME, 'rb').readline()
@@ -31,7 +32,11 @@ def getTests(main_dict, keyword=None):
         # sandbox/test/test_bla.py => sandbox.test.bla
         module_name = basename(filename)[:-3]
         full_module_name = "sandbox.test.%s" % module_name
-        parent_module = __import__(full_module_name)
+        try:
+            parent_module = __import__(full_module_name)
+        except SkipTest, skip:
+            print("Skip %s: %s" % (module_name, skip))
+            continue
         module = getattr(parent_module.test, module_name)
         _getTests(module.__dict__, all_tests, keyword)
     all_tests.sort(key=lambda func: func.__name__)

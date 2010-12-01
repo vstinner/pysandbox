@@ -1,11 +1,11 @@
-from sandbox import Sandbox, HAVE_CPYTHON_RESTRICTED, HAVE_CSANDBOX
+from sandbox import Sandbox, HAVE_CPYTHON_RESTRICTED, HAVE_CSANDBOX, HAVE_PYPY
 from sandbox.test import SkipTest, createSandboxConfig
 from ._test_restricted import _test_restricted
 
-def test_frame_restricted():
-    if not HAVE_CPYTHON_RESTRICTED:
-        raise SkipTest("restricted mode is specific to Python 2.x")
+if not HAVE_CPYTHON_RESTRICTED:
+    raise SkipTest("restricted mode is specific to Python 2.x")
 
+def test_frame_restricted():
     from sys import _getframe
 
     config = createSandboxConfig(cpython_restricted=True)
@@ -25,9 +25,6 @@ def test_frame_restricted():
     assert frame.f_restricted == False
 
 def test_module_frame_restricted():
-    if not HAVE_CPYTHON_RESTRICTED:
-        raise SkipTest("restricted mode is specific to Python 2.x")
-
     from sys import _getframe
 
     config = createSandboxConfig(cpython_restricted=True)
