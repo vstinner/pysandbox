@@ -1,4 +1,4 @@
-from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX
+from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX, HAVE_PYPY
 from sandbox.test import SkipTest, createSandbox, createSandboxConfig
 from sys import version_info
 
@@ -8,7 +8,11 @@ def test_exec_builtins():
         exec "result.append(type(__builtins__))" in {'result': result}
         builtin_type = result[0]
         assert builtin_type != dict
-    createSandbox().call(check_builtins_type)
+    config = createSandboxConfig()
+    if HAVE_PYPY:
+        # FIXME: is it really needed?
+        config._builtins_whitelist.add('compile')
+    Sandbox(config).call(check_builtins_type)
 
 def test_builtins_setitem():
     def builtins_superglobal():
@@ -68,7 +72,7 @@ def test_builtins_init():
 
 def test_modify_builtins_dict():
     def builtins_dict_superglobal():
-        dict.__setitem__(__builtins__, 'SUPERGLOBAL', 42)
+        __builtins__['SUPERGLOBAL'] = 42
         assert SUPERGLOBAL == 42
         del __builtins__['SUPERGLOBAL']
 
@@ -77,6 +81,8 @@ def test_modify_builtins_dict():
             builtins_dict_superglobal()
         except AttributeError, err:
             assert str(err) == "type object 'dict' has no attribute '__setitem__'"
+        except SandboxError, err:
+            assert str(err) == "Read only object"
         else:
             assert False
     createSandbox().call(readonly_builtins_dict)
@@ -98,6 +104,8 @@ def test_del_builtin():
             del_builtin_import()
         except AttributeError, err:
             assert str(err) == "type object 'dict' has no attribute '__delitem__'"
+        except SandboxError, err:
+            assert str(err) == "Read only object"
         else:
             assert False
 

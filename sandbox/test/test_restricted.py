@@ -5,6 +5,10 @@ from ._test_restricted import _test_restricted
 if not HAVE_CPYTHON_RESTRICTED:
     raise SkipTest("restricted mode is specific to Python 2.x")
 
+# TODO: enable these tests on PyPy
+if HAVE_PYPY:
+    raise SkipTest("test disabled on PyPy")
+
 def test_frame_restricted():
     from sys import _getframe
 

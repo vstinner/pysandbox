@@ -1,13 +1,17 @@
 from __future__ import with_statement
 from sys import version_info
-from sandbox import Sandbox
+from sandbox import Sandbox, HAVE_PYPY
 from sandbox.test import createSandbox, createSandboxConfig, SkipTest
 from sandbox.test.tools import capture_stdout
 
 def test_execute():
     def test(*lines, **kw):
         code = "; ".join(lines)
-        createSandbox().execute(code, **kw)
+        config = createSandboxConfig()
+        if HAVE_PYPY:
+            # FIXME: is it really needed?
+            config._builtins_whitelist.add('compile')
+        Sandbox(config).execute(code, **kw)
 
     test(
         "assert globals() is locals(), 'test_execute #1a'",

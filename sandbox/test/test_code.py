@@ -1,7 +1,7 @@
 from sys import version_info
-from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX
+from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX, HAVE_PYPY
 from sandbox.test import (createSandbox, createSandboxConfig,
-    SkipTest, TestException)
+    SkipTest, TestException, skipIf)
 
 # code constructor arguments
 def get_code_args():
@@ -117,6 +117,8 @@ def replace_func_code():
         add.__code__ = substract.__code__
     return add(52, 10)
 
+# FIXME: reenable this test on PyPy
+@skipIf(HAVE_PYPY, "test disabled on PyPy")
 def test_func_code():
     sandbox = createSandbox()
     try:

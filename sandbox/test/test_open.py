@@ -1,7 +1,7 @@
 from __future__ import with_statement
-from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX
+from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX, HAVE_PYPY
 from sandbox.test import (createSandbox, createSandboxConfig,
-    SkipTest, TestException)
+    SkipTest, TestException, skipIf)
 from sandbox.test.tools import read_first_line, READ_FILENAME
 from sys import version_info
 
@@ -139,6 +139,8 @@ def test_method_proxy():
     file_type = get_file_type_from_stdout_method()
     read_first_line(file_type)
 
+# TODO: enable this test on PyPy
+@skipIf(HAVE_PYPY, "test disabled on PyPy")
 def test_subclasses():
     if version_info >= (3, 0):
         raise SkipTest("Python 3 has not file type")

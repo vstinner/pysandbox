@@ -2,7 +2,7 @@ from os.path import realpath, sep as path_sep, dirname, join as path_join, exist
 from sys import version_info
 #import imp
 import sys
-from sandbox import HAVE_CSANDBOX, HAVE_CPYTHON_RESTRICTED
+from sandbox import HAVE_CSANDBOX, HAVE_CPYTHON_RESTRICTED, HAVE_PYPY
 
 DEFAULT_TIMEOUT = 5.0
 
@@ -79,6 +79,8 @@ class SandboxConfig:
             if HAVE_CSANDBOX:
                 # use _sandbox
                 self._cpython_restricted = False
+            elif HAVE_PYPY:
+                self._cpython_restricted = False
             else:
                 # _sandbox is missing: use restricted mode
                 self._cpython_restricted = True
@@ -135,6 +137,11 @@ class SandboxConfig:
             # note: exit is replaced by safe_exit() if exit feature is disabled
             # note: open is replaced by safe_open()
         ))
+        if HAVE_PYPY:
+            self._builtins_whitelist |= set((
+                # functions
+                'intern',
+            ))
         if version_info >= (3, 0):
             self._builtins_whitelist |= set((
                 # functions
@@ -229,6 +236,11 @@ class SandboxConfig:
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion', 'version_info')
+            if HAVE_PYPY:
+                self.enable('unicodedata')
+                self.allowModule('os', 'write', 'waitpid')
+                self.allowSafeModule('pyrepl', 'input')
+                self.allowModule('pyrepl.keymap', 'compile_keymap', 'parse_keys')
         elif feature == 'debug_sandbox':
             self.enable('traceback')
             self.allowModule('sys', '_getframe')

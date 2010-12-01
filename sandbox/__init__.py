@@ -9,9 +9,10 @@ class Protection:
         pass
 
 # CPython restricted mode is only available in Python 2.x
-from sys import version_info
+from sys import version_info, version
 HAVE_CPYTHON_RESTRICTED = (version_info < (3, 0))
-del version_info
+HAVE_PYPY = ('PyPy' in version)
+del version, version_info
 
 # Use the C module (_sandbox)
 try:
@@ -34,8 +35,12 @@ from .sandbox_class import Sandbox
 from .builtins import CleanupBuiltins
 Sandbox.PROTECTIONS.append(CleanupBuiltins)
 
-from .attributes import HideAttributes
-Sandbox.PROTECTIONS.append(HideAttributes)
+if not HAVE_PYPY:
+    from .attributes import HideAttributes
+    Sandbox.PROTECTIONS.append(HideAttributes)
+else:
+    # replace the follow line by "pass" to test PyPy
+    raise SandboxError("PyPy is not supported yet")
 
 from .stdio import ProtectStdio
 Sandbox.PROTECTIONS.append(ProtectStdio)
