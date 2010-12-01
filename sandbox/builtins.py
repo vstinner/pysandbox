@@ -4,7 +4,6 @@ from sys import _getframe, version_info
 import sys
 
 from sandbox import SandboxError, HAVE_CSANDBOX
-from .cpython import dictionary_of
 from .safe_open import _safe_open
 from .safe_import import _safe_import
 from .restorable_dict import RestorableDict
@@ -18,7 +17,7 @@ class CleanupBuiltins:
     Deny unsafe builtins functions.
     """
     def __init__(self):
-        self.get_frame_builtins = dictionary_of(FrameType)['f_builtins'].__get__
+        self.get_frame_builtins = FrameType.f_builtins.__get__
         self.builtin_dict = RestorableDict(BUILTINS_MODULE.__dict__)
 
     def enable(self, sandbox):
