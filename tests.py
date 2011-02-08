@@ -3,6 +3,7 @@ from sandbox import HAVE_CSANDBOX
 from sys import version_info
 from sandbox.test import SkipTest, createSandboxConfig
 from sandbox.test.tools import getTests
+from sandbox.version import VERSION
 
 def parseOptions():
     from optparse import OptionParser
@@ -30,9 +31,11 @@ def main():
     options = parseOptions()
     createSandboxConfig.debug = options.debug
 
+    print("Run the test suite on pysandbox %s with Python %s.%s"
+          % (VERSION, version_info[0], version_info[1]))
     if not HAVE_CSANDBOX:
         print("WARNING: _sandbox module is missing")
-        print
+    print
 
     # Get all tests
     all_tests = getTests(globals(), options.keyword)
