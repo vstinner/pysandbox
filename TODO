@@ -31,7 +31,8 @@ Minor tasks
 -----------
 
  * Allow function.func_code again?
- * Don't hide dict methods able to modify a dict (eg. dict.clear)
+ * Don't hide dict methods able to modify a dict (eg. dict.clear): need a
+   builtin frozendict type
  * Write a cache for safe_import. Reuse sys.modules???
  * interpreter.py: import code module (InteractiveConsole) in the sandbox to
    execute the whole interpreter in the sandbox

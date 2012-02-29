@@ -8,8 +8,6 @@ if version_info < (3, 0):
     OBJECT_TYPES = (file, ClassType, InstanceType)
     BYTES_TYPE = str
     UNICODE_TYPE = unicode
-    def is_callable(obj):
-        return callable(obj)
 else:
     # Python 3 has no NoneType
     NoneType = type(None)
@@ -17,8 +15,9 @@ else:
     # 2to3 script converts str to str instead of bytes
     BYTES_TYPE = bytes
     UNICODE_TYPE = str
-    def is_callable(obj):
-        return any("__call__" in cls.__dict__ for cls in type(obj).__mro__)
+    if version_info < (3, 2):
+        def callable(obj):
+            return any("__call__" in cls.__dict__ for cls in type(obj).__mro__)
 
 from types import MethodType, FrameType
 from sandbox import SandboxError
@@ -267,7 +266,7 @@ def _proxy():
         if isinstance(value, SAFE_TYPES):
             # Safe type, no need to create a proxy
             return value
-        elif is_callable(value):
+        elif callable(value):
             return callback_proxy(proxy, value)
         elif isinstance(value, tuple):
             return tuple(
