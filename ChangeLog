@@ -8,6 +8,7 @@ method of the SandoxConfig, the result of the function is not proxified. This
 version improves also the support of CPython restricted mode and is mostly
 compatible with Python 3.
 
+    * Block access to function.func_defaults/__defaults__
     * Add SandoxConfig.allowSafeModule(): similar to allowModule() but don't
       proxify the attribute
     * SandboxConfig doesn't import modules to get their path

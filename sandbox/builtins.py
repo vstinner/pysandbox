@@ -42,7 +42,7 @@ class CleanupBuiltins:
                 # builtin modules have no __dict__ attribute
                 continue
             if name == "__main__":
-                 # __main__ is a special case
+                 # __main__ is handled differently, see below
                 continue
             self.modules_dict.append(module.__dict__)
         self.main_module = sys.modules['__main__']
