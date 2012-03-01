@@ -6,7 +6,8 @@ import contextlib
 from sandbox.test import SkipTest
 
 READ_FILENAME = realpath(__file__)
-FIRST_LINE = open(READ_FILENAME, 'rb').readline()
+with open(READ_FILENAME, 'rb') as f:
+    FIRST_LINE = f.readline()
 
 if version_info >= (3, 0):
     # function for python2/python3 compatibility: bytes literal string
