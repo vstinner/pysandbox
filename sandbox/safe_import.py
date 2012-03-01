@@ -51,11 +51,17 @@ def _safe_import(__import__, module_whitelist):
     """
     Import a module.
     """
-    def safe_import(name, globals={}, locals={}, fromlist=[], level=-1):
+    def safe_import(name, globals=None, locals=None, fromlist=None, level=-1):
         try:
             attributes, safe_attributes = module_whitelist[name]
         except KeyError:
             raise ImportError('Import "%s" blocked by the sandbox' % name)
+        if globals is None:
+            globals = {}
+        if locals is None:
+            locals = {}
+        if fromlist is None:
+            fromlist = []
         module = __import__(name, globals, locals, fromlist, level)
         return createSafeModule(module, attributes, safe_attributes)
     return safe_import
