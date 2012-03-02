@@ -166,6 +166,9 @@ Python
  * Zope security:
    http://pypi.python.org/pypi/RestrictedPython
    http://svn.zope.org/zope.security/trunk/src/zope/security/
+ * Brett Canon's "objcap" secured Python interpreter
+   http://sayspy.blogspot.com/2007/05/i-have-finished-securing-python.html
+   http://svn.python.org/view/python/branches/bcannon-objcap/secure_python.c?revision=56111&view=markup
  * Python taint mode:
    http://www.cats-muvva.net/software/
  * Controlling Access to Resources Within The Python Interpreter:
