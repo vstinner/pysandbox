@@ -235,7 +235,8 @@ class SandboxConfig:
             self._builtins_whitelist.add('compile')
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
-                'api_version', 'version', 'hexversion', 'version_info')
+                'api_version', 'version', 'hexversion')
+            self.allowSafeModule('sys', 'version_info')
             if HAVE_PYPY:
                 self.enable('unicodedata')
                 self.allowModule('os', 'write', 'waitpid')
