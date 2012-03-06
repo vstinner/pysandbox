@@ -1,4 +1,4 @@
-from sandbox import HAVE_PYPY
+from sandbox import HAVE_PYPY, SandboxError
 from sandbox.test import createSandbox, SkipTest
 
 # FIXME: reenable these tests
@@ -120,4 +120,30 @@ def test_func_defaults():
             else:
                 assert False
     createSandbox().call(func_defaults_denied)
+
+def test_type_bases():
+    from sys import version_info
+
+    def test():
+        class A(object):
+            pass
+        class B(object):
+            pass
+        class X(A):
+            pass
+        X.__bases__ = (B,)
+        if not issubclass(X, B):
+            raise SandboxError("yep")
+
+    def sandbox_test():
+        try:
+            test()
+        except SandboxError:
+            pass
+        else:
+            assert False
+
+    createSandbox().call(sandbox_test)
+
+    test()
 

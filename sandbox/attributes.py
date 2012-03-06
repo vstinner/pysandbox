@@ -47,6 +47,9 @@ class HideAttributes:
         if ('code' not in sandbox.config.features) \
         and ('traceback' not in sandbox.config.features):
             del self.frame_dict['f_code']
+        # Setting __bases__ crash Python < 3.3a2
+        # http://bugs.python.org/issue14199
+        del self.type_dict['__bases__']
         del self.type_dict['__subclasses__']
         del self.builtin_func_dict['__self__']
         if version_info >= (2, 6) \
