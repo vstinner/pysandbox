@@ -307,6 +307,22 @@ class SandboxConfig:
                 'choice', 'gauss', 'getrandbits', 'randint', 'random',
                 'randrange', 'sample', 'shuffle', 'triangular', 'uniform')
                 # blocked: getstate, jumpahead, seed, setstate
+            self.enable('hashlib')
+        elif feature == 'hashlib':
+            self.allowSafeModule('hashlib',
+                'md5',
+                'sha1',
+                'sha224',
+                'sha256',
+                'sha384',
+                'sha512')
+            self.allowSafeModule('_hashlib',
+                'openssl_md5',
+                'openssl_sha1',
+                'openssl_sha224',
+                'openssl_sha256',
+                'openssl_sha384',
+                'openssl_sha512')
         elif feature == 'codecs':
             self.allowModule('codecs',
                 'lookup', 'CodecInfo',

@@ -1,12 +1,12 @@
 Version 1.1
 -----------
 
-This version is much more functional: itertools, math, random, time, ...
-modules are supported. This is possible thanks to a more laxist configuration:
-it's possible to allow "unsafe" module functions using allowSafeModule()
-method of the SandoxConfig, the result of the function is not proxified. This
-version improves also the support of CPython restricted mode and is mostly
-compatible with Python 3.
+This version is much more functional: hashlib, itertools, math, random,
+time, ...  modules are supported. This is possible thanks to a more laxist
+configuration: it's possible to allow "unsafe" module functions using
+allowSafeModule() method of the SandoxConfig, the result of the function is
+not proxified. This version improves also the support of CPython restricted
+mode and is mostly compatible with Python 3.
 
     * Block access to type.__bases__
     * Block access to function.func_defaults/__defaults__
