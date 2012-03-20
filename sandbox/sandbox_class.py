@@ -1,7 +1,6 @@
 from __future__ import with_statement
 from .config import SandboxConfig
 from .proxy import proxy
-from .timeout import limitedTime
 
 def keywordsProxy(keywords):
     # Dont proxy keys because function keywords must be strings
@@ -23,14 +22,10 @@ class Sandbox:
         self.protections = [protection() for protection in self.PROTECTIONS]
 
     def _call(self, func, args, kw):
-        timeout = self.config.timeout
         for protection in self.protections:
             protection.enable(self)
         try:
-            if timeout is not None:
-                return limitedTime(timeout, func, *args, **kw)
-            else:
-                return func(*args, **kw)
+            return func(*args, **kw)
         finally:
             for protection in reversed(self.protections):
                 protection.disable(self)

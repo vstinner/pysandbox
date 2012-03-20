@@ -1,4 +1,4 @@
 PACKAGE = "pysandbox"
-VERSION = "1.1"
+VERSION = "1.5"
 LICENSE = "BSD (2-clause)"
 URL = "http://github.com/haypo/pysandbox/"

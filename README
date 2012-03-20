@@ -18,8 +18,7 @@ Blocked Python functions (by default):
  * Deny some builtins symbols like execfile(), reload() or KeyboardInterrupt
  * Deny execution of arbitrary bytecode (creation of arbitrary code object)
 
-A timeout of 5 seconds if used by default. You can enable all of these
-features by setting the sandbox configuration.
+You can enable all of these features by setting the sandbox configuration.
 
 The default recursion limit is 50 frames.
 
@@ -31,6 +30,25 @@ Protection of the namespace:
  * __builtins__ is read only
  * Deny access to dict methods able to modify a dict, eg. dict.__setitem__.
    But you can use "d[key] = value" and "del d[key]" instead
+
+
+Limitations
+===========
+
+pysandbox is unable to limit the memory or the CPU of the sandbox process: you
+have to use your own protection. Use for example a subprocess to run the
+untrusted code and use the OS to limit resources (memory and CPU) of the
+subprocess. Using a subprocess protects also the main process against crash in
+the untrusted code.
+
+pysandbox is a sandbox for the Python namespace, not a sandbox between Python
+and the operating system. It does not protect your system against Python
+security vulnerabilities: vulnerabilities in modules/functions available in
+your sandbox (depend on your sandbox configuration). By default, only few
+functions are exposed to the sandbox namespace which limits the attack surface.
+
+See Lib/test/crashers/ directory in the CPython source code to see examples of
+known bugs crashing the CPython interpreter.
 
 
 Configuration
@@ -93,8 +111,6 @@ bastion and rexec modules:
 Other options
 -------------
 
- - config.timeout: timeout in seconds. Use None to disable the timeout. Default
-   timeout value is 5 seconds.
  - config.allowPath(path) allows to read a file from the specified path
  - config.allowModule(name, symbol1, symbol2, ...) allows to import the
    specified module, but give only access to the specified symbols
@@ -128,19 +144,6 @@ execute() with a local variable: ::
 
 Objects passed to .call() globals/locals and .execute() arguments are
 proxified: they are replaced by read-only views of the objects.
-
-
-Limitations
-===========
-
-pysandbox is a sandbox for the Python namespace, not a sandbox between Python
-and the operating system. It doesn't protect your system against Python
-security vulnerabilities: vulnerabilities in modules/functions available in
-your sandbox (depend on your sandbox configuration). By default, only few
-functions are exposed to the sandbox namespace which limits the attack surface.
-
-pysandbox is unable to limit the memory of the sandbox process: you have to use
-your own protection.
 
 
 Status

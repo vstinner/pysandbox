@@ -1,4 +1,4 @@
-Version 1.1
+Version 1.5
 -----------
 
 This version is much more functional: hashlib, itertools, math, random,
@@ -10,6 +10,9 @@ mode and is mostly compatible with Python 3.
 
     * Deny unsafe configuration: the _sandbox module or the CPython restricted
       mode is mandatory
+    * Drop the timeout protection: it was not effective on CPU intensive
+      function. The Python signal handler is not called directly the SIGALRM
+      is received.
     * The recursion limit is now configurable with a default of 50 frames
     * Allow the compile() builtin by default
     * Block access to type.__bases__ to protect against a crasher in CPython

@@ -1,5 +1,5 @@
 from __future__ import with_statement
-from sandbox import Sandbox, SandboxError, SandboxConfig, Timeout
+from sandbox import Sandbox, SandboxError, SandboxConfig
 from sandbox.test import createSandbox, createSandboxConfig
 from sandbox.test.tools import capture_stdout
 
@@ -91,18 +91,6 @@ def test_stdout():
         output = stdout.getvalue()
 
     assert output == "Hello Sandbox 2\nHello Sandbox 3\n"
-
-def test_timeout():
-    def denial_of_service():
-        try:
-            while 1:
-                pass
-        except Timeout:
-            pass
-
-    config = createSandboxConfig()
-    config.timeout = 0.1
-    Sandbox(config).call(denial_of_service)
 
 def test_traceback():
     def check_frame_filename():

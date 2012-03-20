@@ -51,5 +51,3 @@ if HAVE_CSANDBOX:
 
 from .recursion import SetRecursionLimit
 Sandbox.PROTECTIONS.append(SetRecursionLimit)
-
-from .timeout import Timeout

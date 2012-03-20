@@ -47,8 +47,7 @@ class SandboxedInterpeter:
 
     def parseOptions(self):
         parser = OptionParser(usage="%prog [options]")
-        SandboxConfig.createOptparseOptions(parser,
-            default_timeout=None)
+        SandboxConfig.createOptparseOptions(parser)
         parser.add_option("--verbose", "-v",
             help="Verbose mode",
             action="store_true", default=False)
