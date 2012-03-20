@@ -62,6 +62,7 @@ class SandboxConfig:
          - SandboxConfig('stdout', 'stderr')
          - SandboxConfig('interpreter', cpython_restricted=True)
         """
+        self.recusion_limit = 50
 
         # open() whitelist: see safe_open()
         self._open_whitelist = set()

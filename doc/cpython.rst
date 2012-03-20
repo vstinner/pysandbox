@@ -1,3 +1,7 @@
+Python 2.x has a restriced mode. It is enabled when the builtins attribute of a
+frame is different from the interpreter builtins. The restricted mode is used
+by the Python rexec module.
+
 ``frame.f_restricted``: ``True if frame.builtins is not interpreter.builtins``
 
 Restricted

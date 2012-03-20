@@ -49,4 +49,7 @@ if HAVE_CSANDBOX:
     from .code import DisableCode
     Sandbox.PROTECTIONS.append(DisableCode)
 
+from .recursion import SetRecursionLimit
+Sandbox.PROTECTIONS.append(SetRecursionLimit)
+
 from .timeout import Timeout
