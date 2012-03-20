@@ -77,7 +77,7 @@ def main():
     # Exit
     from sys import exit
     if nerrors:
-        print("%s ERRORS!" % nerror)
+        print("%s ERRORS!" % nerrors)
         exit(1)
     else:
         print("%s tests succeed (%s skipped)" % (ntests, nskipped))
