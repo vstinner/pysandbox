@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 # Todo list to prepare a release:
-#  - run python2.5 tests.py
-#  - run python2.6 tests.py
+#  - run ./run_tests.sh
 #  - check TODO if there is no more critical known bug
 #  - do an audit of new features (see the ChangeLog)
 #  - set version in sandbox/version.py
