@@ -5,12 +5,17 @@ from sandbox.test import createSandbox, createSandboxConfig, SkipTest
 from sandbox.test.tools import capture_stdout
 
 def test_execute():
+    config = createSandboxConfig()
+    if HAVE_PYPY:
+        # FIXME: is it really needed?
+        config._builtins_whitelist.add('compile')
+    if config.use_subprocess:
+        globals_builtins = set()
+    else:
+        globals_builtins = set(( '__builtins__',))
+
     def test(*lines, **kw):
         code = "; ".join(lines)
-        config = createSandboxConfig()
-        if HAVE_PYPY:
-            # FIXME: is it really needed?
-            config._builtins_whitelist.add('compile')
         Sandbox(config).execute(code, **kw)
 
     test(
@@ -25,7 +30,7 @@ def test_execute():
         "a=10",
         "x=42",
         globals=namespace)
-    assert set(namespace.keys()) == set(('a', 'x', '__builtins__'))
+    assert set(namespace.keys()) == (set(('a', 'x')) | globals_builtins)
     assert namespace['a'] == 10
     assert namespace['x'] == 42
 
@@ -50,7 +55,7 @@ def test_execute():
         "b=20",
         globals=my_globals,
         locals=namespace)
-    assert set(my_globals.keys()) == set(('a', '__builtins__'))
+    assert set(my_globals.keys()) == (set(('a',)) | globals_builtins)
     assert my_globals['a'] == 1
     assert namespace == {'a': 10, 'b': 20, 'x': 42}
 
