@@ -1,5 +1,5 @@
-Version 1.5
------------
+Version 1.5 (2012-03-20)
+------------------------
 
 This version is much more functional: hashlib, itertools, math, random,
 time, ...  modules are supported. This is possible thanks to a more laxist
