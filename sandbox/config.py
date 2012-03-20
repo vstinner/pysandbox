@@ -85,6 +85,12 @@ class SandboxConfig:
             else:
                 # _sandbox is missing: use restricted mode
                 self._cpython_restricted = True
+        else:
+            if not self._cpython_restricted \
+            and (not HAVE_CSANDBOX and not HAVE_PYPY):
+                raise ValueError(
+                    "unsafe configuration: the _sanbox module is missing "
+                    "and the CPython restricted mode is disabled")
 
         if self._cpython_restricted and not HAVE_CPYTHON_RESTRICTED:
             raise ValueError(
