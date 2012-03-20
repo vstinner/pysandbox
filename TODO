@@ -1,47 +1,43 @@
-Document "dangerous functions": functions allowing to override the sandbox policy
-Write a learning tool
-
 Major tasks
 -----------
 
+ * Python3 support: fix proxy()
+ * Document "dangerous functions": functions allowing to override the sandbox policy
  * FIXME: ReadOnlyList(list('abc')) == list('abc') is False
  * Choose getModulePath() implementation (problem with "from encodings import
    aliases")
- * Python3: set/fix OBJECT_TYPES of proxy()
- * Python3: allow __subclasses__ attribute?
  * Write a test for traceback
- * interpreter.py has a quit() builtin function (instance of site.Quitter)
-   which is not protected by a proxy
- * safe_import(): from_list default value is mutable
- * safe_open() should not use createReadOnlyObject(), but just hide the real
-   type
- * Write a blacklist for ObjectProxy (eg. "__class__" attribute)
- * Write a whitelist of modifiable attributes in ObjectProxy?
-   Problem of callback: have to be executed in the sandbox
+ * Write a whitelist for sys.path and clear sys.meta_path?
+ * Clear sys.modules?
 
 Open questions
 --------------
 
- * A function keeps its func_globals. Is it a problem?
+ * A function keeps its func_globals/__global__ attribute. Is it a problem?
  * A generator can be controled: .throw(), .send(), etc. Is it a problem if the
    generator was created outside the sandbox?
- * Move compile() builtin in its own feature (compile)?
 
 Minor tasks
 -----------
 
- * Allow function.func_code again?
+ * isinstance(createReadOnlyList(...), list) is False
+ * interpreter.py has a quit() builtin function (instance of site.Quitter)
+   which is not protected by a proxy
+ * Write a blacklist for ObjectProxy (eg. "__class__" attribute)
+ * Write a whitelist of modifiable attributes in ObjectProxy?
+   Problem of callback: have to be executed in the sandbox
+ * safe_open() should not use createReadOnlyObject(), but just hide the real
+   type
+ * Hide __file__ and __path__ attributes of modules and co_filename of code objects?
+ * Write a tool generating a security policy (sandbox configuration)
  * Don't hide dict methods able to modify a dict (eg. dict.clear): need a
-   builtin frozendict type
+   builtin frozendict type. I proposed the PEP 416 to add a builtin frozendict type.
+   http://www.python.org/dev/peps/pep-0416/
  * Write a cache for safe_import. Reuse sys.modules???
  * interpreter.py: import code module (InteractiveConsole) in the sandbox to
    execute the whole interpreter in the sandbox
  * Only instanciate each protection once?
  * Write a test using class.mro()?
- * __builtins__ can be redefined
- * isinstance(createReadOnlyList(...), list) is False
- * Write a whitelist for sys.path?
- * Clear sys.modules?
  * Improve type(open(...))(filename, "r") error message,
    see test_import_sys_stdout()
 
