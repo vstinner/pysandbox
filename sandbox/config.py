@@ -73,7 +73,9 @@ class SandboxConfig:
         self._use_subprocess = kw.get('use_subprocess', True)
         if self._use_subprocess:
             self._timeout = DEFAULT_TIMEOUT
-            self._max_memory = 10 * 1024 * 1024
+            # 100 MB is the minimum size of the virtual memory on Fedora 16 on
+            # x86_64 to run a basic Python script with Python 2.7
+            self._max_memory = 200 * 1024 * 1024
         else:
             self._timeout = None
             self._max_memory = None
@@ -216,12 +218,9 @@ class SandboxConfig:
                 'findall', 'split',
                 'sub', 'subn', 'escape', 'I', 'IGNORECASE', 'L', 'LOCALE', 'M',
                 'MULTILINE', 'S', 'DOTALL', 'X', 'VERBOSE',
-                # FIXME: proxy() doesn't support class yet
-                # 'error',
-                # blocked: '_subx',
             )
             self.allowSafeModule('re',
-                'compile', 'finditer', 'match', 'search')
+                'compile', 'finditer', 'match', 'search', '_subx', 'error')
             self.allowSafeModule('sre_parse', 'parse')
         elif feature == 'exit':
             self.allowModule('sys', 'exit')
