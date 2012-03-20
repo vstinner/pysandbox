@@ -1,6 +1,5 @@
 from __future__ import with_statement, absolute_import
 from .config import SandboxConfig
-from .subprocess import call_fork, execute_subprocess
 from .proxy import proxy
 
 def keywordsProxy(keywords):
@@ -27,6 +26,8 @@ class Sandbox:
         else:
             self.config = SandboxConfig()
         self.protections = [protection() for protection in self.PROTECTIONS]
+        self.execute_subprocess = None
+        self.call_fork = None
 
     def _call(self, func, args, kw):
         """
@@ -47,7 +48,10 @@ class Sandbox:
         Call a function in the sandbox.
         """
         if self.config.use_subprocess:
-            return call_fork(self, func, args, kw)
+            if self.call_fork is None:
+                from .subprocess import call_fork
+                self.call_fork = call_fork
+            return self.call_fork(self, func, args, kw)
         else:
             return self._call(func, args, kw)
 
@@ -80,7 +84,10 @@ class Sandbox:
         namespace.
         """
         if self.config.use_subprocess:
-            return execute_subprocess(self, code, globals, locals)
+            if self.execute_subprocess is None:
+                from .subprocess import execute_subprocess
+                self.execute_subprocess = execute_subprocess
+            return self.execute_subprocess(self, code, globals, locals)
         else:
             code = proxy(code)
             if globals is not None:
