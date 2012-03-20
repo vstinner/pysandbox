@@ -75,6 +75,8 @@ class SandboxedInterpeter:
             print "Enabled features: %s" % features
             if self.config.cpython_restricted:
                 print "CPython restricted mode enabled."
+            if self.config.use_subprocess:
+                print "Run untrusted code in a subprocess."
         if 'help' not in self.config.features:
             print "(use --features=help to enable the help function)"
         print
