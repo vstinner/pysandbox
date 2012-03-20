@@ -1,5 +1,6 @@
-from __future__ import with_statement
+from __future__ import with_statement, absolute_import
 from .config import SandboxConfig
+from .subprocess import call_fork, execute_subprocess
 from .proxy import proxy
 
 def keywordsProxy(keywords):
@@ -10,6 +11,12 @@ def keywordsProxy(keywords):
 
 def _call_exec(code, globals, locals):
     exec code in globals, locals
+
+def _dictProxy(data):
+    items = data.items()
+    data.clear()
+    for key, value in items:
+        data[proxy(key)] = proxy(value)
 
 class Sandbox:
     PROTECTIONS = []
@@ -22,6 +29,11 @@ class Sandbox:
         self.protections = [protection() for protection in self.PROTECTIONS]
 
     def _call(self, func, args, kw):
+        """
+        Call a function in the sandbox.
+        """
+        args = proxy(args)
+        kw = keywordsProxy(kw)
         for protection in self.protections:
             protection.enable(self)
         try:
@@ -34,32 +46,48 @@ class Sandbox:
         """
         Call a function in the sandbox.
         """
-        args = proxy(args)
-        kw = keywordsProxy(kw)
-        return self._call(func, args, kw)
+        if self.config.use_subprocess:
+            return call_fork(self, func, args, kw)
+        else:
+            return self._call(func, args, kw)
 
-    def _dictProxy(self, data):
-        items = data.items()
-        data.clear()
-        for key, value in items:
-            data[proxy(key)] = proxy(value)
+    def _execute(self, code, globals, locals):
+        """
+        Execute the code in the sandbox:
+
+           exec code in globals, locals
+        """
+        if globals is None:
+            globals = {}
+        for protection in self.protections:
+            protection.enable(self)
+        try:
+            _call_exec(code, globals, locals)
+        finally:
+            for protection in reversed(self.protections):
+                protection.disable(self)
 
     def execute(self, code, globals=None, locals=None):
         """
-        execute the code in the sandbox:
+        Execute the code in the sandbox:
 
            exec code in globals, locals
 
-        Use globals={} by default to get an empty namespace.
-        """
-        if globals is not None:
-            self._dictProxy(globals)
-        else:
-            globals = {}
-        if locals is not None:
-            self._dictProxy(locals)
+        Run the code in a subprocess except if it is disabled in the sandbox
+        configuration.
 
-        self._call(_call_exec, (code, globals, locals), {})
+        The method has no result. By default, use globals={} to get an empty
+        namespace.
+        """
+        if self.config.use_subprocess:
+            return execute_subprocess(self, code, globals, locals)
+        else:
+            code = proxy(code)
+            if globals is not None:
+                _dictProxy(globals)
+            if locals is not None:
+                _dictProxy(locals)
+            return self._execute(code, globals, locals)
 
     def createCallback(self, func, *args, **kw):
         """
@@ -69,6 +97,6 @@ class Sandbox:
         args = proxy(args)
         kw = keywordsProxy(kw)
         def callback():
-            return self._call(func, args, kw)
+            return self.call(func, *args, **kw)
         return callback
 

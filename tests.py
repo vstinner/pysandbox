@@ -25,10 +25,12 @@ def parseOptions():
         exit(1)
     return options
 
-def run_tests(options, cpython_restricted):
-    print("Run tests with cpython_restricted=%s" % cpython_restricted)
+def run_tests(options, use_subprocess, cpython_restricted):
+    print("Run tests with cpython_restricted=%s and use_subprocess=%s"
+          % (cpython_restricted, use_subprocess))
     print("")
     createSandboxConfig.cpython_restricted = cpython_restricted
+    createSandboxConfig.use_subprocess = use_subprocess
 
     # Get all tests
     all_tests = getTests(globals(), options.keyword)
@@ -42,6 +44,8 @@ def run_tests(options, cpython_restricted):
         base_exception = BaseException
     for func in all_tests:
         name = '%s.%s()' % (func.__module__.split('.')[-1], func.__name__)
+        if options.debug:
+            print(name)
         try:
             func()
         except SkipTest, skip:
@@ -67,12 +71,15 @@ def main():
         print("WARNING: _sandbox module is missing")
     print
 
-    nskipped, nerrors, ntests = run_tests(options, False)
-    if not nerrors:
-        result = run_tests(options, True)
-        nskipped += result[0]
-        nerrors += result[1]
-        ntests += result[2]
+    nskipped, nerrors, ntests = 0, 0, 0
+    for use_subprocess in (False, True):
+        for cpython_restricted in (False, True):
+            result = run_tests(options, use_subprocess, cpython_restricted)
+            nskipped += result[0]
+            nerrors += result[1]
+            ntests += result[2]
+            if nerrors:
+                break
 
     # Exit
     from sys import exit

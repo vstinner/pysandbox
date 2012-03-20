@@ -20,7 +20,8 @@ Blocked Python functions (by default):
 
 You can enable all of these features by setting the sandbox configuration.
 
-The default recursion limit is 50 frames.
+By default, the untrusted code is executed in a subprocess and the default
+recursion limit is 50 frames.
 
 Protection of the namespace:
 

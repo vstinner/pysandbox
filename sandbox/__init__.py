@@ -1,4 +1,11 @@
+from __future__ import absolute_import
+
+DEFAULT_TIMEOUT = 5.0
+
 class SandboxError(Exception):
+    pass
+
+class Timeout(SandboxError):
     pass
 
 class Protection:

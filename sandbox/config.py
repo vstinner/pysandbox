@@ -1,8 +1,10 @@
+from __future__ import absolute_import
 from os.path import realpath, sep as path_sep, dirname, join as path_join, exists, isdir
 from sys import version_info
 #import imp
 import sys
-from sandbox import HAVE_CSANDBOX, HAVE_CPYTHON_RESTRICTED, HAVE_PYPY
+from sandbox import (DEFAULT_TIMEOUT,
+    HAVE_CSANDBOX, HAVE_CPYTHON_RESTRICTED, HAVE_PYPY)
 
 def findLicenseFile():
     # Adapted from setcopyright() from site.py
@@ -59,8 +61,22 @@ class SandboxConfig:
         Usage:
          - SandboxConfig('stdout', 'stderr')
          - SandboxConfig('interpreter', cpython_restricted=True)
+
+        Options:
+
+         - use_subprocess=True (bool): if True, execute() run the code in
+           a subprocess
+         - cpython_restricted=False (bool): if True, use CPython restricted
+           mode instead of the _sandbox module
         """
         self.recusion_limit = 50
+        self._use_subprocess = kw.get('use_subprocess', True)
+        if self._use_subprocess:
+            self._timeout = DEFAULT_TIMEOUT
+            self._max_memory = 10 * 1024 * 1024
+        else:
+            self._timeout = None
+            self._max_memory = None
 
         # open() whitelist: see safe_open()
         self._open_whitelist = set()
@@ -159,6 +175,18 @@ class SandboxConfig:
     @property
     def features(self):
         return self._features.copy()
+
+    @property
+    def use_subprocess(self):
+        return self._use_subprocess
+
+    @property
+    def timeout(self):
+        return self._timeout
+
+    @property
+    def max_memory(self):
+        return self._max_memory
 
     @property
     def import_whitelist(self):
@@ -415,8 +443,7 @@ class SandboxConfig:
             action="append", type="str")
 
     @staticmethod
-    def fromOptparseOptions(options):
-        kw = {}
+    def fromOptparseOptions(options, **kw):
         if HAVE_CPYTHON_RESTRICTED and options.restricted:
             kw['cpython_restricted'] = True
         config = SandboxConfig(**kw)
