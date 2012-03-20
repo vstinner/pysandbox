@@ -79,6 +79,8 @@ def child_call(wpipe, sandbox, func, args, kw):
     pickle.dump(data, output)
     output.flush()
     output.close()
+    sys.stdout.flush()
+    sys.stderr.flush()
     os._exit(0)
 
 def set_cloexec_flag(fd):
@@ -97,9 +99,9 @@ def call_fork(sandbox, func, args, kw):
         os.close(rpipe)
         try:
             child_call(wpipe, sandbox, func, args, kw)
-        except:
+        finally:
             # FIXME: handle error differently?
-            raise
+            os._exit(0)
     else:
         os.close(wpipe)
         try:
