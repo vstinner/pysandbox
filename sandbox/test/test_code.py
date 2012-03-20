@@ -51,7 +51,7 @@ def get_code_objects():
         pass
     try:
         yield func.__code__
-    except AttributeError:
+    except (AttributeError, RuntimeError):
         pass
 
     # Generator code
@@ -113,7 +113,7 @@ def replace_func_code():
         return x - y
     try:
         add.func_code = substract.func_code
-    except AttributeError:
+    except (AttributeError, RuntimeError):
         add.__code__ = substract.__code__
     return add(52, 10)
 
@@ -125,6 +125,8 @@ def test_func_code():
         sandbox.call(replace_func_code)
     except AttributeError, err:
         assert str(err) == "'function' object has no attribute '__code__'"
+    except RuntimeError, err:
+        assert str(err) == "function attributes not accessible in restricted mode"
     else:
         assert False
 

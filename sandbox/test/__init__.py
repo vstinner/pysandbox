@@ -10,8 +10,12 @@ class SkipTest(Exception):
 def createSandboxConfig(*features, **kw):
     if createSandboxConfig.debug:
         features += ("stdout", "stderr")
+    if (createSandboxConfig.cpython_restricted is not None) \
+    and ('cpython_restricted' not in kw):
+        kw['cpython_restricted'] = createSandboxConfig.cpython_restricted
     return SandboxConfig(*features, **kw)
 createSandboxConfig.debug = False
+createSandboxConfig.cpython_restricted = None
 
 def createSandbox(*features):
     config = createSandboxConfig(*features)

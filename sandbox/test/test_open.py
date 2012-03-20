@@ -35,11 +35,10 @@ def test_open_denied():
     read_first_line(open)
 
 def test_open_whitelist():
-    if not HAVE_CSANDBOX:
-        # restricted python denies access to all files
-        raise SkipTest("require _sandbox")
-
     config = createSandboxConfig()
+    if config.cpython_restricted:
+        # the CPython restricted mode denies to open any file
+        raise SkipTest("require _sandbox")
     config.allowPath(READ_FILENAME)
     Sandbox(config).call(read_first_line, open)
 
@@ -84,10 +83,6 @@ def test_filetype_from_sys_stdout():
     read_first_line(file_type)
 
 def test_filetype_from_open_file():
-    if not HAVE_CSANDBOX:
-        # restricted mode deny to open any file
-        raise SkipTest("require _sandbox")
-
     def get_file_type_from_open_file(filename):
         try:
             with open(filename, 'rb') as fp:
@@ -105,6 +100,9 @@ def test_filetype_from_open_file():
     filename = READ_FILENAME
 
     config = createSandboxConfig()
+    if config.cpython_restricted:
+        # the CPython restricted mode denies to open any file
+        raise SkipTest("require _sandbox")
     config.allowPath(filename)
     def get_file_type_object():
         file_type = get_file_type_from_open_file(filename)

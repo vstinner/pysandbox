@@ -85,6 +85,8 @@ def test_object_proxy_dict():
         sandbox.call(setDict, person)
     except SandboxError, err:
         assert str(err) == 'Read only object'
+    except RuntimeError, err:
+        assert str(err) == 'instance.__dict__ not accessible in restricted mode'
     else:
         assert False
 

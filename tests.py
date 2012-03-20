@@ -25,23 +25,17 @@ def parseOptions():
         exit(1)
     return options
 
-def main():
-    global createSandboxConfig
-
-    options = parseOptions()
-    createSandboxConfig.debug = options.debug
-
-    print("Run the test suite on pysandbox %s with Python %s.%s"
-          % (VERSION, version_info[0], version_info[1]))
-    if not HAVE_CSANDBOX:
-        print("WARNING: _sandbox module is missing")
-    print
+def run_tests(options, cpython_restricted):
+    print("Run tests with cpython_restricted=%s" % cpython_restricted)
+    print("")
+    createSandboxConfig.cpython_restricted = cpython_restricted
 
     # Get all tests
     all_tests = getTests(globals(), options.keyword)
 
     # Run tests
     nerror = 0
+    nskipped = 0
     if version_info < (2, 6):
         base_exception = Exception
     else:
@@ -52,6 +46,7 @@ def main():
             func()
         except SkipTest, skip:
             print("%s: skipped (%s)" % (name, skip))
+            nskipped += 1
         except base_exception, err:
             nerror += 1
             print("%s: FAILED! %r" % (name, err))
@@ -59,15 +54,33 @@ def main():
                 raise
         else:
             print "%s: ok" % name
+    print("")
+    return nskipped, nerror, len(all_tests)
+
+def main():
+    options = parseOptions()
+    createSandboxConfig.debug = options.debug
+
+    print("Run the test suite on pysandbox %s with Python %s.%s"
+          % (VERSION, version_info[0], version_info[1]))
+    if not HAVE_CSANDBOX:
+        print("WARNING: _sandbox module is missing")
+    print
+
+    nskipped, nerrors, ntests = run_tests(options, False)
+    if not nerrors:
+        result = run_tests(options, True)
+        nskipped += result[0]
+        nerrors += result[1]
+        ntests += result[2]
 
     # Exit
     from sys import exit
-    print
-    if nerror:
-        print "%s ERRORS!" % nerror
+    if nerrors:
+        print("%s ERRORS!" % nerror)
         exit(1)
     else:
-        print "%s tests succeed" % len(all_tests)
+        print("%s tests succeed (%s skipped)" % (ntests, nskipped))
         exit(0)
 
 if __name__ == "__main__":
