@@ -1,11 +1,13 @@
-include doc/*.rst
-include sandbox/test/*.py
 include AUTHORS
+include COPYING
 include ChangeLog
 include INSTALL
 include MANIFEST.in
 include TODO
+include doc/*.rst
 include execfile.py
 include interpreter.py
-include tests.py
+include run_tests.sh
+include sandbox/test/*.py
 include test_restricted.py
+include tests.py
