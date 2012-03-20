@@ -1,7 +1,7 @@
 """
 Proxies using a whitelist policy.
 """
-
+from __future__ import absolute_import
 from sys import version_info
 if version_info < (3, 0):
     from types import NoneType, ClassType, InstanceType

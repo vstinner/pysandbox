@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import __builtin__ as BUILTINS_MODULE
 from types import FrameType
 from sys import _getframe, version_info

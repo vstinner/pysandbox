@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from types import FunctionType, FrameType, GeneratorType
 from sys import version_info
 try:

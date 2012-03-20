@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 class RestorableDict:
     def __init__(self, dict):
         self.dict = dict

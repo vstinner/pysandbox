@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from sandbox import Protection
 from _sandbox import disable_code_new, restore_code_new
 

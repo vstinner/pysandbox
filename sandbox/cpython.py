@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from sandbox import HAVE_CSANDBOX
 if HAVE_CSANDBOX:
     from _sandbox import dictionary_of

@@ -5,7 +5,7 @@ Use a blacklist instead of a whitelist policy because __builtins__ HAVE TO
 inherit from dict: Python/ceval.c uses PyDict_SetItem() and an inlined version
 of PyDict_GetItem().
 """
-
+from __future__ import absolute_import
 from .proxy import readOnlyError
 
 def createReadOnlyBuiltins(builtins):
