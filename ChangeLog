@@ -8,20 +8,19 @@ allowSafeModule() method of the SandoxConfig, the result of the function is
 not proxified. This version improves also the support of CPython restricted
 mode and is mostly compatible with Python 3.
 
-    * Deny unsafe configuration: the _sandbox module or the CPython restricted
-      mode is mandatory
-    * Drop the timeout protection: it was not effective on CPU intensive
-      function. The Python signal handler is not called directly the SIGALRM
-      is received.
+    * SECURITY FIX: Drop the timeout protection: it was not effective on CPU
+      intensive function implemented in C. The Python signal handler is not
+      called directly when the SIGALRM is received.
+    * SECURITY FIX: Deny unsafe configuration: the _sandbox module or the
+      CPython restricted mode is mandatory
+    * SECURITY FIX: Block access to type.__bases__ to protect against a crasher
+      in CPython.
     * The recursion limit is now configurable with a default of 50 frames
     * Allow the compile() builtin by default
-    * Block access to type.__bases__ to protect against a crasher in CPython
     * Block access to function.func_defaults/__defaults__
     * Add SandoxConfig.allowSafeModule(): similar to allowModule() but don't
       proxify the attribute
-    * SandboxConfig doesn't import modules to get their path
-    * interpreter config feature is more strict: don't give access to
-      frame.f_locals
+    * SandboxConfig doesn't import modules anymore to get their path.
     * Add __dir__() special method to read object proxy and fake module
       objects
     * Add "codecs", "datetime", "encodings", "itertools", "math", "random"
@@ -30,8 +29,8 @@ mode and is mostly compatible with Python 3.
       unicode literals
     * On Python 2.x, enable CPython restricted mode if the _sandbox module is
       missing (_sandbox becomes optional on Python 2.x).
-    * Allow access to frame.f_code and generator.gi_code
-    * Drop the "code" configuration feature
+    * Drop the "code" configuration feature: give access to frame.f_code and
+      generator.gi_code by default
     * Run the test suite with and without the CPython restricted mode
 
 Version 1.0.3 (2010-09-16)

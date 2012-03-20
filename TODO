@@ -1,7 +1,9 @@
 Major tasks
 -----------
 
+ * Hide type.__bases__ on Python 2.5 or mark the attribute as read-only
  * Python3 support: fix proxy()
+ * Write an option to run the code in a subprocess
  * Document "dangerous functions": functions allowing to override the sandbox policy
  * FIXME: ReadOnlyList(list('abc')) == list('abc') is False
  * Choose getModulePath() implementation (problem with "from encodings import

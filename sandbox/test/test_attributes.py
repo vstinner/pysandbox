@@ -123,6 +123,8 @@ def test_func_defaults():
 
 def test_type_bases():
     from sys import version_info
+    if version_info < (2, 6):
+        raise SkipTest("tests disabled on Python < 2.6")
 
     def test():
         class A(object):

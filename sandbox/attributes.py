@@ -14,9 +14,7 @@ builtin_function = type(len)
 
 class HideAttributes:
     """
-    Hide unsafe frame attributes from the Python space:
-     * frame.xxx
-     * function.xxx
+    Hide unsafe frame attributes from the Python space
     """
     def __init__(self):
         self.dict_dict = RestorableDict(dictionary_of(dict))
@@ -57,9 +55,15 @@ class HideAttributes:
                 del self.function_dict['__code__']
             del self.function_dict['__defaults__']
         del self.frame_dict['f_locals']
-        # Setting __bases__ crash Python < 3.3a2
-        # http://bugs.python.org/issue14199
-        del self.type_dict['__bases__']
+
+        # Hiding type.__bases__ crashs CPython 2.5 because of a infinite loop
+        # in PyErr_ExceptionMatches(): it calls abstract_get_bases() but
+        # abstract_get_bases() fails and call PyErr_ExceptionMatches() ...
+        if version_info >= (2, 6):
+            # Setting __bases__ crash Python < 3.3a2
+            # http://bugs.python.org/issue14199
+            del self.type_dict['__bases__']
+
         # object.__subclasses__ leaks the file type in Python 2
         # and (indirectly) the FileIO file in Python 3
         del self.type_dict['__subclasses__']
