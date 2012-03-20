@@ -14,7 +14,7 @@ mode and is mostly compatible with Python 3.
     * SECURITY FIX: Deny unsafe configuration: the _sandbox module or the
       CPython restricted mode is mandatory
     * SECURITY FIX: Block access to type.__bases__ to protect against a crasher
-      in CPython.
+      in CPython. This fix is disabled on Python 2.5 to workaround a crash.
     * The recursion limit is now configurable with a default of 50 frames
     * Allow the compile() builtin by default
     * Block access to function.func_defaults/__defaults__
