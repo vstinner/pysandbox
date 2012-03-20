@@ -78,7 +78,7 @@ def main():
             nskipped += result[0]
             nerrors += result[1]
             ntests += result[2]
-            if nerrors:
+            if options.raise_exception and nerrors:
                 break
 
     # Exit
