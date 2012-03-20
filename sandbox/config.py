@@ -438,14 +438,20 @@ class SandboxConfig:
             parser.add_option("--restricted",
                 help="Enable CPython restricted mode",
                 action="store_true")
+        parser.add_option("--disable-subprocess",
+            help="Don't run untrusted code in a subprocess",
+            action="store_true")
         parser.add_option("--allow-path",
             help="Allow reading files from PATH",
             action="append", type="str")
 
     @staticmethod
-    def fromOptparseOptions(options, **kw):
+    def fromOptparseOptions(options):
+        kw = {}
         if HAVE_CPYTHON_RESTRICTED and options.restricted:
             kw['cpython_restricted'] = True
+        if options.disable_subprocess:
+            kw['use_subprocess'] = False
         config = SandboxConfig(**kw)
         if options.features:
             for feature in options.features.split(","):

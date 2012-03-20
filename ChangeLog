@@ -3,6 +3,7 @@ Version 1.6
 
     * Execute code in a subprocess using the Python subprocess module
       or os.fork()
+    * Add --disable-subprocess command line option
 
 Version 1.5 (2012-03-20)
 ------------------------
