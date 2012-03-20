@@ -1,4 +1,5 @@
 from subprocess import Popen, PIPE
+from sandbox.test import createSandboxConfig
 from sandbox.test.tools import bytes_literal
 import os
 import sys
@@ -13,8 +14,11 @@ def check_interpreter_stdout(code, expected, **kw):
     # escape sequence ('\x1b[?1034h')
     env['TERM'] = 'dumb'
     env['PYTHONIOENCODING'] = encoding
+    args = [sys.executable, 'interpreter.py', '-q']
+    if not createSandboxConfig.use_subprocess:
+        args.append('--disable-subprocess')
     process = Popen(
-        [sys.executable, 'interpreter.py', '-q'],
+        args,
         stdin=PIPE, stdout=PIPE, stderr=PIPE,
         env=env)
     code += u'\nexit()'
