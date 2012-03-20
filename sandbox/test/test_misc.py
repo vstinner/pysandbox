@@ -88,7 +88,8 @@ def test_stdout():
 
         print "Hello Sandbox 3"
 
-        output = stdout.getvalue()
+        stdout.seek(0)
+        output = stdout.read()
 
     assert output == "Hello Sandbox 2\nHello Sandbox 3\n"
 

@@ -4,6 +4,7 @@ from glob import glob
 from sys import version_info
 import contextlib
 from sandbox.test import SkipTest
+import os
 
 READ_FILENAME = realpath(__file__)
 with open(READ_FILENAME, 'rb') as f:
@@ -51,12 +52,14 @@ def read_first_line(open):
 @contextlib.contextmanager
 def capture_stdout():
     import sys
-    from StringIO import StringIO
-
-    original = sys.stdout
-    sys.stdout = StringIO()
-    try:
-        yield sys.stdout
-    finally:
-        sys.stdout = original
+    import tempfile
+    stdout_fd = sys.stdout.fileno()
+    with tempfile.TemporaryFile(mode='w+b') as tmp:
+        stdout_copy = os.dup(stdout_fd)
+        try:
+            os.dup2(tmp.fileno(), stdout_fd)
+            yield tmp
+        finally:
+            os.dup2(stdout_copy, stdout_fd)
+            os.close(stdout_copy)
 

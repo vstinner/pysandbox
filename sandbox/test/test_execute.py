@@ -88,7 +88,8 @@ def test_execfile():
 
         with capture_stdout() as stdout:
             execfile_test(filename)
-            output = stdout.getvalue()
+            stdout.seek(0)
+            output = stdout.read()
             print(repr(output))
             assert output.startswith('Hello World')
 
