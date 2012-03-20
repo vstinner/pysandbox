@@ -128,14 +128,14 @@ class SandboxConfig:
             # functions
             '__import__', 'abs', 'all', 'any', 'apply', 'bin', 'bool',
             'buffer', 'callable', 'chr', 'classmethod', 'cmp',
-            'coerce', 'delattr', 'dir', 'divmod', 'enumerate', 'eval', 'exit',
+            'coerce', 'compile', 'delattr', 'dir', 'divmod', 'enumerate', 'eval', 'exit',
             'filter', 'format', 'getattr', 'globals', 'hasattr', 'hash', 'hex',
             'id', 'isinstance', 'issubclass', 'iter', 'len', 'locals',
             'map', 'max', 'min', 'next', 'oct', 'open', 'ord', 'pow', 'print',
             'property', 'range', 'reduce', 'repr',
             'reversed', 'round', 'setattr', 'slice', 'sorted', 'staticmethod',
             'sum', 'super', 'type', 'unichr', 'vars', 'xrange', 'zip',
-            # blocked: compile (enabled by code feature), execfile, input
+            # blocked: execfile, input
             #          and raw_input (enabled by stdin feature), intern,
             #          help (from site module, enabled by help feature), quit
             #          (enabled by exit feature), reload
@@ -229,8 +229,6 @@ class SandboxConfig:
             self.enable('regex')
             self.allowModule('pydoc', 'help')
             self._builtins_whitelist.add('help')
-        elif feature == 'code':
-            self._builtins_whitelist.add('compile')
         elif feature == 'interpreter':
             self.enable('traceback')
             self.enable('stdin')

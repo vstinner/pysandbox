@@ -101,7 +101,7 @@ def test_compile():
         def _test_compile():
             exec compile("1+1", "<string>", "single") in {}
             assert results == [2]
-        config = createSandboxConfig('code')
+        config = createSandboxConfig()
         Sandbox(config).call(_test_compile)
 
         del results[:]

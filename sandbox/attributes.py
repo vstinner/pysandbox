@@ -27,6 +27,15 @@ class HideAttributes:
         self.generator_dict = RestorableDict(dictionary_of(GeneratorType))
 
     def enable(self, sandbox):
+        if not sandbox.config.cpython_restricted:
+            # Deny access to func.func_code to avoid an attacker to modify a
+            # trusted function: replace the code of the function
+            hide_func_code = True
+        else:
+            # CPython restricted mode already denies read and write access to
+            # function attributes
+            hide_func_code = False
+
         # Blacklist all dict methods able to modify a dict, to protect
         # ReadOnlyBuiltins
         for name in (
@@ -34,27 +43,27 @@ class HideAttributes:
         'setdefault', '__setitem__', 'update'):
             del self.dict_dict[name]
         if version_info < (3, 0):
+            # pysandbox stores trusted objects in closures: deny access to
+            # closures to not leak these secrets
             del self.function_dict['func_closure']
             del self.function_dict['func_globals']
-            del self.function_dict['func_code']
+            if hide_func_code:
+                del self.function_dict['func_code']
             del self.function_dict['func_defaults']
         if version_info >= (2, 6):
             del self.function_dict['__closure__']
             del self.function_dict['__globals__']
-            del self.function_dict['__code__']
+            if hide_func_code:
+                del self.function_dict['__code__']
             del self.function_dict['__defaults__']
         del self.frame_dict['f_locals']
-        if ('code' not in sandbox.config.features) \
-        and ('traceback' not in sandbox.config.features):
-            del self.frame_dict['f_code']
         # Setting __bases__ crash Python < 3.3a2
         # http://bugs.python.org/issue14199
         del self.type_dict['__bases__']
+        # object.__subclasses__ leaks the file type in Python 2
+        # and (indirectly) the FileIO file in Python 3
         del self.type_dict['__subclasses__']
         del self.builtin_func_dict['__self__']
-        if version_info >= (2, 6) \
-        and ('code' not in sandbox.config.features):
-            del self.generator_dict['gi_code']
         _clear_type_cache()
 
     def disable(self, sandbox):

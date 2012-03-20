@@ -95,7 +95,7 @@ def test_bytecode():
 
     code_args = get_code_args()
 
-    config = createSandboxConfig('code')
+    config = createSandboxConfig()
     config.allowModule('sys', '_getframe')
     try:
         Sandbox(config).call(exec_bytecode, code_args)
