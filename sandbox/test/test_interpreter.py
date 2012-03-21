@@ -1,4 +1,4 @@
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
 from sandbox.test import createSandboxConfig
 from sandbox.test.tools import bytes_literal
 import os
@@ -19,7 +19,7 @@ def check_interpreter_stdout(code, expected, **kw):
         args.append('--disable-subprocess')
     process = Popen(
         args,
-        stdin=PIPE, stdout=PIPE, stderr=PIPE,
+        stdin=PIPE, stdout=PIPE, stderr=STDOUT,
         env=env)
     code += u'\nexit()'
     code = code.encode(encoding)
@@ -31,7 +31,8 @@ def check_interpreter_stdout(code, expected, **kw):
     assert process.returncode == 0
     stdout = stdout.splitlines()
     assert stdout[0] == bytes_literal(''), stdout[0]
-    stdout = stdout[1:]
+    assert stdout[1] == bytes_literal(''), stdout[1]
+    stdout = stdout[2:]
     assert stdout == expected, "%s != %s" % (stdout, expected)
 
 def test_interpreter():
