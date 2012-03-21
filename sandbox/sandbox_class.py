@@ -49,7 +49,7 @@ class Sandbox(object):
         """
         if self.config.use_subprocess:
             if self.call_fork is None:
-                from .subprocess import call_fork
+                from .subprocess_parent import call_fork
                 self.call_fork = call_fork
             return self.call_fork(self, func, args, kw)
         else:
@@ -85,7 +85,7 @@ class Sandbox(object):
         """
         if self.config.use_subprocess:
             if self.execute_subprocess is None:
-                from .subprocess import execute_subprocess
+                from .subprocess_parent import execute_subprocess
                 self.execute_subprocess = execute_subprocess
             return self.execute_subprocess(self, code, globals, locals)
         else:
