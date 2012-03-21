@@ -6,6 +6,8 @@ import sys
 from sandbox import (DEFAULT_TIMEOUT,
     HAVE_CSANDBOX, HAVE_CPYTHON_RESTRICTED, HAVE_PYPY)
 
+_UNSET = object()
+
 def findLicenseFile():
     # Adapted from setcopyright() from site.py
     import os
@@ -55,7 +57,7 @@ def getModulePath(name):
         sys.modules.clear()
         sys.modules.update(old_modules)
 
-class SandboxConfig:
+class SandboxConfig(object):
     def __init__(self, *features, **kw):
         """
         Usage:
@@ -174,6 +176,9 @@ class SandboxConfig:
         for feature in features:
             self.enable(feature)
 
+    def has_feature(self, feature):
+        return (feature in self._features)
+
     @property
     def features(self):
         return self._features.copy()
@@ -182,9 +187,16 @@ class SandboxConfig:
     def use_subprocess(self):
         return self._use_subprocess
 
-    @property
-    def timeout(self):
+    def _get_timeout(self):
         return self._timeout
+    def _set_timeout(self, timeout):
+        if timeout:
+            if not self._use_subprocess:
+                raise NotImplementedError("Timeout requires the subprocess mode")
+            self._timeout = timeout
+        else:
+            self._timeout = None
+    timeout = property(_get_timeout, _set_timeout)
 
     @property
     def max_memory(self):
@@ -272,6 +284,7 @@ class SandboxConfig:
         elif feature == 'debug_sandbox':
             self.enable('traceback')
             self.allowModule('sys', '_getframe')
+            self.allowSafeModule('_sandbox', '_test_crash')
             self.allowModuleSourceCode('sandbox')
         elif feature == 'future':
             self.allowModule('__future__',
@@ -429,20 +442,29 @@ class SandboxConfig:
         self.allowPath(filename)
 
     @staticmethod
-    def createOptparseOptions(parser):
+    def createOptparseOptions(parser, default_timeout=_UNSET):
+        if default_timeout is _UNSET:
+           default_timeout = DEFAULT_TIMEOUT
         parser.add_option("--features",
             help="List of enabled features separated by a comma",
             type="str")
         if HAVE_CPYTHON_RESTRICTED:
             parser.add_option("--restricted",
-                help="Enable CPython restricted mode",
+                help="Use CPython restricted mode (less secure) instead of _sandbox",
                 action="store_true")
         parser.add_option("--disable-subprocess",
-            help="Don't run untrusted code in a subprocess",
+            help="Don't run untrusted code in a subprocess (less secure)",
             action="store_true")
         parser.add_option("--allow-path",
             help="Allow reading files from PATH",
             action="append", type="str")
+        if default_timeout:
+            text = "Timeout (default: %.1f sec)" % default_timeout
+        else:
+            text = "Timeout (default: no timeout)"
+        parser.add_option("--timeout",
+            help=text, metavar="SECONDS",
+            action="store", type="float", default=default_timeout)
 
     @staticmethod
     def fromOptparseOptions(options):
@@ -461,5 +483,6 @@ class SandboxConfig:
         if options.allow_path:
             for path in options.allow_path:
                 config.allowPath(path)
+        config.timeout = options.timeout
         return config
 
