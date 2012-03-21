@@ -8,7 +8,7 @@ class SandboxError(Exception):
 class Timeout(SandboxError):
     pass
 
-class Protection:
+class Protection(object):
     def enable(self, sandbox):
         pass
 
@@ -32,7 +32,7 @@ else:
     HAVE_CSANDBOX = True
     set_error_class(SandboxError)
     del set_error_class
-    if _sandbox_version != 2:
+    if _sandbox_version != 3:
         raise SandboxError(
             "_sandbox version %s is not supported" % _sandbox_version)
 

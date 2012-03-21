@@ -3,10 +3,11 @@
 
 /**
  * Version history:
+ *  - Version 3: add _test_crash() function
  *  - Version 2: add dictionary_of() function
  *  - Version 1: initial version
  */
-#define VERSION 2
+#define VERSION 3
 
 #if PY_MAJOR_VERSION >= 3
 # define PYTHON3
@@ -113,6 +114,20 @@ error:
     return NULL;
 }
 
+static PyObject *
+sandbox_test_crash(PyObject *self)
+{
+    volatile int *x;
+    volatile int y;
+    x = NULL;
+    y = *x;
+#ifdef PYTHON3
+    return PyLong_FromLong(y);
+#else
+    return PyInt_FromLong(y);
+#endif
+}
+
 static PyMethodDef sandbox_methods[] = {
     {"set_error_class", set_error_class, METH_VARARGS,
      PyDoc_STR("set_error_class(error_class) -> None")},
@@ -126,6 +141,8 @@ static PyMethodDef sandbox_methods[] = {
      PyDoc_STR("restore_code_new() -> None")},
     {"dictionary_of", dictionary_of, METH_VARARGS,
      PyDoc_STR("dictionary_of(obj) -> dict")},
+    {"_test_crash", (PyCFunction)sandbox_test_crash, METH_NOARGS,
+     PyDoc_STR("_test_crash(): crash the process")},
     {NULL,              NULL}           /* sentinel */
 };
 
