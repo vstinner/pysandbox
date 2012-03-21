@@ -9,6 +9,7 @@ Version 1.6
     * Limit memory
     * Block fork and thread
     * stdin, stdout and stderr are redirected to /dev/null (or :NUL on Windows)
+    * Drop the "interpreter" configuration feature: move the code to interpreter.py
 
 Version 1.5 (2012-03-20)
 ------------------------

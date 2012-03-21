@@ -8,10 +8,16 @@ from sandbox import (DEFAULT_TIMEOUT,
 
 _UNSET = object()
 
+# The os module is part of the Python standard library
+# and it is implemented in Python
+import os
+PYTHON_STDLIB_DIR = dirname(os.__file__)
+del os
+
 def findLicenseFile():
-    # Adapted from setcopyright() from site.py
     import os
-    here = dirname(os.__file__)
+    # Adapted from setcopyright() from site.py
+    here = PYTHON_STDLIB_DIR
     for filename in ("LICENSE.txt", "LICENSE"):
         for directory in (path_join(here, os.pardir), here, os.curdir):
             fullname = path_join(directory, filename)
@@ -75,9 +81,7 @@ class SandboxConfig(object):
         self._use_subprocess = kw.get('use_subprocess', True)
         if self._use_subprocess:
             self._timeout = DEFAULT_TIMEOUT
-            # 100 MB is the minimum size of the virtual memory on Fedora 16 on
-            # x86_64 to run a basic Python script with Python 2.7
-            self._max_memory = 200 * 1024 * 1024
+            self._max_memory = 50 * 1024 * 1024
         else:
             self._timeout = None
             self._max_memory = None
@@ -263,29 +267,6 @@ class SandboxConfig(object):
             self.enable('regex')
             self.allowModule('pydoc', 'help')
             self._builtins_whitelist.add('help')
-        elif feature == 'interpreter':
-            self.enable('traceback')
-            self.enable('stdin')
-            self.enable('stdout')
-            self.enable('stderr')
-            self.enable('exit')
-            self.enable('site')
-            self.enable('encodings')
-            self._builtins_whitelist.add('compile')
-            self.allowModuleSourceCode('code')
-            self.allowModule('sys',
-                'api_version', 'version', 'hexversion')
-            self.allowSafeModule('sys', 'version_info')
-            if HAVE_PYPY:
-                self.enable('unicodedata')
-                self.allowModule('os', 'write', 'waitpid')
-                self.allowSafeModule('pyrepl', 'input')
-                self.allowModule('pyrepl.keymap', 'compile_keymap', 'parse_keys')
-        elif feature == 'debug_sandbox':
-            self.enable('traceback')
-            self.allowModule('sys', '_getframe')
-            self.allowSafeModule('_sandbox', '_test_crash')
-            self.allowModuleSourceCode('sandbox')
         elif feature == 'future':
             self.allowModule('__future__',
                 'all_feature_names',

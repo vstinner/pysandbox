@@ -75,8 +75,6 @@ config.enable('feature'). Available features:
  - "future": from __future__ import ...
  - "hashlib": hashlib module.
  - "help": pydoc.help(), use "import pydoc" outside the sandbox to use it. Enable regex feature.
- - "interpreter": give access to standard streams, enable traceback. Enable
-   encodings, exit, site, stdin, stdout, stderr and traceback features.
  - "itertools": itertools module
  - "math": math module
  - "random": random module. Enable hashlib and math features.

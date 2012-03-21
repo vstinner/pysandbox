@@ -1,6 +1,6 @@
 from __future__ import with_statement
 from code import InteractiveConsole
-from sandbox import Sandbox, SandboxConfig
+from sandbox import Sandbox, SandboxConfig, HAVE_PYPY
 import readline
 from optparse import OptionParser
 from sandbox.version import VERSION
@@ -36,18 +36,16 @@ class SandboxConsole(InteractiveConsole):
 class SandboxedInterpeter:
     def __init__(self):
         self.sandbox_locals = None
-        self.config, self.options = self.parseOptions()
-
-        self.config.enable('interpreter')
-        if ('traceback' in self.config.features) \
-        and (not self.config.cpython_restricted):
-            self.config.allowPath(__file__)
-
+        self.options = self.parseOptions()
+        self.config = self.createConfig()
         self.stdout = sys.stdout
 
     def parseOptions(self):
         parser = OptionParser(usage="%prog [options]")
         SandboxConfig.createOptparseOptions(parser, default_timeout=None)
+        parser.add_option("--debug",
+            help="Debug mode",
+            action="store_true", default=False)
         parser.add_option("--verbose", "-v",
             help="Verbose mode",
             action="store_true", default=False)
@@ -58,15 +56,39 @@ class SandboxedInterpeter:
         if argv:
             parser.print_help()
             exit(1)
-
         if options.quiet:
             options.verbose = False
+        return options
 
-        config = SandboxConfig.fromOptparseOptions(options)
-        return config, options
+    def createConfig(self):
+        config = SandboxConfig.fromOptparseOptions(self.options)
+        config.enable('traceback')
+        config.enable('stdin')
+        config.enable('stdout')
+        config.enable('stderr')
+        config.enable('exit')
+        config.enable('site')
+        config.enable('encodings')
+        config._builtins_whitelist.add('compile')
+        config.allowModuleSourceCode('code')
+        config.allowModule('sys',
+            'api_version', 'version', 'hexversion')
+        config.allowSafeModule('sys', 'version_info')
+        if HAVE_PYPY:
+            config.enable('unicodedata')
+            config.allowModule('os', 'write', 'waitpid')
+            config.allowSafeModule('pyrepl', 'input')
+            config.allowModule('pyrepl.keymap', 'compile_keymap', 'parse_keys')
+        if self.options.debug:
+            config.allowModule('sys', '_getframe')
+            config.allowSafeModule('_sandbox', '_test_crash')
+            config.allowModuleSourceCode('sandbox')
+        if not config.cpython_restricted:
+            config.allowPath(__file__)
+        return config
 
     def dumpConfig(self):
-        if self.options.verbose:
+        if self.options.debug:
             from pprint import pprint
             print "Sandbox config:"
             pprint(self.config.__dict__)
@@ -76,7 +98,11 @@ class SandboxedInterpeter:
             if self.config.cpython_restricted:
                 print "CPython restricted mode enabled."
             if self.config.use_subprocess:
-                print "Run untrusted code in a subprocess."
+                text = "Run untrusted code in a subprocess"
+                if self.options.debug:
+                    from os import getpid
+                    text += ": pid=%s" % getpid()
+                print(text)
         if 'help' not in self.config.features:
             print "(use --features=help to enable the help function)"
         print
