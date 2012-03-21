@@ -13,7 +13,7 @@ from .restorable_dict import RestorableDict
 
 builtin_function = type(len)
 
-class HideAttributes:
+class HideAttributes(object):
     """
     Hide unsafe frame attributes from the Python space
     """

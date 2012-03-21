@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import sys
 
-class SetRecursionLimit:
+class SetRecursionLimit(object):
     def __init__(self):
         self.old_limit = sys.getrecursionlimit()
 

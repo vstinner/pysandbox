@@ -17,7 +17,7 @@ def _dictProxy(data):
     for key, value in items:
         data[proxy(key)] = proxy(value)
 
-class Sandbox:
+class Sandbox(object):
     PROTECTIONS = []
 
     def __init__(self, config=None):
