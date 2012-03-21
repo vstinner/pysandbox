@@ -82,9 +82,15 @@ class SandboxConfig(object):
         if self._use_subprocess:
             self._timeout = DEFAULT_TIMEOUT
             self._max_memory = 50 * 1024 * 1024
+            # size in bytes of all input objects serialized by pickle
+            self._max_input_size = 64 * 1024
+            # size in bytes of the result serialized by pickle
+            self._max_output_size = 64 * 1024
         else:
             self._timeout = None
             self._max_memory = None
+            self._max_input_size = None
+            self._max_output_size = None
 
         # open() whitelist: see safe_open()
         self._open_whitelist = set()
@@ -207,6 +213,14 @@ class SandboxConfig(object):
     @property
     def max_memory(self):
         return self._max_memory
+
+    @property
+    def max_input_size(self):
+        return self._max_input_size
+
+    @property
+    def max_output_size(self):
+        return self._max_output_size
 
     @property
     def import_whitelist(self):

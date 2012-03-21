@@ -67,41 +67,53 @@ def execute_subprocess(sandbox, code, globals, locals):
     finally:
         os.umask(old_umask)
 
-    with input_file:
-        with output_file:
-            input_data = {
-                'code': code,
-                'config': sandbox.config,
-                'locals': locals,
-                'globals': globals,
-            }
-            args = (
-                sys.executable,
-                # FIXME: use '-S'
-                '-E',
-                '-m', 'sandbox.subprocess_child',
-                input_file.name, output_file.name)
-            pickle.dump(input_data, input_file)
-            # FIXME: check data size?
-            input_file.flush()
+    try:
+        input_data = {
+            'code': code,
+            'config': sandbox.config,
+            'locals': locals,
+            'globals': globals,
+        }
+        args = (
+            sys.executable,
+            # FIXME: use '-S'
+            '-E',
+            '-m', 'sandbox.subprocess_child',
+            input_file.name, output_file.name)
+        pickle.dump(input_data, input_file)
+        input_file.flush()
+        if sandbox.config.max_input_size:
+            size = input_file.tell()
+            if size > sandbox.config.max_input_size:
+                raise SandboxError("Input data are too big: %s bytes (max=%s)"
+                                   % (size, sandbox.config.max_input_size))
 
-            # create the subprocess
-            process = subprocess.Popen(args, close_fds=True, shell=False)
+        # create the subprocess
+        process = subprocess.Popen(args, close_fds=True, shell=False)
 
-            # wait data
-            exitcode = process.wait()
-            if exitcode:
-                if os.name != "nt" and exitcode < 0:
-                    signum = -exitcode
-                    if signum == SIGALRM:
-                        raise Timeout()
-                    text = "subprocess killed by signal %s" % signum
-                else:
-                    text = "subprocess failed with exit code %s" % exitcode
-                raise SandboxError(text)
+        # wait data
+        exitcode = process.wait()
+        if exitcode:
+            if os.name != "nt" and exitcode < 0:
+                signum = -exitcode
+                if signum == SIGALRM:
+                    raise Timeout()
+                text = "subprocess killed by signal %s" % signum
+            else:
+                text = "subprocess failed with exit code %s" % exitcode
+            raise SandboxError(text)
 
-            output_data = pickle.load(output_file)
-            # FIXME: check data size?
+        if sandbox.config.max_output_size:
+            output_file.seek(0, 2)
+            size = output_file.tell()
+            output_file.seek(0)
+            if size > sandbox.config.max_output_size:
+                raise SandboxError("Output data are too big: %s bytes (max=%s)"
+                                   % (size, sandbox.config.max_output_size))
+        output_data = pickle.load(output_file)
+    finally:
+        input_file.close()
+        output_file.close()
 
     if 'error' in output_data:
         raise output_data['error']

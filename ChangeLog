@@ -11,6 +11,7 @@ Version 1.6
     * stdin, stdout and stderr are redirected to /dev/null (or :NUL on Windows)
     * Drop the "interpreter" configuration feature: move the code to interpreter.py
     * Replace sys.path and other related variables
+    * Limit input and output sizes
 
 Version 1.5 (2012-03-20)
 ------------------------

@@ -9,6 +9,8 @@ try:
 except ImportError:
     resource = None
 
+PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
+
 def set_process_limits(config):
     if resource is not None:
         # deny fork and thread
@@ -65,7 +67,7 @@ def execute_child():
             output_data['locals'] = locals
     except base_exception, err:
         output_data = {'error': err}
-    pickle.dump(output_data, output)
+    pickle.dump(output_data, output, PICKLE_PROTOCOL)
     output.flush()
     output.close()
 
@@ -78,7 +80,7 @@ def call_child(wpipe, sandbox, func, args, kw):
     except BaseException, err:
         data = {'error': err}
     output = os.fdopen(wpipe, 'wb')
-    pickle.dump(data, output)
+    pickle.dump(data, output, PICKLE_PROTOCOL)
     output.flush()
     output.close()
     if config.has_feature("stdout"):

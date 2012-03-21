@@ -29,6 +29,7 @@ limits:
  * number of child process = 0 (disable fork or thread at the OS level)
  * pysandbox is able to catch crashes like segmentation fault (SIGSEGV)
  * stdin, stdout and stderr are redirected to /dev/null (or :NUL on Windows)
+ * input and output data are limited to 64 KB
 
 Protection of the namespace:
 
