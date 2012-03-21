@@ -20,8 +20,15 @@ Blocked Python functions (by default):
 
 You can enable all of these features by setting the sandbox configuration.
 
-By default, the untrusted code is executed in a subprocess and the default
-recursion limit is 50 frames.
+By default, the untrusted code is executed in a subprocess with the following
+limits:
+
+ * timeout = 5 seconds
+ * memory limit = 200 MB
+ * recursion limit = 50 frames
+ * number of child process = 0 (disable fork or thread at the OS level)
+ * pysandbox is able to catch crashes like segmentation fault (SIGSEGV)
+ * stderr is redirected to /dev/null (or :NUL on Windows)
 
 Protection of the namespace:
 
@@ -36,15 +43,9 @@ Protection of the namespace:
 Limitations
 ===========
 
-pysandbox is unable to limit the memory or the CPU of the sandbox process: you
-have to use your own protection. Use for example a subprocess to run the
-untrusted code and use the OS to limit resources (memory and CPU) of the
-subprocess. Using a subprocess protects also the main process against crash in
-the untrusted code.
-
 pysandbox is a sandbox for the Python namespace, not a sandbox between Python
 and the operating system. It does not protect your system against Python
-security vulnerabilities: vulnerabilities in modules/functions available in
+security vulnerabilities: vulnerabilities in modules and functions available in
 your sandbox (depend on your sandbox configuration). By default, only few
 functions are exposed to the sandbox namespace which limits the attack surface.
 
@@ -108,6 +109,18 @@ bastion and rexec modules:
 
  * http://svn.python.org/view?view=rev&revision=55301
  * http://hg.python.org/cpython/rev/f60c877d52c8/
+
+Disable subprocess
+------------------
+
+It is possible to not run the untrusted code in a subprocess using
+SandboxConfig(use_subprocess=False). This mode is less secure, the following
+protections are disabled:
+
+ * timeout
+ * memory limit
+ * number the process is not limit (fork and thread are allowed by the OS)
+ * crash cannot be catched
 
 Other options
 -------------

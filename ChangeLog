@@ -2,7 +2,9 @@ Version 1.6
 -----------
 
     * Execute code in a subprocess using the Python subprocess module
-      or os.fork()
+      or os.fork(). pysandbox is now able to catch crash in the Python process.
+    * Reimplement a timeout
+    * Limit memory, block fork and thread
     * Add --disable-subprocess command line option
 
 Version 1.5 (2012-03-20)

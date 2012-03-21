@@ -1,17 +1,20 @@
 Major tasks
 -----------
 
+ * subprocess: disable site module (use -S)
+ * Child process: disable the protection??
+ * Test subprocess on Windows: no fork!
+ * Test timeout on Windows
+ * Implement memory limit on Windows
  * Implement the timeout in the parent process
- * Hide type.__bases__ on Python 2.5 or mark the attribute as read-only
+ * Use a pipe, socket or something else instead of using stdin and stdout.
+   Reuse subprocess and multiprocessing?
+ * Set memory limit to 50 MB
  * Python3 support: fix proxy()
- * Write an option to run the code in a subprocess
  * Document "dangerous functions": functions allowing to override the sandbox policy
- * FIXME: ReadOnlyList(list('abc')) == list('abc') is False
  * Choose getModulePath() implementation (problem with "from encodings import
    aliases")
- * Write a test for traceback
- * Write a whitelist for sys.path and clear sys.meta_path?
- * Clear sys.modules?
+ * Clear sys.modules? Write a whitelist for sys.path and clear sys.meta_path?
 
 Open questions
 --------------
@@ -23,7 +26,9 @@ Open questions
 Minor tasks
 -----------
 
+ * Hide type.__bases__ on Python 2.5 or mark the attribute as read-only
  * isinstance(createReadOnlyList(...), list) is False
+ * Write a test for traceback
  * interpreter.py has a quit() builtin function (instance of site.Quitter)
    which is not protected by a proxy
  * Write a blacklist for ObjectProxy (eg. "__class__" attribute)
@@ -54,8 +59,4 @@ Todo later
    warnings imports modules
    > if there are other non-user-initiated dynamically imported modules?
    Grep the source for PyImport.
- * RuntimeError: maximum recursion depth exceeded
-   import sys; sys.setrecursionlimit(50)
-   http://mail.python.org/pipermail/python-dev/2009-February/086463.html
- * Limit memory usage
 
