@@ -60,51 +60,56 @@ def call_fork(sandbox, func, args, kw):
         return call_parent(pid, rpipe)
 
 def execute_subprocess(sandbox, code, globals, locals):
-    # prepare data
-    input_data = {
-        'code': code,
-        'config': sandbox.config,
-        'locals': locals,
-        'globals': globals,
-    }
-
-    # FIXME: use '-S'
-    args = (sys.executable, '-E', '-m', 'sandbox.subprocess_child')
-    kw = {
-        'close_fds': True,
-        'shell': False,
-    }
-    args += (pickle.dumps(input_data),)
-    output_file = tempfile.NamedTemporaryFile()
-    args += (output_file.name,)
-
+    old_umask = os.umask(0177)
     try:
-        # create the subprocess
-        process = subprocess.Popen(args, **kw)
-
-        # wait data
-        exitcode = process.wait()
-        if exitcode:
-            if os.name != "nt" and exitcode < 0:
-                signum = -exitcode
-                if signum == SIGALRM:
-                    raise Timeout()
-                text = "subprocess killed by signal %s" % signum
-            else:
-                text = "subprocess failed with exit code %s" % exitcode
-            raise SandboxError(text)
-
-        output_data = pickle.load(output_file)
+        input_file = tempfile.NamedTemporaryFile()
+        output_file = tempfile.NamedTemporaryFile()
     finally:
-        output_file.close()
+        os.umask(old_umask)
+
+    with input_file:
+        with output_file:
+            input_data = {
+                'code': code,
+                'config': sandbox.config,
+                'locals': locals,
+                'globals': globals,
+            }
+            args = (
+                sys.executable,
+                # FIXME: use '-S'
+                '-E',
+                '-m', 'sandbox.subprocess_child',
+                input_file.name, output_file.name)
+            pickle.dump(input_data, input_file)
+            # FIXME: check data size?
+            input_file.flush()
+
+            # create the subprocess
+            process = subprocess.Popen(args, close_fds=True, shell=False)
+
+            # wait data
+            exitcode = process.wait()
+            if exitcode:
+                if os.name != "nt" and exitcode < 0:
+                    signum = -exitcode
+                    if signum == SIGALRM:
+                        raise Timeout()
+                    text = "subprocess killed by signal %s" % signum
+                else:
+                    text = "subprocess failed with exit code %s" % exitcode
+                raise SandboxError(text)
+
+            output_data = pickle.load(output_file)
+            # FIXME: check data size?
 
     if 'error' in output_data:
         raise output_data['error']
-    if input_data['locals'] is not None:
-        input_data['locals'].clear()
-        input_data['locals'].update(output_data['locals'])
-    if input_data['globals'] is not None:
-        input_data['globals'].clear()
-        input_data['globals'].update(output_data['globals'])
+    if locals is not None:
+        locals.clear()
+        locals.update(output_data['locals'])
+    if globals is not None:
+        globals.clear()
+        globals.update(output_data['globals'])
     return output_data['result']
 

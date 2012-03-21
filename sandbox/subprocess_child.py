@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import sys
 import os
 import pickle
@@ -40,19 +41,20 @@ def set_process_limits(config):
         signal.alarm(seconds)
 
 def execute_child():
+    input_filename = sys.argv[1]
     output_filename = sys.argv[2]
     output = open(output_filename, "wb")
     base_exception = BaseException
     try:
-        input_data = sys.argv[1]
-        input_data = pickle.loads(input_data)
+        with open(input_filename, 'rb') as input_file:
+            input_data = pickle.load(input_file)
+        code = input_data['code']
         config = input_data['config']
+        locals = input_data['locals']
+        globals = input_data['globals']
         set_process_limits(config)
 
         sandbox = Sandbox(config)
-        code = input_data['code']
-        locals = input_data.get('locals')
-        globals = input_data.get('globals')
         result = sandbox._execute(code, globals, locals)
 
         output_data = {'result': result}
