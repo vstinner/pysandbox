@@ -1,31 +1,28 @@
 Major tasks
 -----------
 
- * subprocess: disable site module (use -S)
- * Child process: disable the protection??
- * Test subprocess on Windows: no fork!
- * Test timeout on Windows
- * Implement memory limit on Windows
+ * subprocess should use a pipe or socket instead of a named file. Reuse
+   subprocess and multiprocessing?
  * Implement the timeout in the parent process
- * Use a pipe, socket or something else instead of using stdin and stdout.
-   Reuse subprocess and multiprocessing?
- * Set memory limit to 50 MB
+ * subprocess: disable site module (use -S)
+ * Windows:
+
+     * Test subprocess: no fork!
+     * Test timeout
+     * Implement memory limit
+
  * Python3 support: fix proxy()
- * Document "dangerous functions": functions allowing to override the sandbox policy
- * Choose getModulePath() implementation (problem with "from encodings import
-   aliases")
  * Clear sys.modules? Write a whitelist for sys.path and clear sys.meta_path?
-
-Open questions
---------------
-
- * A function keeps its func_globals/__global__ attribute. Is it a problem?
- * A generator can be controled: .throw(), .send(), etc. Is it a problem if the
-   generator was created outside the sandbox?
 
 Minor tasks
 -----------
 
+ * A function keeps its func_globals/__global__ attribute. Is it a problem?
+ * A generator can be controled: .throw(), .send(), etc. Is it a problem if the
+   generator was created outside the sandbox?
+ * Document "dangerous functions": functions allowing to override the sandbox policy
+ * Choose getModulePath() implementation (problem with "from encodings import
+   aliases")
  * Hide type.__bases__ on Python 2.5 or mark the attribute as read-only
  * isinstance(createReadOnlyList(...), list) is False
  * Write a test for traceback
