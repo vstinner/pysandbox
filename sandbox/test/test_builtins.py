@@ -40,12 +40,7 @@ def test_builtins_init():
     import warnings
 
     def check_init():
-        try:
-            __builtins__.__init__({})
-        except SandboxError, err:
-            assert str(err) == "Read only object"
-        else:
-            assert False
+        __builtins__.__init__({})
 
     def check_dict_init():
         try:
@@ -57,7 +52,12 @@ def test_builtins_init():
         else:
             assert False
 
-    createSandbox().call(check_init)
+    try:
+        createSandbox().call(check_init)
+    except SandboxError, err:
+        assert str(err) == "Read only object", str(err)
+    else:
+        assert False
 
     if version_info >= (2, 6):
         original_filters = warnings.filters[:]

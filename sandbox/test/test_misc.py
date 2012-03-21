@@ -1,6 +1,6 @@
 from __future__ import with_statement
-from sandbox import Sandbox, SandboxError, SandboxConfig
-from sandbox.test import createSandbox, createSandboxConfig
+from sandbox import Sandbox, SandboxError, SandboxConfig, Timeout
+from sandbox.test import createSandbox, createSandboxConfig, SkipTest
 from sandbox.test.tools import capture_stdout
 
 def test_valid_code():
@@ -36,13 +36,6 @@ def test_exit():
             assert False
     Sandbox(config).call(exit_1)
 
-    try:
-        exit(1)
-    except SystemExit, err:
-        assert err.args[0] == 1
-    else:
-        assert False
-
 def test_sytem_exit():
     def system_exit_denied():
         try:
@@ -74,13 +67,13 @@ def test_stdout():
     with capture_stdout() as stdout:
         config = SandboxConfig()
         def print_denied():
-            try:
-                print "Hello Sandbox 1"
-            except SandboxError:
-                pass
-            else:
-                assert False
-        Sandbox(config).call(print_denied)
+            print "Hello Sandbox 1"
+        try:
+            Sandbox(config).call(print_denied)
+        except SandboxError:
+            pass
+        else:
+            assert False
 
         def print_allowed():
             print "Hello Sandbox 2"
@@ -125,4 +118,54 @@ def test_regex():
 
     check_regex()
 
+def test_timeout_while_1():
+    if not createSandboxConfig.use_subprocess:
+        raise SkipTest("timeout is only supported with subprocess")
+
+    def denial_of_service():
+        while 1:
+            pass
+
+    config = createSandboxConfig()
+    config.timeout = 0.1
+    try:
+        Sandbox(config).call(denial_of_service)
+    except Timeout:
+        pass
+    else:
+        assert False
+
+def test_timeout_cpu_intensive():
+    if not createSandboxConfig.use_subprocess:
+        raise SkipTest("timeout is only supported with subprocess")
+
+    def denial_of_service():
+        sum(2**x for x in range(100000))
+
+    config = createSandboxConfig()
+    config.timeout = 0.1
+    try:
+        Sandbox(config).call(denial_of_service)
+    except Timeout:
+        pass
+    else:
+        assert False
+
+def test_crash():
+    if not createSandboxConfig.use_subprocess:
+        raise SkipTest("catching a crash is only supported with subprocess")
+
+    def crash():
+        import _sandbox
+        _sandbox._test_crash()
+
+    config = createSandboxConfig()
+    config.allowSafeModule("_sandbox", "_test_crash")
+    sand = Sandbox(config)
+    try:
+        sand.call(crash)
+    except SandboxError, err:
+        assert str(err) == 'subprocess killed by signal 11', str(err)
+    else:
+        assert False
 
