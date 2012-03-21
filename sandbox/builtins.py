@@ -96,4 +96,8 @@ class CleanupBuiltins:
         for module_dict in self.modules_dict:
             module_dict['__builtins__'] = self.builtins_dict
         self.main_module.__dict__['__builtins__'] = BUILTINS_MODULE
+        self.frame = None
+        self.builtins_dict = None
+        self.main_module = None
+        self.modules_dict = None
 

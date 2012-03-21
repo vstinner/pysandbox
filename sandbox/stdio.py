@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import sys
-from sandbox import SandboxError
+from sandbox import SandboxError, Protection
 
 def createNoAttribute(stream_name):
     def _blocked(name):
@@ -20,7 +20,7 @@ def createNoAttribute(stream_name):
             _blocked(name)
     return NoAttribute()
 
-class ProtectStdio:
+class ProtectStdio(Protection):
     """
     If stdin / stdout / stderr feature is disable, replace sys.stdin /
     sys.stdout / sys.stderr by a dummy object with no attribute.
@@ -47,4 +47,7 @@ class ProtectStdio:
         self.sys.stdin = self.stdin
         self.sys.stdout = self.stdout
         self.sys.stderr = self.stderr
+        self.stdin = None
+        self.stdout = None
+        self.stderr = None
 

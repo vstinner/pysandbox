@@ -1,10 +1,8 @@
 from __future__ import absolute_import
+from sandbox import Protection
 import sys
 
-class SetRecursionLimit(object):
-    def __init__(self):
-        self.old_limit = sys.getrecursionlimit()
-
+class SetRecursionLimit(Protection):
     def enable(self, sandbox):
         self.old_limit = sys.getrecursionlimit()
         sys.setrecursionlimit(sandbox.config.recusion_limit)

@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from types import FunctionType, FrameType, GeneratorType
 from sys import version_info
+from sandbox import Protection
 try:
     from sys import _clear_type_cache
 except ImportError:
@@ -13,7 +14,7 @@ from .restorable_dict import RestorableDict
 
 builtin_function = type(len)
 
-class HideAttributes(object):
+class HideAttributes(Protection):
     """
     Hide unsafe frame attributes from the Python space
     """
