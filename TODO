@@ -1,6 +1,7 @@
 Major tasks
 -----------
 
+ * Limit input/output size for call_fork()?
  * subprocess should use a pipe or socket instead of a named file. Reuse
    subprocess and multiprocessing?
  * Implement the timeout in the parent process
