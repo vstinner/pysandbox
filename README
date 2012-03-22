@@ -38,6 +38,7 @@ Protection of the namespace:
  * __builtins__ is read only
  * Deny access to dict methods able to modify a dict, eg. dict.__setitem__.
    But you can use "d[key] = value" and "del d[key]" instead
+ * Use a whitelist for sys.path
 
 
 Limitations
@@ -123,6 +124,7 @@ protections are disabled:
 Other options
 -------------
 
+ - config.sys_path: trusted path list used to import modules
  - config.allowPath(path) allows to read a file from the specified path
  - config.allowModule(name, symbol1, symbol2, ...) allows to import the
    specified module, but give only access to the specified symbols

@@ -177,6 +177,8 @@ class SandboxConfig(object):
                 '__build_class__', 'ascii', 'exec',
             ))
 
+        self.sys_path = (PYTHON_STDLIB_DIR,)
+
         for feature in features:
             self.enable(feature)
 

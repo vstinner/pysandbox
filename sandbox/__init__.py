@@ -39,6 +39,9 @@ else:
 from .config import SandboxConfig
 from .sandbox_class import Sandbox
 
+from .clear_import import ClearImport
+Sandbox.PROTECTIONS.append(ClearImport)
+
 from .builtins import CleanupBuiltins
 Sandbox.PROTECTIONS.append(CleanupBuiltins)
 

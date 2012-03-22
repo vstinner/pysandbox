@@ -12,11 +12,12 @@ Major tasks
      * Implement memory limit
 
  * Python3 support: fix proxy()
- * Clear sys.modules? Write a whitelist for sys.path and clear sys.meta_path?
+ * Clear sys.modules?
 
 Minor tasks
 -----------
 
+ * Clear sys.last_{type,value,traceback}?
  * A function keeps its func_globals/__global__ attribute. Is it a problem?
  * A generator can be controled: .throw(), .send(), etc. Is it a problem if the
    generator was created outside the sandbox?
