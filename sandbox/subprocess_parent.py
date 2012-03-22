@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import with_statement, absolute_import
 from sandbox import SandboxError, Timeout
 from sandbox.subprocess_child import call_child
 from signal import SIGALRM
