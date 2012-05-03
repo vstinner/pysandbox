@@ -7,5 +7,6 @@ Victor Stinner <victor.stinner AT haypocalc.com> - author of pysandbox, based on
 Contributors
 ============
 
+Vadim Graboys <dimva13 AT gmail.com> - add ability to set max_memory via config
 masklinn <github.com AT masklinn.net> - fix reST documentation syntax
 
