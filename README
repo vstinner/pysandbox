@@ -68,8 +68,6 @@ To enable a feature, use SandboxConfig('feature1', 'feature2', ...) or
 config.enable('feature'). Available features:
 
  - "codecs": codecs module
- - "debug_sandbox": allow to display a traceback of the sandbox. Enable
-   traceback feature.
  - "datetime": datetime module
  - "encodings": encodings module with ascii, latin_1, utf_8, utf_16_be,
    utf_32_be and rot_13 codecs (submodules). Enable codecs feature.
