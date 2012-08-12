@@ -9,13 +9,13 @@ Website: http://github.com/haypo/pysandbox/
 Features
 ========
 
-Blocked Python functions (by default):
+Blocked Python functionality (by default):
 
  * Deny access to the file system
  * Deny importing Python modules
  * Deny exiting Python
  * Deny access to stdin, stdout or stderr
- * Deny some builtins symbols like execfile(), reload() or KeyboardInterrupt
+ * Deny some builtin symbols like execfile(), reload() or KeyboardInterrupt
  * Deny execution of arbitrary bytecode (creation of arbitrary code object)
 
 You can enable all of these features by setting the sandbox configuration.
@@ -26,7 +26,7 @@ limits:
  * timeout = 5 seconds
  * memory limit = 200 MB
  * recursion limit = 50 frames
- * number of child process = 0 (disable fork or thread at the OS level)
+ * number of child processes = 0 (forking and threads are disabled at the OS level)
  * pysandbox is able to catch crashes like segmentation fault (SIGSEGV)
  * stdin, stdout and stderr are redirected to /dev/null (or :NUL on Windows)
  * input and output data are limited to 64 KB
@@ -35,7 +35,7 @@ Protection of the namespace:
 
  * Deny access to function closure, globals, defaults and code
  * Deny access to frame locals
- * Deny access to types subclasses
+ * Deny access to types' subclasses
  * __builtins__ is read only
  * Deny access to dict methods able to modify a dict, eg. dict.__setitem__.
    But you can use "d[key] = value" and "del d[key]" instead
@@ -47,12 +47,13 @@ Limitations
 
 pysandbox is a sandbox for the Python namespace, not a sandbox between Python
 and the operating system. It does not protect your system against Python
-security vulnerabilities: vulnerabilities in modules and functions available in
-your sandbox (depend on your sandbox configuration). By default, only few
-functions are exposed to the sandbox namespace which limits the attack surface.
+security vulnerabilities, i.e. vulnerabilities in modules and functions
+available in your sandbox (depends on your sandbox configuration). By default,
+only a few functions are exposed to the sandbox namespace which limits the
+attack surface.
 
-See Lib/test/crashers/ directory in the CPython source code to see examples of
-known bugs crashing the CPython interpreter.
+See the Lib/test/crashers/ directory in the CPython source code to see examples
+of known bugs crashing the CPython interpreter.
 
 
 Configuration
@@ -85,7 +86,7 @@ config.enable('feature'). Available features:
  - "time": time module (except sleep, strptime and tzset functions)
  - "traceback": compile() builtin, frame.f_code. Next calls to allowModule()
    will add the module filename to the open() whitelist, so Python can display
-   a traceback with the source code. This feature have to be enabled before all
+   a traceback with the source code. This feature has to be enabled before all
    other features.
  - "unicodedata": unicodedata module, required for u'\N{ATOM SYMBOL}' syntax
 
@@ -96,14 +97,14 @@ WARNING: CPython restricted mode is unsafe because it is possible to execute
 arbitrary bytecode.
 
 Use SandboxConfig(cpython_restricted=True) to enable CPython restricted mode.
-In this mode, reading a file and modify a class are blocked. Some attributes
-are hidden (eg. method.__self__), other are read only (eg. func.__doc__).
+In this mode, reading a file and modifying a class are blocked. Some attributes
+are hidden (eg. method.__self__), others are read only (eg. func.__doc__).
 
 CPython restricted mode is disabled by default. The restricted mode is
-incompatible with SandboxConfig "traceback" feature and allowPath() method.
+incompatible with SandboxConfig's "traceback" feature and allowPath() method.
 
-The restricted mode doesn't exist in Python3 anymore, it was removed with
-bastion and rexec modules:
+The restricted mode doesn't exist in Python3 anymore; it was removed with
+the bastion and rexec modules:
 
  * http://svn.python.org/view?view=rev&revision=55301
  * http://hg.python.org/cpython/rev/f60c877d52c8/
@@ -112,21 +113,21 @@ Disable subprocess
 ------------------
 
 It is possible to not run the untrusted code in a subprocess using
-SandboxConfig(use_subprocess=False). This mode is less secure, the following
+SandboxConfig(use_subprocess=False). This mode is less secure; the following
 protections are disabled:
 
  * timeout
  * memory limit
- * number the process is not limit (fork and thread are allowed by the OS)
- * crash cannot be catched
+ * number the process is not limit (forking and threads are allowed by the OS)
+ * crashes aren't be caught
 
 Other options
 -------------
 
  - config.sys_path: trusted path list used to import modules
- - config.allowPath(path) allows to read a file from the specified path
- - config.allowModule(name, symbol1, symbol2, ...) allows to import the
-   specified module, but give only access to the specified symbols
+ - config.allowPath(path) allows reading a file from the specified path
+ - config.allowModule(name, symbol1, symbol2, ...) allows importing the
+   specified module, but only gives access to the specified symbols
 
 
 Example

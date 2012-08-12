@@ -210,9 +210,13 @@ class SandboxConfig(object):
             self._timeout = None
     timeout = property(_get_timeout, _set_timeout)
 
-    @property
-    def max_memory(self):
+    def _get_max_memory(self):
         return self._max_memory
+    def _set_max_memory(self, mb):
+        if not self._use_subprocess:
+            raise NotImplementedError("Max Memory requires the subprocess mode")
+        self._max_memory = mb * 1024 * 1024
+    max_memory = property(_get_max_memory, _set_max_memory)
 
     @property
     def max_input_size(self):
