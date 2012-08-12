@@ -1,6 +1,7 @@
 Major tasks
 -----------
 
+ * Re-enable ClearImport() protection: break test_random test
  * Limit input/output size for call_fork()?
  * subprocess should use a pipe or socket instead of a named file. Reuse
    subprocess and multiprocessing?

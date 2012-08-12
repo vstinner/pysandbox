@@ -1,6 +1,8 @@
 Version 1.6
 -----------
 
+FIXME: repair ClearImport() protection, or remove it
+
     * Execute code in a subprocess using the Python subprocess module
       or os.fork()
     * Add --disable-subprocess command line option

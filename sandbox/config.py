@@ -81,7 +81,7 @@ class SandboxConfig(object):
         self._use_subprocess = kw.get('use_subprocess', True)
         if self._use_subprocess:
             self._timeout = DEFAULT_TIMEOUT
-            self._max_memory = 50 * 1024 * 1024
+            self._max_memory = 250 * 1024 * 1024
             # size in bytes of all input objects serialized by pickle
             self._max_input_size = 64 * 1024
             # size in bytes of the result serialized by pickle
