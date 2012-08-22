@@ -228,6 +228,8 @@ Python-dev mailing list
 Other
 -----
 
+ * Python shell running in Google AppEngine (which uses a sandbox)
+   http://shell.appspot.com/
  * http://lua-users.org/wiki/SandBoxes
  * "Capability-based Financial Instruments"
    Mark S. Miller, Chip Morningstar and Bill Frantz, 2000
