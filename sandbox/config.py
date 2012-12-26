@@ -484,6 +484,7 @@ class SandboxConfig(object):
         if options.allow_path:
             for path in options.allow_path:
                 config.allowPath(path)
-        config.timeout = options.timeout
+        if config.use_subprocess:
+            config.timeout = options.timeout
         return config
 

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import __builtin__ as BUILTINS_MODULE
 from types import FrameType
-from sys import _getframe, version_info
+from sys import version_info
 import sys
 
 from sandbox import SandboxError, HAVE_CSANDBOX
@@ -31,7 +31,7 @@ class CleanupBuiltins:
             del self.builtin_dict[key]
 
         # Get frame builtins
-        self.frame = _getframe(2)
+        self.frame = sandbox.frame
         self.builtins_dict = self.get_frame_builtins(self.frame)
 
         # Get module list

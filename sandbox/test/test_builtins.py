@@ -2,7 +2,7 @@ from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX, HAVE_PYPY
 from sandbox.test import SkipTest, createSandbox, createSandboxConfig
 from sys import version_info
 
-def test_exec_builtins():
+def test_call_exec_builtins():
     def check_builtins_type():
         result = []
         exec "result.append(type(__builtins__))" in {'result': result}
@@ -13,6 +13,12 @@ def test_exec_builtins():
         # FIXME: is it really needed?
         config._builtins_whitelist.add('compile')
     Sandbox(config).call(check_builtins_type)
+
+def test_exec_builtins():
+    config = createSandboxConfig()
+    Sandbox(config).execute("""
+assert type(__builtins__) != dict
+    """.strip())
 
 def test_builtins_setitem():
     def builtins_superglobal():

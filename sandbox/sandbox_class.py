@@ -1,6 +1,7 @@
 from __future__ import with_statement, absolute_import
 from .config import SandboxConfig
 from .proxy import proxy
+from sys import _getframe
 
 def keywordsProxy(keywords):
     # Dont proxy keys because function keywords must be strings
@@ -28,6 +29,8 @@ class Sandbox(object):
         self.protections = [protection() for protection in self.PROTECTIONS]
         self.execute_subprocess = None
         self.call_fork = None
+        # set during enable()
+        self.frame = None
 
     def _call(self, func, args, kw):
         """
@@ -35,8 +38,10 @@ class Sandbox(object):
         """
         args = proxy(args)
         kw = keywordsProxy(kw)
+        self.frame = _getframe()
         for protection in self.protections:
             protection.enable(self)
+        self.frame = None
         try:
             return func(*args, **kw)
         finally:
@@ -63,8 +68,10 @@ class Sandbox(object):
         """
         if globals is None:
             globals = {}
+        self.frame = _getframe()
         for protection in self.protections:
             protection.enable(self)
+        self.frame = None
         try:
             _call_exec(code, globals, locals)
         finally:
