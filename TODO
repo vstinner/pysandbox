@@ -1,16 +1,16 @@
 Major tasks
 -----------
 
+ * Remove sandbox.call(): os.fork() is not available on Windows
+ * Replace pickle with marshal?
  * Re-enable ClearImport() protection: break test_random test
  * Limit input/output size for call_fork()?
  * subprocess should use a pipe or socket instead of a named file. Reuse
    subprocess and multiprocessing?
- * Implement the timeout in the parent process
  * subprocess: disable site module (use -S)
  * Windows:
 
      * Test subprocess: no fork!
-     * Test timeout
      * Implement memory limit
 
  * Python3 support: fix proxy()

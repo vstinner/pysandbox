@@ -1,33 +1,64 @@
 from __future__ import with_statement, absolute_import
 from sandbox import SandboxError, Timeout
 from sandbox.subprocess_child import call_child
-from signal import SIGALRM
-import fcntl
 import os
 import pickle
 import subprocess
 import sys
 import tempfile
+import time
+try:
+    import fcntl
+except ImportError:
+    set_cloexec_flag = None
+else:
+    def set_cloexec_flag(fd):
+        try:
+            cloexec_flag = fcntl.FD_CLOEXEC
+        except AttributeError:
+            cloexec_flag = 1
+        flags = fcntl.fcntl(fd, fcntl.F_GETFD)
+        fcntl.fcntl(fd, fcntl.F_SETFD, flags | cloexec_flag)
+try:
+    from time import monotonic as monotonic_time
+except ImportError:
+    # Python < 3.3
+    from time import time as monotonic_time
 
-def set_cloexec_flag(fd):
-    try:
-        cloexec_flag = fcntl.FD_CLOEXEC
-    except AttributeError:
-        cloexec_flag = 1
-    flags = fcntl.fcntl(fd, fcntl.F_GETFD)
-    fcntl.fcntl(fd, fcntl.F_SETFD, flags | cloexec_flag)
+def wait_child(config, pid, sigkill):
+    if config.timeout:
+        timeout = monotonic_time() + config.timeout
+        kill = False
+        status = os.waitpid(pid, os.WNOHANG)[1]
+        while status == 0:
+            dt = timeout - monotonic_time()
+            if dt < 0:
+                os.kill(pid, sigkill)
+                status = os.waitpid(pid, 0)[1]
+                raise Timeout()
 
-def call_parent(pid, rpipe):
-    try:
+            if dt > 1.0:
+                pause = 0.5
+            else:
+                pause = 0.1
+            # TODO: handle SIGCHLD to avoid wasting time in polling
+            time.sleep(pause)
+            status = os.waitpid(pid, os.WNOHANG)[1]
+    else:
         status = os.waitpid(pid, 0)[1]
+    return status
+
+def call_parent(config, pid, rpipe):
+    import signal
+    sigkill = signal.SIGKILL
+    try:
+        status = wait_child(config, pid, sigkill)
     except:
         os.close(rpipe)
         raise
     if status != 0:
         if os.WIFSIGNALED(status):
             signum = os.WTERMSIG(status)
-            if signum == SIGALRM:
-                raise Timeout()
             text = "subprocess killed by signal %s" % signum
         elif os.WIFEXITED(status):
             exitcode = os.WEXITSTATUS(status)
@@ -46,7 +77,8 @@ def call_parent(pid, rpipe):
 
 def call_fork(sandbox, func, args, kw):
     rpipe, wpipe = os.pipe()
-    set_cloexec_flag(wpipe)
+    if set_cloexec_flag is not None:
+        set_cloexec_flag(wpipe)
     pid = os.fork()
     if pid == 0:
         os.close(rpipe)
@@ -57,63 +89,95 @@ def call_fork(sandbox, func, args, kw):
             os._exit(1)
     else:
         os.close(wpipe)
-        return call_parent(pid, rpipe)
+        return call_parent(sandbox.config, pid, rpipe)
 
 def execute_subprocess(sandbox, code, globals, locals):
-    old_umask = os.umask(0177)
-    try:
-        input_file = tempfile.NamedTemporaryFile()
-        output_file = tempfile.NamedTemporaryFile()
-    finally:
-        os.umask(old_umask)
+    config = sandbox.config
+    input_filename = tempfile.mktemp()
+    output_filename = tempfile.mktemp()
+    args = (
+        sys.executable,
+        # FIXME: use '-S'
+        '-E',
+        '-m', 'sandbox.subprocess_child',
+        input_filename, output_filename,
+    )
+
+    input_data = {
+        'code': code,
+        'config': config,
+        'locals': locals,
+        'globals': globals,
+    }
 
     try:
-        input_data = {
-            'code': code,
-            'config': sandbox.config,
-            'locals': locals,
-            'globals': globals,
-        }
-        args = (
-            sys.executable,
-            # FIXME: use '-S'
-            '-E',
-            '-m', 'sandbox.subprocess_child',
-            input_file.name, output_file.name)
-        pickle.dump(input_data, input_file)
-        input_file.flush()
-        if sandbox.config.max_input_size:
-            size = input_file.tell()
-            if size > sandbox.config.max_input_size:
-                raise SandboxError("Input data are too big: %s bytes (max=%s)"
-                                   % (size, sandbox.config.max_input_size))
+        # serialize input data
+        with open(input_filename, 'wb') as input_file:
+            pickle.dump(input_data, input_file)
+            if config.max_input_size:
+                size = input_file.tell()
+                if size > config.max_input_size:
+                    raise SandboxError("Input data are too big: %s bytes (max=%s)"
+                                       % (size, config.max_input_size))
 
         # create the subprocess
         process = subprocess.Popen(args, close_fds=True, shell=False)
 
-        # wait data
-        exitcode = process.wait()
+        # wait process exit
+        if config.timeout:
+            timeout = monotonic_time() + config.timeout
+            kill = False
+            exitcode = process.poll()
+            while exitcode is None:
+                dt = timeout - monotonic_time()
+                if dt < 0:
+                    process.terminate()
+                    exitcode = process.wait()
+                    raise Timeout()
+
+                if dt > 1.0:
+                    pause = 0.5
+                else:
+                    pause = 0.1
+                # TODO: handle SIGCHLD to avoid wasting time in polling
+                time.sleep(pause)
+                exitcode = process.poll()
+        else:
+            exitcode = process.wait()
+        os.unlink(input_filename)
+        input_filename = None
+
+        # handle child process error
         if exitcode:
             if os.name != "nt" and exitcode < 0:
                 signum = -exitcode
-                if signum == SIGALRM:
-                    raise Timeout()
                 text = "subprocess killed by signal %s" % signum
             else:
                 text = "subprocess failed with exit code %s" % exitcode
             raise SandboxError(text)
 
-        if sandbox.config.max_output_size:
-            output_file.seek(0, 2)
-            size = output_file.tell()
-            output_file.seek(0)
-            if size > sandbox.config.max_output_size:
-                raise SandboxError("Output data are too big: %s bytes (max=%s)"
-                                   % (size, sandbox.config.max_output_size))
-        output_data = pickle.load(output_file)
+        with open(output_filename, 'rb') as output_file:
+            if config.max_output_size:
+                output_file.seek(0, 2)
+                size = output_file.tell()
+                output_file.seek(0)
+                if size > config.max_output_size:
+                    raise SandboxError("Output data are too big: %s bytes (max=%s)"
+                                       % (size, config.max_output_size))
+            output_data = pickle.load(output_file)
+        os.unlink(output_filename)
+        output_filename = None
     finally:
-        input_file.close()
-        output_file.close()
+        temp_filenames = []
+        if input_filename is not None:
+            temp_filenames.append(input_filename)
+        if output_filename is not None:
+            temp_filenames.append(output_filename)
+        for filename in temp_filenames:
+            try:
+                os.unlink(filename)
+            except OSError:
+                pass
 
     if 'error' in output_data:
         raise output_data['error']

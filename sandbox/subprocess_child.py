@@ -36,12 +36,6 @@ def set_process_limits(config):
             raise NotImplementedError("SandboxConfig.max_memory is not implemented on your platform")
         resource.setrlimit(resource.RLIMIT_AS, (config.max_memory, -1))
 
-    if config.timeout:
-        import math, signal
-        seconds = int(math.ceil(config.timeout))
-        seconds = max(seconds, 1)
-        signal.alarm(seconds)
-
 def execute_child():
     input_filename = sys.argv[1]
     output_filename = sys.argv[2]
