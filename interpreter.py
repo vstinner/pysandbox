@@ -1,7 +1,10 @@
 from __future__ import with_statement
 from code import InteractiveConsole
 from sandbox import Sandbox, SandboxConfig, HAVE_PYPY
-import readline
+try:
+    import readline
+except ImportError:
+    pass
 from optparse import OptionParser
 from sandbox.version import VERSION
 import sys
