@@ -4,6 +4,7 @@ from sandbox.test import (createSandbox, createSandboxConfig,
     SkipTest, TestException, skipIf)
 from sandbox.test.tools import read_first_line, READ_FILENAME
 from sys import version_info
+import os
 
 def _get_file_type(obj):
     if version_info >= (3, 0):
@@ -43,25 +44,27 @@ def test_open_whitelist():
     Sandbox(config).call(read_first_line, open)
 
 def test_write_file():
+    from tempfile import mktemp
+
     def write_file(filename):
         with open(filename, "w") as fp:
             fp.write("test")
 
-    from tempfile import NamedTemporaryFile
-    with NamedTemporaryFile("wb") as tempfile:
-        def write_denied():
-            try:
-                write_file(tempfile.name)
-            except ValueError, err:
-                assert str(err) == "Only read modes are allowed."
-            except IOError, err:
-                assert str(err) == "file() constructor not accessible in restricted mode"
-            else:
-                assert False, "writing to a file is not blocked"
-        createSandbox().call(write_denied)
+    filename = mktemp()
+    def write_denied(filename):
+        try:
+            write_file(filename)
+        except ValueError, err:
+            assert str(err) == "Only read modes are allowed."
+        except IOError, err:
+            assert str(err) == "file() constructor not accessible in restricted mode"
+        else:
+            assert False, "writing to a file is not blocked"
+    createSandbox().call(write_denied, filename)
 
-    with NamedTemporaryFile("wb") as tempfile:
-        write_file(tempfile.name)
+    filename = mktemp()
+    write_file(filename)
+    os.unlink(filename)
 
 def test_filetype_from_sys_stdout():
     def get_file_type_from_stdout():

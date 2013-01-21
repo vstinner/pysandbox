@@ -64,8 +64,10 @@ def test_sytem_exit():
         assert False
 
 def test_stdout():
+    import sys
+
+    config = createSandboxConfig(disable_debug=True)
     with capture_stdout() as stdout:
-        config = SandboxConfig()
         def print_denied():
             print "Hello Sandbox 1"
         try:
@@ -77,10 +79,12 @@ def test_stdout():
 
         def print_allowed():
             print "Hello Sandbox 2"
-        Sandbox(createSandboxConfig('stdout')).call(print_allowed)
+        config2 = createSandboxConfig('stdout')
+        Sandbox(config2).call(print_allowed)
 
         print "Hello Sandbox 3"
 
+        sys.stdout.flush()
         stdout.seek(0)
         output = stdout.read()
 

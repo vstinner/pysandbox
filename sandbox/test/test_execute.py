@@ -3,6 +3,7 @@ from sys import version_info
 from sandbox import Sandbox, HAVE_PYPY
 from sandbox.test import createSandbox, createSandboxConfig, SkipTest
 from sandbox.test.tools import capture_stdout
+import os
 
 def test_execute():
     config = createSandboxConfig()
@@ -64,20 +65,22 @@ def test_execute():
     assert namespace == {'a': 1}, namespace
 
 def test_execfile():
+    import sys
+
     if version_info >= (3, 0):
         raise SkipTest("execfile() only exists in Python 2.x")
 
     def execfile_test(filename):
         execfile(filename)
 
-    from tempfile import NamedTemporaryFile
+    from tempfile import mktemp
 
-    with NamedTemporaryFile() as script:
+    filename = mktemp()
+    with open(filename, "w") as script:
         print >>script, "print('Hello World!')"
         script.flush()
 
-        filename = script.name
-
+    try:
         config = createSandboxConfig('stdout')
         try:
             Sandbox(config).call(execfile_test, filename)
@@ -88,10 +91,12 @@ def test_execfile():
 
         with capture_stdout() as stdout:
             execfile_test(filename)
+            sys.stdout.flush()
             stdout.seek(0)
             output = stdout.read()
-            print(repr(output))
             assert output.startswith('Hello World')
+    finally:
+        os.unlink(filename)
 
 def test_compile():
     import sys

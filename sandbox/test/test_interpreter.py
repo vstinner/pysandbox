@@ -30,9 +30,10 @@ def check_interpreter_stdout(code, expected, **kw):
             % (process.returncode, stdout))
     assert process.returncode == 0
     stdout = stdout.splitlines()
-    assert stdout[0] == bytes_literal(''), stdout[0]
-    assert stdout[1] == bytes_literal(''), stdout[1]
-    stdout = stdout[2:]
+    start = 0
+    while not stdout[start]:
+        start += 1
+    stdout = stdout[start:]
     assert stdout == expected, "%s != %s" % (stdout, expected)
 
 def test_interpreter():

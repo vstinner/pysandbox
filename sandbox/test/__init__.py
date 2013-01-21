@@ -8,7 +8,8 @@ class SkipTest(Exception):
     pass
 
 def createSandboxConfig(*features, **kw):
-    if createSandboxConfig.debug:
+    disable_debug = kw.pop('disable_debug', False)
+    if createSandboxConfig.debug and not disable_debug:
         features += ("stdout", "stderr")
     if (createSandboxConfig.cpython_restricted is not None) \
     and ('cpython_restricted' not in kw):
