@@ -5,6 +5,11 @@ from sys import version_info
 import sys
 from sandbox import (DEFAULT_TIMEOUT,
     HAVE_CSANDBOX, HAVE_CPYTHON_RESTRICTED, HAVE_PYPY)
+try:
+    # check if memory limit is supported
+    import resource
+except ImportError:
+    resource = None
 
 _UNSET = object()
 
@@ -81,7 +86,10 @@ class SandboxConfig(object):
         self._use_subprocess = kw.get('use_subprocess', True)
         if self._use_subprocess:
             self._timeout = DEFAULT_TIMEOUT
-            self._max_memory = 250 * 1024 * 1024
+            if resource is not None:
+                self._max_memory = 250 * 1024 * 1024
+            else:
+                self._max_memory = None
             # size in bytes of all input objects serialized by pickle
             self._max_input_size = 64 * 1024
             # size in bytes of the result serialized by pickle
