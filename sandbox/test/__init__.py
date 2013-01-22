@@ -50,3 +50,6 @@ def execute_code(code):
     namespace = {}
     exec code_obj in namespace, namespace
 
+def unindent(code):
+    return 'if 1:\n' + code + '\n'
+
