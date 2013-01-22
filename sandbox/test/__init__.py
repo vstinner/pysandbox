@@ -45,3 +45,8 @@ def skipIf(test, reason):
         return wrapper
     return decorator
 
+def execute_code(code):
+    code_obj = compile(code, "<test>", "exec")
+    namespace = {}
+    exec code_obj in namespace, namespace
+

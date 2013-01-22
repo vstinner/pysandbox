@@ -1,5 +1,5 @@
 from sandbox import HAVE_PYPY, SandboxError
-from sandbox.test import createSandbox, SkipTest
+from sandbox.test import createSandbox, SkipTest, execute_code
 
 # FIXME: reenable these tests
 if HAVE_PYPY:
@@ -18,38 +18,39 @@ def get_secret_from_func_globals():
     return func_globals['SECRET']
 
 def test_closure():
-    def read_closure_secret():
-        def createClosure(secret):
-            def closure():
-                return secret
-            return closure
-        func = createClosure(42)
-        try:
-            cell = func.func_closure[0]
-        except AttributeError:
-            # Python 2.6+
-            cell = func.__closure__[0]
-        # Does Python < 2.5 have the cell_contents attribute?  See this recipe,
-        # get_cell_value(), for version without the attribute:
-        # http://code.activestate.com/recipes/439096/
-        secret = cell.cell_contents
-        assert secret == 42
+    code = '''
+def read_closure_secret():
+    def createClosure(secret):
+        def closure():
+            return secret
+        return closure
+    func = createClosure(42)
+    try:
+        cell = func.func_closure[0]
+    except AttributeError:
+        # Python 2.6+
+        cell = func.__closure__[0]
+    # Does Python < 2.5 have the cell_contents attribute?  See this recipe,
+    # get_cell_value(), for version without the attribute:
+    # http://code.activestate.com/recipes/439096/
+    secret = cell.cell_contents
+    assert secret == 42
+    '''
 
-    def check_closure():
-        try:
-            read_closure_secret()
-        except AttributeError, err:
-            assert str(err) == "'function' object has no attribute '__closure__'"
-        else:
-            assert False, "func_closure is present"
+    sandbox_code = code + '''
+try:
+    read_closure_secret()
+except AttributeError, err:
+    assert str(err) == "'function' object has no attribute '__closure__'"
+else:
+    assert False, "func_closure is present"
+    '''
 
     # Begin by a test outside the sandbox to fill the type cache
-    read_closure_secret()
-    createSandbox().call(check_closure)
+    createSandbox().execute(sandbox_code)
 
     # Repeat the test to ensure that the attribute cache is cleared correctly
-    read_closure_secret()
-    createSandbox().call(check_closure)
+    execute_code(code)
 
 def test_func_globals():
     def func_globals_denied():
