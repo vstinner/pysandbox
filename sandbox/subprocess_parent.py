@@ -29,24 +29,27 @@ def wait_child(config, pid, sigkill):
     if config.timeout:
         timeout = monotonic_time() + config.timeout
         kill = False
-        status = os.waitpid(pid, os.WNOHANG)[1]
-        while status == 0:
+        status = os.waitpid(pid, os.WNOHANG)
+        while status[0] == 0:
             dt = timeout - monotonic_time()
             if dt < 0:
+                print("kill!")
                 os.kill(pid, sigkill)
-                status = os.waitpid(pid, 0)[1]
+                status = os.waitpid(pid, 0)
                 raise Timeout()
 
             if dt > 1.0:
-                pause = 0.5
+                pause = 0.100
             else:
-                pause = 0.1
+                pause = 0.010
             # TODO: handle SIGCHLD to avoid wasting time in polling
             time.sleep(pause)
-            status = os.waitpid(pid, os.WNOHANG)[1]
+            status = os.waitpid(pid, os.WNOHANG)
     else:
-        status = os.waitpid(pid, 0)[1]
-    return status
+        status = os.waitpid(pid, 0)
+    if status[0] != pid:
+        raise Exception("got the status of the wrong process!")
+    return status[1]
 
 def call_parent(config, pid, rpipe):
     import signal
