@@ -33,7 +33,6 @@ def wait_child(config, pid, sigkill):
         while status[0] == 0:
             dt = timeout - monotonic_time()
             if dt < 0:
-                print("kill!")
                 os.kill(pid, sigkill)
                 status = os.waitpid(pid, 0)
                 raise Timeout()
