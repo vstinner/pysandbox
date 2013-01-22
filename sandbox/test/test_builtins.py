@@ -1,18 +1,19 @@
 from sandbox import Sandbox, SandboxError, HAVE_CSANDBOX, HAVE_PYPY
-from sandbox.test import SkipTest, createSandbox, createSandboxConfig
+from sandbox.test import SkipTest, createSandbox, createSandboxConfig, unindent
 from sys import version_info
 
 def test_call_exec_builtins():
-    def check_builtins_type():
+    code = unindent('''
         result = []
         exec "result.append(type(__builtins__))" in {'result': result}
         builtin_type = result[0]
         assert builtin_type != dict
+    ''')
     config = createSandboxConfig()
     if HAVE_PYPY:
         # FIXME: is it really needed?
         config._builtins_whitelist.add('compile')
-    Sandbox(config).call(check_builtins_type)
+    Sandbox(config).execute(code)
 
 def test_exec_builtins():
     config = createSandboxConfig()
@@ -21,91 +22,110 @@ assert type(__builtins__) != dict
     """.strip())
 
 def test_builtins_setitem():
-    def builtins_superglobal():
-        if isinstance(__builtins__, dict):
-            __builtins__['SUPERGLOBAL'] = 42
-            assert SUPERGLOBAL == 42
-            del __builtins__['SUPERGLOBAL']
-        else:
-            __builtins__.SUPERGLOBAL = 42
-            assert SUPERGLOBAL == 42
-            del __builtins__.SUPERGLOBAL
+    code = unindent('''
+        def builtins_superglobal():
+            if isinstance(__builtins__, dict):
+                __builtins__['SUPERGLOBAL'] = 42
+                assert SUPERGLOBAL == 42
+                del __builtins__['SUPERGLOBAL']
+            else:
+                __builtins__.SUPERGLOBAL = 42
+                assert SUPERGLOBAL == 42
+                del __builtins__.SUPERGLOBAL
+    ''')
 
-    def readonly_builtins():
+    unsafe_code = code + unindent('''
         try:
             builtins_superglobal()
         except SandboxError, err:
             assert str(err) == "Read only object"
         else:
             assert False
-    createSandbox().call(readonly_builtins)
+    ''')
+    createSandbox().execute(unsafe_code)
 
-    builtins_superglobal()
+    safe_code = code + unindent('''
+        builtins_superglobal()
+    ''')
+    execute_code(safe_code)
 
 def test_builtins_init():
     import warnings
 
-    def check_init():
-        __builtins__.__init__({})
+    code = unindent('''
+        def check_init():
+            __builtins__.__init__({})
 
-    def check_dict_init():
-        try:
-            dict.__init__(__builtins__, {})
-        except ImportError, err:
-            assert str(err) == 'Import "_warnings" blocked by the sandbox'
-        except DeprecationWarning, err:
-            assert str(err) == 'object.__init__() takes no parameters'
-        else:
-            assert False
+        def check_dict_init():
+            try:
+                dict.__init__(__builtins__, {})
+            except ImportError, err:
+                assert str(err) == 'Import "_warnings" blocked by the sandbox'
+            except DeprecationWarning, err:
+                assert str(err) == 'object.__init__() takes no parameters'
+            else:
+                assert False
+    ''')
+
+    unsafe_code = code + unindent('''
+        check_init()
+    ''')
 
     try:
-        createSandbox().call(check_init)
+        createSandbox().execute(unsafe_code)
     except SandboxError, err:
         assert str(err) == "Read only object", str(err)
     else:
         assert False
 
-    if version_info >= (2, 6):
-        original_filters = warnings.filters[:]
-        try:
-            warnings.filterwarnings('error', '', DeprecationWarning)
+    # FIXME: is this test still needed?
+    # if version_info >= (2, 6):
+    #     original_filters = warnings.filters[:]
+    #     try:
+    #         warnings.filterwarnings('error', '', DeprecationWarning)
 
-            config = createSandboxConfig()
-            Sandbox(config).call(check_dict_init)
-        finally:
-            del warnings.filters[:]
-            warnings.filters.extend(original_filters)
+    #         config = createSandboxConfig()
+    #         Sandbox(config).call(check_dict_init)
+    #     finally:
+    #         del warnings.filters[:]
+    #         warnings.filters.extend(original_filters)
 
 def test_modify_builtins_dict():
-    def builtins_dict_superglobal():
-        __builtins__['SUPERGLOBAL'] = 42
-        assert SUPERGLOBAL == 42
-        del __builtins__['SUPERGLOBAL']
+    code = unindent('''
+        def builtins_dict_superglobal():
+            __builtins__['SUPERGLOBAL'] = 42
+            assert SUPERGLOBAL == 42
+            del __builtins__['SUPERGLOBAL']
+    ''')
 
-    def readonly_builtins_dict():
+    unsafe_code = code + unindent('''
         try:
             builtins_dict_superglobal()
         except AttributeError, err:
             assert str(err) == "type object 'dict' has no attribute '__setitem__'"
-        except SandboxError, err:
-            assert str(err) == "Read only object"
         else:
             assert False
-    createSandbox().call(readonly_builtins_dict)
+    ''')
+    try:
+        createSandbox().execute(unsafe_code)
+    except SandboxError, err:
+        assert str(err) == "Read only object"
 
 def test_del_builtin():
-    def del_builtin_import():
-        import_func = __builtins__['__import__']
-        dict.__delitem__(__builtins__, '__import__')
-        try:
+    code = unindent('''
+        def del_builtin_import():
+            import_func = __builtins__['__import__']
+            dict.__delitem__(__builtins__, '__import__')
             try:
-                import sys
-            except NameError, err:
-                assert str(err) == "type object 'dict' has no attribute '__setitem__'"
-        finally:
-            __builtins__['__import__'] = import_func
+                try:
+                    import sys
+                except NameError, err:
+                    assert str(err) == "type object 'dict' has no attribute '__setitem__'"
+            finally:
+                __builtins__['__import__'] = import_func
+    ''')
 
-    def del_builtin_denied():
+    unsafe_code = code + unindent('''
         try:
             del_builtin_import()
         except AttributeError, err:
@@ -114,8 +134,9 @@ def test_del_builtin():
             assert str(err) == "Read only object"
         else:
             assert False
+    ''')
 
     config = createSandboxConfig()
     config.allowModule('sys')
-    Sandbox(config).call(del_builtin_denied)
+    Sandbox(config).execute(unsafe_code)
 
