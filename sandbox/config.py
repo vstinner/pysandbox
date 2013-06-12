@@ -83,7 +83,7 @@ class SandboxConfig(object):
            mode instead of the _sandbox module
         """
         self.recusion_limit = 50
-        self._use_subprocess = kw.get('use_subprocess', True)
+        self._use_subprocess = kw.pop('use_subprocess', True)
         if self._use_subprocess:
             self._timeout = DEFAULT_TIMEOUT
             if resource is not None:
@@ -111,7 +111,7 @@ class SandboxConfig(object):
         self._features = set()
 
         try:
-            self._cpython_restricted = kw['cpython_restricted']
+            self._cpython_restricted = kw.pop('cpython_restricted')
         except KeyError:
             if HAVE_CSANDBOX:
                 # use _sandbox
@@ -195,6 +195,9 @@ class SandboxConfig(object):
 
         for feature in features:
             self.enable(feature)
+
+        if kw:
+            raise TypeError("unexpected keywords: %s" % ', '.join(kw.keys()))
 
     def has_feature(self, feature):
         return (feature in self._features)
