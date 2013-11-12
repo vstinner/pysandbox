@@ -87,26 +87,3 @@ def test_execfile():
             print(repr(output))
             assert output.startswith('Hello World')
 
-def test_compile():
-    import sys
-
-    orig_displayhook = sys.displayhook
-    try:
-        results = []
-        def displayhook(value):
-            results.append(value)
-
-        sys.displayhook = displayhook
-
-        def _test_compile():
-            exec compile("1+1", "<string>", "single") in {}
-            assert results == [2]
-        config = createSandboxConfig('compile')
-        Sandbox(config).call(_test_compile)
-
-        del results[:]
-        _test_compile()
-    finally:
-        sys.displayhook = orig_displayhook
-
-

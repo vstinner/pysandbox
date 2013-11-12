@@ -86,17 +86,14 @@ config.enable('feature'). Available features:
 
 
 The following features are unsafe: only use them if you really understand their
-impact in term of security. traceback.tb_frame attribute and compile() builtin
-function may be used to escape from the sandbox. Available unsafe features:
+impact in term of security. Available unsafe features:
 
- - "compile": allow builtin functions compile() and eval()
  - "debug_sandbox": allow to display a traceback of the sandbox. Enable
    traceback feature.
- - "frame": allow access to traceback.tb_frame and frame.f_back attributes.
- - "traceback": enable "compile" feature and allow access to the frame.f_code
-   attribute. Next calls to allowModule() will add the module filename to the
-   open() whitelist, so Python can display a traceback with the source code.
-   This feature have to be enabled before all other features.
+ - "traceback": allow access to the frame.f_code attribute. Next calls to
+   allowModule() will add the module filename to the open() whitelist, so
+   Python can display a traceback with the source code.  This feature have to
+   be enabled before all other features.
 
 CPython restricted mode
 -----------------------

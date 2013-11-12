@@ -6,13 +6,18 @@ Version 1.5.1
   Vulnerability found by 雪狼 <kurskk141 AT gmail.com>.
 * SECURITY FIX: block access to frame.f_globals.
   Vulnerability found by Dan Sigalov <dansmbox AT gmail.com>.
-* compile() and eval() builtin functions are now blocked by default: enable
-  the new "compile" configuration feature to get them
+* compile() and eval() builtin functions are now blocked by default.
+  The builtin compile() function is unsafe: it allows to read arbitrary file
+  on disk line by line using syntax error.
+  Example:compile("1=2", "/etc/passwd", "exec"). Use exec statement and
+  Sandbox.execute() instead of compile() function.
 * traceback.tb_frame and frame.f_back attributes are now blocked by default:
-   enable the new *unsafe* "frame" configuration feature to get them
-* REGRESSION: exceptions in interpreter.py now exit instead of displaying
-  the traceback. Formatting a traceback fails because the traceback module
-  reads the frame.f_globals attribute which is now blocked.
+  they are used in pysandbox exploits to reach the trusted namespace from
+  the untrusted namespace.
+* REGRESSIONS: interpreter.py does not work anymore because it requires
+  compile() which now blocked. Formatting a traceback is also broken because
+  the traceback module reads the frame.f_globals attribute which is now
+  blocked.
 
 
 Version 1.5 (2012-03-20)

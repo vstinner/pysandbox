@@ -205,8 +205,7 @@ class SandboxConfig:
                 'quit'))
         elif feature == 'traceback':
             # change allowModule() behaviour
-            # give access to traceback.tb_frame and frame.f_back attributes
-            self.enable("frame")
+            pass
         elif feature in ('stdout', 'stderr'):
             self.allowModule('sys', feature)
             # ProtectStdio.enable() use also these features
@@ -225,9 +224,6 @@ class SandboxConfig:
             self.enable('regex')
             self.allowModule('pydoc', 'help')
             self._builtins_whitelist.add('help')
-        elif feature == 'compile':
-            self._builtins_whitelist.add('compile')
-            self._builtins_whitelist.add('eval')
         elif feature == 'interpreter':
             self.enable('traceback')
             self.enable('stdin')
@@ -236,7 +232,10 @@ class SandboxConfig:
             self.enable('exit')
             self.enable('site')
             self.enable('encodings')
-            self.enable('compile')
+            # FIXME: the builtin compile() function is unsafe: it allows to
+            # read arbitrary file on disk line by line using syntax error.
+            # Example: compile("1=2", "/etc/passwd", "exec")
+            #self._builtins_whitelist.add('compile')
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')
@@ -246,9 +245,6 @@ class SandboxConfig:
                 self.allowModule('os', 'write', 'waitpid')
                 self.allowSafeModule('pyrepl', 'input')
                 self.allowModule('pyrepl.keymap', 'compile_keymap', 'parse_keys')
-        elif feature == 'frame':
-            # allow access to traceback.tb_frame and frame.f_back attributes
-            pass
         elif feature == 'debug_sandbox':
             self.enable('traceback')
             self.allowModule('sys', '_getframe')

@@ -16,4 +16,4 @@ for PYVER in 2.5 2.6 2.7; do
     fi
 done
 
-echo "pysandbox tesed on Python $TESTED"
+echo "pysandbox tested on Python $TESTED"

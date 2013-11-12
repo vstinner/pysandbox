@@ -55,9 +55,8 @@ class HideAttributes:
             if hide_func_code:
                 del self.function_dict['__code__']
             del self.function_dict['__defaults__']
-        if 'frame' not in sandbox.config.features:
-            del self.traceback_dict['tb_frame']
-            del self.frame_dict['f_back']
+        del self.traceback_dict['tb_frame']
+        del self.frame_dict['f_back']
         del self.frame_dict['f_locals']
         del self.frame_dict['f_globals']
 

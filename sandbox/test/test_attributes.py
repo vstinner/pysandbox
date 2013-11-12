@@ -96,12 +96,7 @@ def test_frame_globals():
     def get_secret():
         import sys
         frame = sys._getframe()
-        while frame.f_back is not None:
-            value = frame.f_globals.get('TEST_FRAME_GLOBALS_SECRET')
-            if value is not None:
-                return value
-            frame = frame.f_back
-        return None
+        return frame.f_globals.get('TEST_FRAME_GLOBALS_SECRET')
 
     def test_get_secret():
         try:
@@ -112,7 +107,7 @@ def test_frame_globals():
             assert False
 
     # traceback: want frame.f_back
-    config = createSandboxConfig('traceback')
+    config = createSandboxConfig()
     config.allowModule('sys', '_getframe')
     Sandbox(config).call(test_get_secret)
 
