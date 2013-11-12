@@ -1,5 +1,5 @@
-Version 1.5.1
--------------
+Version 1.5.1 (2013-11-12)
+--------------------------
 
 * SECURITY FIX: __builtins__ is now readonly when execute() is used.
   It was only readonly when call() was used.
@@ -9,15 +9,16 @@ Version 1.5.1
 * compile() and eval() builtin functions are now blocked by default.
   The builtin compile() function is unsafe: it allows to read arbitrary file
   on disk line by line using syntax error.
-  Example:compile("1=2", "/etc/passwd", "exec"). Use exec statement and
-  Sandbox.execute() instead of compile() function.
+  Example: compile("1=2", "/etc/passwd", "exec") displays the first line of
+  the /etc/passwd file in the traceback. The exec statement and
+  Sandbox.execute() must be used instead of the compile() function.
 * traceback.tb_frame and frame.f_back attributes are now blocked by default:
-  they are used in pysandbox exploits to reach the trusted namespace from
-  the untrusted namespace.
+  they are used in exploits to reach the trusted namespace from the untrusted
+  namespace.
 * REGRESSIONS: interpreter.py does not work anymore because it requires
-  compile() which now blocked. Formatting a traceback is also broken because
-  the traceback module reads the frame.f_globals attribute which is now
-  blocked.
+  compile() which is now blocked. Formatting a traceback is also broken
+  because the traceback module reads the frame.f_globals attribute which is
+  now blocked.
 
 
 Version 1.5 (2012-03-20)
