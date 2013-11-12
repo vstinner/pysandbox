@@ -46,7 +46,7 @@ options = {
     'long_description': long_description,
     'url': version.URL,
     'author': 'Victor Stinner',
-    'author_email': 'victor.stinner@haypocalc.com',
+    'author_email': 'victor.stinner@gmail.com',
     'ext_modules': [Extension('_sandbox', ['_sandbox/module.c'])],
     'classifiers': CLASSIFIERS,
     'packages': ('sandbox',),
