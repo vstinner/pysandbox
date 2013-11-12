@@ -1,5 +1,5 @@
-from sandbox import HAVE_PYPY, SandboxError
-from sandbox.test import createSandbox, SkipTest
+from sandbox import HAVE_PYPY, SandboxError, Sandbox
+from sandbox.test import createSandbox, createSandboxConfig, SkipTest
 
 # FIXME: reenable these tests
 if HAVE_PYPY:
@@ -63,33 +63,101 @@ def test_func_globals():
 
     assert get_secret_from_func_globals() == 42
 
-def test_func_locals():
-    def get_import_from_func_locals(safe_import, exc_info):
-        try:
-            safe_import("os")
-        except ImportError:
-            # import os always raise an error
-            err_value, err_type, try_traceback = exc_info()
-            safe_import_traceback = try_traceback.tb_next
-            safe_import_frame = safe_import_traceback.tb_frame
-            return safe_import_frame.f_locals['__import__']
+def test_frame_locals():
+    def func_secret_local(callback):
+        secret = 9
+        return callback()
+
+    def get_func_locals():
+        import sys
+        frame = sys._getframe(1)
+        return frame.f_locals['secret']
+
+    def get_secret():
+        return func_secret_local(get_func_locals)
 
     import sys
 
-    def frame_locals_denied():
+    def test_get_secret():
         try:
-            get_import_from_func_locals(__import__, sys.exc_info)
+            get_secret()
         except AttributeError, err:
             assert str(err) == "'frame' object has no attribute 'f_locals'"
         else:
             assert False
-    createSandbox().call(frame_locals_denied)
+    createSandbox('debug_sandbox').call(test_get_secret)
 
-    builtin_import = __import__
-    from sandbox.safe_import import _safe_import
-    safe_import = _safe_import(builtin_import, {})
-    myimport = get_import_from_func_locals(safe_import, sys.exc_info)
-    assert myimport is builtin_import
+    assert get_secret() == 9
+
+def test_frame_globals():
+    global TEST_FRAME_GLOBALS_SECRET
+    TEST_FRAME_GLOBALS_SECRET = 44
+
+    def get_secret():
+        import sys
+        frame = sys._getframe()
+        while frame.f_back is not None:
+            value = frame.f_globals.get('TEST_FRAME_GLOBALS_SECRET')
+            if value is not None:
+                return value
+            frame = frame.f_back
+        return None
+
+    def test_get_secret():
+        try:
+            get_secret()
+        except AttributeError, err:
+            assert str(err) == "'frame' object has no attribute 'f_globals'"
+        else:
+            assert False
+
+    # traceback: want frame.f_back
+    config = createSandboxConfig('traceback')
+    config.allowModule('sys', '_getframe')
+    Sandbox(config).call(test_get_secret)
+
+    assert get_secret() == 44
+
+def test_traceback_frame():
+    global TEST_TRACEBACK_FRAME_SECRET
+    TEST_TRACEBACK_FRAME_SECRET = 8
+
+    def get_secret():
+        def get_frame_secret(frame):
+            while frame.f_back is not None:
+                value = frame.f_globals.get('TEST_TRACEBACK_FRAME_SECRET')
+                if value is not None:
+                    return value
+                frame = frame.f_back
+
+        class CM:
+            def __init__(self):
+                self.secret = None
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_value, exc_type, traceback):
+                self.secret = get_frame_secret(traceback.tb_frame)
+                return True
+
+        cm = CM()
+        with cm:
+            raise ValueError()
+        return cm.secret
+
+    def test_get_secret():
+        try:
+            get_secret()
+        except AttributeError, err:
+            assert str(err) == "'traceback' object has no attribute 'tb_frame'"
+        else:
+            assert False
+    config = createSandboxConfig()
+    config.allowModule('sys', '_getframe')
+    Sandbox(config).call(test_get_secret)
+
+    assert get_secret() == 8
 
 def test_func_defaults():
     from sys import version_info

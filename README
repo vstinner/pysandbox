@@ -25,7 +25,8 @@ The default recursion limit is 50 frames.
 Protection of the namespace:
 
  * Deny access to function closure, globals, defaults and code
- * Deny access to frame locals
+ * Deny access to frame locals, globals and previous frame
+ * Deny access to traceback frame
  * Deny access to types subclasses
  * __builtins__ is read only
  * Deny access to dict methods able to modify a dict, eg. dict.__setitem__.
@@ -64,8 +65,6 @@ To enable a feature, use SandboxConfig('feature1', 'feature2', ...) or
 config.enable('feature'). Available features:
 
  - "codecs": codecs module
- - "debug_sandbox": allow to display a traceback of the sandbox. Enable
-   traceback feature.
  - "datetime": datetime module
  - "encodings": encodings module with ascii, latin_1, utf_8, utf_16_be,
    utf_32_be and rot_13 codecs (submodules). Enable codecs feature.
@@ -83,11 +82,21 @@ config.enable('feature'). Available features:
  - "stdin": sys.stdin, input() and raw_input()
  - "stdout", "stderr": sys.stdout and sys.stderr
  - "time": time module (except sleep, strptime and tzset functions)
- - "traceback": compile() builtin, frame.f_code. Next calls to allowModule()
-   will add the module filename to the open() whitelist, so Python can display
-   a traceback with the source code. This feature have to be enabled before all
-   other features.
  - "unicodedata": unicodedata module, required for u'\N{ATOM SYMBOL}' syntax
+
+
+The following features are unsafe: only use them if you really understand their
+impact in term of security. traceback.tb_frame attribute and compile() builtin
+function may be used to escape from the sandbox. Available unsafe features:
+
+ - "compile": allow builtin functions compile() and eval()
+ - "debug_sandbox": allow to display a traceback of the sandbox. Enable
+   traceback feature.
+ - "frame": allow access to traceback.tb_frame and frame.f_back attributes.
+ - "traceback": enable "compile" feature and allow access to the frame.f_code
+   attribute. Next calls to allowModule() will add the module filename to the
+   open() whitelist, so Python can display a traceback with the source code.
+   This feature have to be enabled before all other features.
 
 CPython restricted mode
 -----------------------

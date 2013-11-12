@@ -126,14 +126,14 @@ class SandboxConfig:
             # functions
             '__import__', 'abs', 'all', 'any', 'apply', 'bin', 'bool',
             'buffer', 'callable', 'chr', 'classmethod', 'cmp',
-            'coerce', 'compile', 'delattr', 'dir', 'divmod', 'enumerate', 'eval', 'exit',
+            'coerce', 'delattr', 'dir', 'divmod', 'enumerate', 'exit',
             'filter', 'format', 'getattr', 'globals', 'hasattr', 'hash', 'hex',
             'id', 'isinstance', 'issubclass', 'iter', 'len', 'locals',
             'map', 'max', 'min', 'next', 'oct', 'open', 'ord', 'pow', 'print',
             'property', 'range', 'reduce', 'repr',
             'reversed', 'round', 'setattr', 'slice', 'sorted', 'staticmethod',
             'sum', 'super', 'type', 'unichr', 'vars', 'xrange', 'zip',
-            # blocked: execfile, input
+            # blocked: compile, eval, execfile, input
             #          and raw_input (enabled by stdin feature), intern,
             #          help (from site module, enabled by help feature), quit
             #          (enabled by exit feature), reload
@@ -205,7 +205,8 @@ class SandboxConfig:
                 'quit'))
         elif feature == 'traceback':
             # change allowModule() behaviour
-            pass
+            # give access to traceback.tb_frame and frame.f_back attributes
+            self.enable("frame")
         elif feature in ('stdout', 'stderr'):
             self.allowModule('sys', feature)
             # ProtectStdio.enable() use also these features
@@ -224,6 +225,9 @@ class SandboxConfig:
             self.enable('regex')
             self.allowModule('pydoc', 'help')
             self._builtins_whitelist.add('help')
+        elif feature == 'compile':
+            self._builtins_whitelist.add('compile')
+            self._builtins_whitelist.add('eval')
         elif feature == 'interpreter':
             self.enable('traceback')
             self.enable('stdin')
@@ -232,7 +236,7 @@ class SandboxConfig:
             self.enable('exit')
             self.enable('site')
             self.enable('encodings')
-            self._builtins_whitelist.add('compile')
+            self.enable('compile')
             self.allowModuleSourceCode('code')
             self.allowModule('sys',
                 'api_version', 'version', 'hexversion')
@@ -242,6 +246,9 @@ class SandboxConfig:
                 self.allowModule('os', 'write', 'waitpid')
                 self.allowSafeModule('pyrepl', 'input')
                 self.allowModule('pyrepl.keymap', 'compile_keymap', 'parse_keys')
+        elif feature == 'frame':
+            # allow access to traceback.tb_frame and frame.f_back attributes
+            pass
         elif feature == 'debug_sandbox':
             self.enable('traceback')
             self.allowModule('sys', '_getframe')

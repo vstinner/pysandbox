@@ -1,4 +1,4 @@
-from types import FunctionType, FrameType, GeneratorType
+from types import FunctionType, FrameType, GeneratorType, TracebackType
 from sys import version_info
 try:
     from sys import _clear_type_cache
@@ -20,6 +20,7 @@ class HideAttributes:
         self.dict_dict = RestorableDict(dictionary_of(dict))
         self.function_dict = RestorableDict(dictionary_of(FunctionType))
         self.frame_dict = RestorableDict(dictionary_of(FrameType))
+        self.traceback_dict = RestorableDict(dictionary_of(TracebackType))
         self.type_dict = RestorableDict(dictionary_of(type))
         self.builtin_func_dict = RestorableDict(dictionary_of(builtin_function))
         self.generator_dict = RestorableDict(dictionary_of(GeneratorType))
@@ -54,7 +55,11 @@ class HideAttributes:
             if hide_func_code:
                 del self.function_dict['__code__']
             del self.function_dict['__defaults__']
+        if 'frame' not in sandbox.config.features:
+            del self.traceback_dict['tb_frame']
+            del self.frame_dict['f_back']
         del self.frame_dict['f_locals']
+        del self.frame_dict['f_globals']
 
         # Hiding type.__bases__ crashs CPython 2.5 because of a infinite loop
         # in PyErr_ExceptionMatches(): it calls abstract_get_bases() but
@@ -73,6 +78,7 @@ class HideAttributes:
     def disable(self, sandbox):
         self.dict_dict.restore()
         self.function_dict.restore()
+        self.traceback_dict.restore()
         self.frame_dict.restore()
         self.type_dict.restore()
         self.builtin_func_dict.restore()

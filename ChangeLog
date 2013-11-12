@@ -1,9 +1,18 @@
-Version 1.5.1 (2013-11-12)
---------------------------
+Version 1.5.1
+-------------
 
 * SECURITY FIX: __builtins__ is now readonly when execute() is used.
   It was only readonly when call() was used.
   Vulnerability found by 雪狼 <kurskk141 AT gmail.com>.
+* SECURITY FIX: block access to frame.f_globals.
+  Vulnerability found by Dan Sigalov <dansmbox AT gmail.com>.
+* compile() and eval() builtin functions are now blocked by default: enable
+  the new "compile" configuration feature to get them
+* traceback.tb_frame and frame.f_back attributes are now blocked by default:
+   enable the new *unsafe* "frame" configuration feature to get them
+* REGRESSION: exceptions in interpreter.py now exit instead of displaying
+  the traceback. Formatting a traceback fails because the traceback module
+  reads the frame.f_globals attribute which is now blocked.
 
 
 Version 1.5 (2012-03-20)
