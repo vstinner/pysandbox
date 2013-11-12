@@ -8,4 +8,6 @@ Contributors
 ============
 
 masklinn <github.com AT masklinn.net> - fix reST documentation syntax
+雪狼 <kurskk141 AT gmail.com> - found a vulnerability on __builtins__ in
+                                pysandbox 1.5 when Sandbox.execute() was used
 

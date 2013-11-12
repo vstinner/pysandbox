@@ -1,6 +1,7 @@
 from __future__ import with_statement
 from .config import SandboxConfig
 from .proxy import proxy
+from sys import _getframe
 
 def keywordsProxy(keywords):
     # Dont proxy keys because function keywords must be strings
@@ -20,10 +21,14 @@ class Sandbox:
         else:
             self.config = SandboxConfig()
         self.protections = [protection() for protection in self.PROTECTIONS]
+        # set during enable()
+        self.frame = None
 
     def _call(self, func, args, kw):
+        self.frame = _getframe()
         for protection in self.protections:
             protection.enable(self)
+        self.frame = None
         try:
             return func(*args, **kw)
         finally:

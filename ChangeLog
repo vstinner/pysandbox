@@ -1,3 +1,11 @@
+Version 1.5.1 (2013-11-12)
+--------------------------
+
+* SECURITY FIX: __builtins__ is now readonly when execute() is used.
+  It was only readonly when call() was used.
+  Vulnerability found by 雪狼 <kurskk141 AT gmail.com>.
+
+
 Version 1.5 (2012-03-20)
 ------------------------
 
