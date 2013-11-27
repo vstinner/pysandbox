@@ -1,3 +1,37 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING !!!
+!!!                                                                 !!!
+!!! pysandbox is BROKEN BY DESIGN, please move to a new sandboxing  !!!
+!!! solution: run python in a sandbox, not the opposite!            !!!
+!!!                                                                 !!!
+!!! Learn about about pysandbox failure:                            !!!
+!!! https://lwn.net/Articles/574215/                                !!!
+!!!                                                                 !!!
+!!! WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING !!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+On Linux, SECCOMP security feature looks nice a nice start to build a Python
+sandbox.
+
+Other sandboxing projects for Python:
+
+* PyPy project has a sandbox:
+  http://pypy.org/
+* http://pythonsweetness.tumblr.com/post/65442885019/secure-low-overhead-eval-sandbox-in-80-lines-of-python
+* http://chdir.org/~nico/seccomp-nurse/
+
+The old README follows.
+
+
+
+
+
+----
+
+
+
+
+
 pysandbox is a Python sandbox. By default, untrusted code executed in the
 sandbox cannot modify the environment (write a file, use print or import a
 module). But you can configure the sandbox to choose exactly which features are
