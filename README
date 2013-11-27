@@ -4,7 +4,7 @@
 !!! pysandbox is BROKEN BY DESIGN, please move to a new sandboxing  !!!
 !!! solution: run python in a sandbox, not the opposite!            !!!
 !!!                                                                 !!!
-!!! Learn about about pysandbox failure:                            !!!
+!!! Learn more about pysandbox failure:                             !!!
 !!! https://lwn.net/Articles/574215/                                !!!
 !!!                                                                 !!!
 !!! WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING !!!
