@@ -18,6 +18,10 @@
 #  - git commit
 
 from __future__ import with_statement
+
+raise Exception("pysandbox is broken by design, don't use it: "
+                "https://lwn.net/Articles/574215/")
+
 from distutils.core import setup, Extension
 import imp
 
